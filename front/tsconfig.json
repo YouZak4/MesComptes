@@ -1,11 +1,30 @@
 {
-  "files": [],
-  "references": [
-    {
-      "path": "./tsconfig.node.json"
+    "compilerOptions": {
+        "target": "ESNext",
+        "useDefineForClassFields": true,
+        "module": "ESNext",
+        "baseUrl": ".",
+        "types": ["node"],
+        "paths": {
+            "@/*": ["src/*"]
+        },
+        "lib": ["ESNext", "DOM", "DOM.Iterable"],
+        "skipLibCheck": true,
+
+        /* Bundler mode */
+        "moduleResolution": "Bundler",
+        "allowSyntheticDefaultImports": true,
+        "allowImportingTsExtensions": true,
+        "resolveJsonModule": true,
+        "isolatedModules": true,
+        "noEmit": true,
+        "sourceMap": true,
+        /* Linting */
+        "strict": true,
+        "noUnusedLocals": true,
+        "noUnusedParameters": true,
+        "noFallthroughCasesInSwitch": true
     },
-    {
-      "path": "./tsconfig.app.json"
-    }
-  ]
+    "include": ["src/**/*.ts", "src/**/*.d.ts", "src/**/*.vue"],
+    "references": [{ "path": "./tsconfig.node.json" }]
 }
