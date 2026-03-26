@@ -4,7 +4,7 @@
         "useDefineForClassFields": true,
         "module": "ESNext",
         "baseUrl": ".",
-        "types": ["node"],
+        "types": ["vite/client"],
         "paths": {
             "@/*": ["src/*"]
         },
