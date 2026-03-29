@@ -1,5 +1,5 @@
 {
-    "name": "dominion-of-war",
+    "name": "demon-invasion",
     "private": true,
     "version": "0.0.0",
     "type": "module",
@@ -18,8 +18,8 @@
     },
     "devDependencies": {
         "@types/node": "^25.5.0",
-        "@typescript-eslint/eslint-plugin": "^8.57.1",
-        "@typescript-eslint/parser": "^8.57.1",
+        "@typescript-eslint/eslint-plugin": "^8.57.2",
+        "@typescript-eslint/parser": "^8.57.2",
         "@vitejs/plugin-vue": "^6.0.5",
         "@vue/eslint-config-typescript": "^14.7.0",
         "eslint": "^10.1.0",
@@ -31,7 +31,7 @@
         "eslint-plugin-vue": "^10.8.0",
         "prettier": "^3.8.1",
         "typescript": "^5.9.3",
-        "vite": "^8.0.1",
+        "vite": "^8.0.2",
         "vue-eslint-parser": "^10.4.0",
         "vue-tsc": "^3.2.6"
     }
