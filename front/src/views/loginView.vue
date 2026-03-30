@@ -25,8 +25,8 @@ async function login() {
             motDePasse: motDePasseLogin.value,
         });
 
-        auth.setAuth(data); // ← remplace les 3 localStorage.setItem
-        await router.push("/"); // ← chemin correct vers l'accueil
+        auth.setAuth(data);
+        await router.push("/");
     } catch (e: any) {
         erreur.value = e.response?.data || "Erreur de connexion.";
     } finally {

@@ -3,7 +3,7 @@ import router from "@/router";
 import { useAuthStore } from "@/stores/auth";
 
 const api = axios.create({
-    baseURL: "http://localhost:8085/api",
+    baseURL: "http://localhost:8085",
 });
 
 api.interceptors.request.use((config) => {
