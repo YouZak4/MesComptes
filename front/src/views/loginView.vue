@@ -1,9 +1,12 @@
 <script setup lang="ts">
 import { ref } from "vue";
 import { useRouter } from "vue-router";
-import axios from "axios";
+import api from "@/services/api"; // ← ton instance axios centralisée
+import { useAuthStore } from "@/stores/auth"; // ← le store
 
 const router = useRouter();
+const auth = useAuthStore();
+
 const identifiantLogin = ref("");
 const motDePasseLogin = ref("");
 const pseudoRegister = ref("");
@@ -17,43 +20,33 @@ async function login() {
     erreur.value = null;
     isLoading.value = true;
     try {
-        const response = await axios.post("http://localhost:8085/auth/login", {
+        const { data } = await api.post("/auth/login", {
             identifiant: identifiantLogin.value,
             motDePasse: motDePasseLogin.value,
         });
 
-        // On stocke le token dans localStorage
-        localStorage.setItem("token", response.data.token);
-        localStorage.setItem("identifiant", response.data.identifiant);
-        localStorage.setItem("roles", JSON.stringify(response.data.roles));
-
-        await router.push("pageAccueil"); // redirection vers la page d'accueil
+        auth.setAuth(data); // ← remplace les 3 localStorage.setItem
+        await router.push("/"); // ← chemin correct vers l'accueil
     } catch (e: any) {
         erreur.value = e.response?.data || "Erreur de connexion.";
     } finally {
         isLoading.value = false;
     }
 }
+
 async function register() {
     erreur.value = null;
     isLoading.value = true;
     try {
-        const response = await axios.post(
-            "http://localhost:8085/auth/register",
-            {
-                pseudo: pseudoRegister.value,
-                identifiant: identifiantRegister.value,
-                motDePasse: motDePasseRegister.value,
-                email: emailRegister.value,
-            }
-        );
+        const { data } = await api.post("/auth/register", {
+            pseudo: pseudoRegister.value,
+            identifiant: identifiantRegister.value,
+            motDePasse: motDePasseRegister.value,
+            email: emailRegister.value,
+        });
 
-        // On stocke le token dans localStorage
-        localStorage.setItem("token", response.data.token);
-        localStorage.setItem("identifiant", response.data.identifiant);
-        localStorage.setItem("roles", JSON.stringify(response.data.roles));
-
-        await router.push("pageAccueil"); // redirection vers la page d'accueil
+        auth.setAuth(data); // ← idem
+        await router.push("/");
     } catch (e: any) {
         erreur.value = e.response?.data || "Erreur de connexion.";
     } finally {

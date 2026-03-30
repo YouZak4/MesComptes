@@ -1,4 +1,5 @@
 import { createRouter, createWebHistory } from "vue-router";
+import { useAuthStore } from "@/stores/auth";
 import PageAccueil from "@/views/pageAccueil.vue";
 import LoginView from "@/views/loginView.vue";
 
@@ -11,15 +12,23 @@ const router = createRouter({
             component: PageAccueil,
             meta: { requiresAuth: true },
         },
-        { path: "/login", name: "login", component: LoginView },
+        {
+            path: "/login",
+            name: "login",
+            component: LoginView,
+        },
     ],
 });
 
-// Guard global : redirige vers /login si pas de token
 router.beforeEach((to) => {
-    const token = localStorage.getItem("token");
-    if (to.meta.requiresAuth && !token) {
+    const auth = useAuthStore();
+
+    if (to.meta.requiresAuth && !auth.isAuthenticated) {
         return { name: "login" };
+    }
+
+    if (auth.isAuthenticated && to.name === "login") {
+        return { name: "accueil" };
     }
 });
 
