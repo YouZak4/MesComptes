@@ -1,14 +1,33 @@
 <script setup lang="ts">
-import { ref } from "vue";
+import { computed, ref } from "vue";
 import { useRouter } from "vue-router";
-import api from "@/services/api"; // ← ton instance axios centralisée
-import { useAuthStore } from "@/stores/auth"; // ← le store
+import api from "@/services/api";
+import { useAuthStore } from "@/stores/auth";
+
+// On importe notre composant
+import InputComponent from "@/components/InputComponent.vue";
 
 const router = useRouter();
 const auth = useAuthStore();
 
+const validityLogin = ref({
+    identifiant: false,
+    motDePasse: false,
+});
+const loginFormValid = computed(() =>
+    Object.values(validityLogin.value).every(Boolean)
+);
 const identifiantLogin = ref("");
 const motDePasseLogin = ref("");
+const validityRegister = ref({
+    pseudo: false,
+    identifiant: false,
+    motDePasse: false,
+    email: false,
+});
+const registerFormValid = computed(() =>
+    Object.values(validityRegister.value).every(Boolean)
+);
 const pseudoRegister = ref("");
 const identifiantRegister = ref("");
 const motDePasseRegister = ref("");
@@ -57,36 +76,47 @@ async function register() {
 <template>
     <div class="main-container">
         <h1>Demon invasion</h1>
+
+        <!-- ── Formulaire de connexion ── -->
         <div v-if="isRegister" class="login-container">
             <form @submit.prevent="login">
                 <h2>Se connecter à Demon invasion</h2>
-                <div class="login-input">
-                    <input
-                        v-model="identifiantLogin"
-                        type="text"
-                        placeholder="Identifiant"
-                        required
-                    />
-                </div>
-                <div class="login-input">
-                    <input
-                        v-model="motDePasseLogin"
-                        type="password"
-                        placeholder="Mot de passe"
-                        required
-                    />
-                </div>
 
-                <p v-if="erreur" class="erreur">{{ erreur }}</p>
+                <InputComponent
+                    v-model="identifiantLogin"
+                    label="Identifiant"
+                    placeholder="Votre identifiant"
+                    :required="true"
+                    :min-length="8"
+                    :max-length="30"
+                    :regex="/^[a-zA-Z0-9_-]+$/"
+                    regex-message="Lettres, chiffres, _ et - uniquement."
+                    @valid="validityLogin.identifiant = $event"
+                />
+
+                <InputComponent
+                    v-model="motDePasseLogin"
+                    type="password"
+                    label="Mot de passe"
+                    :required="true"
+                    :min-length="8"
+                    :max-length="30"
+                    :regex="/^(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,30}$/"
+                    regex-message="8-30 caractères, avec au moins une majuscule, un chiffre et un caractère spécial."
+                    @valid="validityLogin.motDePasse = $event"
+                />
+
+                <p v-if="erreur" class="erreur">
+                    Identifiant ou mot de passe incorrect
+                </p>
 
                 <button
                     type="submit"
                     class="login-button"
-                    :disabled="isLoading"
+                    :disabled="!loginFormValid"
                 >
-                    {{ isLoading ? "Connexion..." : "Se connecter" }}
+                    Connexion
                 </button>
-
                 <button
                     type="button"
                     class="login-button"
@@ -96,50 +126,63 @@ async function register() {
                 </button>
             </form>
         </div>
+
+        <!-- ── Formulaire d'inscription ── -->
         <div v-if="!isRegister" class="register-container">
             <form @submit.prevent="register">
                 <h2>Créez un compte pour jouer à Demon invasion</h2>
-                <div class="register-input">
-                    <input
-                        v-model="pseudoRegister"
-                        type="text"
-                        placeholder="Pseudonyme"
-                        required
-                    />
-                </div>
-                <div class="register-input">
-                    <input
-                        v-model="identifiantRegister"
-                        type="text"
-                        placeholder="Identifiant"
-                        required
-                    />
-                </div>
-                <div class="register-input">
-                    <input
-                        v-model="motDePasseRegister"
-                        type="password"
-                        placeholder="Mot de passe"
-                        required
-                    />
-                </div>
-                <div class="register-input">
-                    <input
-                        v-model="emailRegister"
-                        type="text"
-                        placeholder="E-mail"
-                        required
-                    />
-                </div>
 
-                <p v-if="erreur" class="erreur">{{ erreur }}</p>
+                <InputComponent
+                    v-model="pseudoRegister"
+                    label="Pseudonyme"
+                    placeholder="Votre pseudo en jeu"
+                    :required="true"
+                    :min-length="2"
+                    :max-length="20"
+                    :regex="/^[a-zA-Z0-9_-]+$/"
+                    regex-message="Lettres, chiffres, _ et - uniquement."
+                    @valid="validityRegister.pseudo = $event"
+                />
+
+                <InputComponent
+                    v-model="identifiantRegister"
+                    label="Identifiant"
+                    placeholder="Votre identifiant de connexion"
+                    :required="true"
+                    :min-length="3"
+                    :max-length="30"
+                    :regex="/^[a-zA-Z0-9_-]+$/"
+                    regex-message="Lettres, chiffres, _ et - uniquement."
+                    @valid="validityRegister.identifiant = $event"
+                />
+
+                <InputComponent
+                    v-model="motDePasseRegister"
+                    type="password"
+                    label="Mot de passe"
+                    :required="true"
+                    :regex="/^(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,30}$/"
+                    regex-message="8-30 caractères, avec au moins une majuscule, un chiffre et un caractère spécial."
+                    @valid="validityRegister.motDePasse = $event"
+                />
+
+                <InputComponent
+                    v-model="emailRegister"
+                    type="email"
+                    label="Adresse e-mail"
+                    placeholder="vous@exemple.com"
+                    :required="true"
+                    :regex="/^[^\s@]+@[^\s@]+\.[^\s@]+$/"
+                    regex-message="Adresse e-mail invalide."
+                    @valid="validityRegister.email = $event"
+                />
 
                 <button
                     type="submit"
                     class="register-button"
-                    :disabled="isLoading"
+                    :disabled="!registerFormValid"
                 >
-                    {{ isLoading ? "Connexion..." : "Créer mon compte" }}
+                    Créer mon compte
                 </button>
                 <button
                     type="button"
@@ -152,37 +195,40 @@ async function register() {
         </div>
     </div>
 </template>
+
 <style scoped>
 .main-container {
-    width: 50%;
-    margin: 15% auto auto;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 1rem;
+    width: 25%;
+    margin: 10% auto auto;
     display: flex;
     flex-direction: column;
     text-align: center;
-    border: red 1px solid;
+
     .login-container {
-        display: flex;
-        flex-direction: column;
-        border: 1px solid blue;
-        .login-input {
-            margin: 1rem auto;
-        }
-        .login-button {
-            display: block;
-            margin: 1rem auto;
+        .erreur {
+            margin-top: 0.5rem;
+            color: #c62727;
+            text-align: left;
         }
     }
     .register-container {
         display: flex;
         flex-direction: column;
-        border: 1px solid blue;
-        .register-input {
-            margin: 1rem auto;
+        padding: 1.5rem;
+
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
         }
-        .register-button {
-            display: block;
-            margin: 1rem auto;
-        }
+    }
+
+    .login-button,
+    .register-button {
+        display: block;
+        margin: 0.5rem auto;
     }
 }
 </style>
