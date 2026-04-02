@@ -15,6 +15,7 @@ const motDePasseRegister = ref("");
 const emailRegister = ref("");
 const erreur = ref<string | null>(null);
 const isLoading = ref(false);
+const isRegister = ref(true);
 
 async function login() {
     erreur.value = null;
@@ -24,7 +25,6 @@ async function login() {
             identifiant: identifiantLogin.value,
             motDePasse: motDePasseLogin.value,
         });
-
         auth.setAuth(data);
         await router.push("/");
     } catch (e: any) {
@@ -44,9 +44,8 @@ async function register() {
             motDePasse: motDePasseRegister.value,
             email: emailRegister.value,
         });
-
-        auth.setAuth(data); // ← idem
-        await router.push("/");
+        console.log(data);
+        isRegister.value = true;
     } catch (e: any) {
         erreur.value = e.response?.data || "Erreur de connexion.";
     } finally {
@@ -56,81 +55,134 @@ async function register() {
 </script>
 
 <template>
-    <div class="login-container">
-        <form @submit.prevent="login">
-            <h1>Vous avez déjà un compte ?</h1>
-            <h2>Connectez-vous !</h2>
-            <div>
-                <label>Identifiant</label>
-                <input
-                    v-model="identifiantLogin"
-                    type="text"
-                    placeholder="Votre identifiant"
-                    required
-                />
-            </div>
+    <div class="main-container">
+        <h1>Demon invasion</h1>
+        <div v-if="isRegister" class="login-container">
+            <form @submit.prevent="login">
+                <h2>Se connecter à Demon invasion</h2>
+                <div class="login-input">
+                    <input
+                        v-model="identifiantLogin"
+                        type="text"
+                        placeholder="Identifiant"
+                        required
+                    />
+                </div>
+                <div class="login-input">
+                    <input
+                        v-model="motDePasseLogin"
+                        type="password"
+                        placeholder="Mot de passe"
+                        required
+                    />
+                </div>
 
-            <div>
-                <label>Mot de passe</label>
-                <input
-                    v-model="motDePasseLogin"
-                    type="password"
-                    placeholder="Votre mot de passe"
-                    required
-                />
-            </div>
+                <p v-if="erreur" class="erreur">{{ erreur }}</p>
 
-            <p v-if="erreur" class="erreur">{{ erreur }}</p>
+                <button
+                    type="submit"
+                    class="login-button"
+                    :disabled="isLoading"
+                >
+                    {{ isLoading ? "Connexion..." : "Se connecter" }}
+                </button>
 
-            <button type="submit" :disabled="isLoading">
-                {{ isLoading ? "Connexion..." : "Se connecter" }}
-            </button>
-        </form>
-        <form @submit.prevent="register">
-            <h1>Pas encore de compte ?</h1>
-            <h2>Renseignez vos informations pour en créer un !</h2>
-            <div>
-                <label>Pseudonyme</label>
-                <input
-                    v-model="pseudoRegister"
-                    type="text"
-                    placeholder="Votre pseudonyme"
-                    required
-                />
-            </div>
-            <div>
-                <label>Identifiant</label>
-                <input
-                    v-model="identifiantRegister"
-                    type="text"
-                    placeholder="Votre identifiant"
-                    required
-                />
-            </div>
-            <div>
-                <label>Mot de passe</label>
-                <input
-                    v-model="motDePasseRegister"
-                    type="password"
-                    placeholder="Votre mot de passe"
-                    required
-                />
-            </div>
-            <div>
-                <label>E-mail</label>
-                <input
-                    v-model="emailRegister"
-                    type="text"
-                    placeholder="Votre email"
-                    required
-                />
-            </div>
+                <button
+                    type="button"
+                    class="login-button"
+                    @click="isRegister = false"
+                >
+                    Créer un nouveau compte
+                </button>
+            </form>
+        </div>
+        <div v-if="!isRegister" class="register-container">
+            <form @submit.prevent="register">
+                <h2>Créez un compte pour jouer à Demon invasion</h2>
+                <div class="register-input">
+                    <input
+                        v-model="pseudoRegister"
+                        type="text"
+                        placeholder="Pseudonyme"
+                        required
+                    />
+                </div>
+                <div class="register-input">
+                    <input
+                        v-model="identifiantRegister"
+                        type="text"
+                        placeholder="Identifiant"
+                        required
+                    />
+                </div>
+                <div class="register-input">
+                    <input
+                        v-model="motDePasseRegister"
+                        type="password"
+                        placeholder="Mot de passe"
+                        required
+                    />
+                </div>
+                <div class="register-input">
+                    <input
+                        v-model="emailRegister"
+                        type="text"
+                        placeholder="E-mail"
+                        required
+                    />
+                </div>
 
-            <p v-if="erreur" class="erreur">{{ erreur }}</p>
+                <p v-if="erreur" class="erreur">{{ erreur }}</p>
 
-            <button type="submit" :disabled="isLoading">
-                {{ isLoading ? "Connexion..." : "Créer mon compte" }}
-            </button>
-        </form>
+                <button
+                    type="submit"
+                    class="register-button"
+                    :disabled="isLoading"
+                >
+                    {{ isLoading ? "Connexion..." : "Créer mon compte" }}
+                </button>
+                <button
+                    type="button"
+                    class="register-button"
+                    @click="isRegister = true"
+                >
+                    J'ai déjà un compte
+                </button>
+            </form>
+        </div>
     </div>
 </template>
+<style scoped>
+.main-container {
+    width: 50%;
+    margin: 15% auto auto;
+    display: flex;
+    flex-direction: column;
+    text-align: center;
+    border: red 1px solid;
+    .login-container {
+        display: flex;
+        flex-direction: column;
+        border: 1px solid blue;
+        .login-input {
+            margin: 1rem auto;
+        }
+        .login-button {
+            display: block;
+            margin: 1rem auto;
+        }
+    }
+    .register-container {
+        display: flex;
+        flex-direction: column;
+        border: 1px solid blue;
+        .register-input {
+            margin: 1rem auto;
+        }
+        .register-button {
+            display: block;
+            margin: 1rem auto;
+        }
+    }
+}
+</style>
