@@ -3,12 +3,14 @@ import { computed, ref } from "vue";
 import { useRouter } from "vue-router";
 import api from "@/services/api";
 import { useAuthStore } from "@/stores/auth";
+import { useNotificationStore } from "@/stores/notification";
 
 // On importe notre composant
 import InputComponent from "@/components/InputComponent.vue";
 
 const router = useRouter();
 const auth = useAuthStore();
+const notification = useNotificationStore();
 
 const validityLogin = ref({
     identifiant: false,
@@ -32,12 +34,18 @@ const pseudoRegister = ref("");
 const identifiantRegister = ref("");
 const motDePasseRegister = ref("");
 const emailRegister = ref("");
-const erreur = ref<string | null>(null);
 const isLoading = ref(false);
 const isRegister = ref(true);
 
+// Le back peut renvoyer un message texte ; sinon on affiche un message générique
+function messageErreur(e: any, messageParDefaut: string): string {
+    const data = e.response?.data;
+    return typeof data === "string" && data.trim() !== ""
+        ? data
+        : messageParDefaut;
+}
+
 async function login() {
-    erreur.value = null;
     isLoading.value = true;
     try {
         const { data } = await api.post("/auth/login", {
@@ -45,28 +53,30 @@ async function login() {
             motDePasse: motDePasseLogin.value,
         });
         auth.setAuth(data);
+        notification.success("Connexion réussie. Bienvenue !");
         await router.push("/");
-    } catch (e: any) {
-        erreur.value = e.response?.data || "Erreur de connexion.";
+    } catch {
+        notification.error("Identifiant ou mot de passe incorrect.");
     } finally {
         isLoading.value = false;
     }
 }
 
 async function register() {
-    erreur.value = null;
     isLoading.value = true;
     try {
-        const { data } = await api.post("/auth/register", {
+        await api.post("/auth/register", {
             pseudo: pseudoRegister.value,
             identifiant: identifiantRegister.value,
             motDePasse: motDePasseRegister.value,
             email: emailRegister.value,
         });
-        console.log(data);
+        notification.success("Votre compte a été créé avec succès.");
         isRegister.value = true;
     } catch (e: any) {
-        erreur.value = e.response?.data || "Erreur de connexion.";
+        notification.error(
+            messageErreur(e, "Une erreur est survenue lors de la création du compte.")
+        );
     } finally {
         isLoading.value = false;
     }
@@ -87,7 +97,7 @@ async function register() {
                     label="Identifiant"
                     placeholder="Votre identifiant"
                     :required="true"
-                    :min-length="8"
+                    :min-length="1"
                     :max-length="30"
                     :regex="/^[a-zA-Z0-9_-]+$/"
                     regex-message="Lettres, chiffres, _ et - uniquement."
@@ -105,10 +115,6 @@ async function register() {
                     regex-message="8-30 caractères, avec au moins une majuscule, un chiffre et un caractère spécial."
                     @valid="validityLogin.motDePasse = $event"
                 />
-
-                <p v-if="erreur" class="erreur">
-                    Identifiant ou mot de passe incorrect
-                </p>
 
                 <button
                     type="submit"
@@ -206,13 +212,6 @@ async function register() {
     flex-direction: column;
     text-align: center;
 
-    .login-container {
-        .erreur {
-            margin-top: 0.5rem;
-            color: #c62727;
-            text-align: left;
-        }
-    }
     .register-container {
         display: flex;
         flex-direction: column;
