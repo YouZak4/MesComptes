@@ -4,14 +4,11 @@ import { useRouter } from "vue-router";
 import api from "@/services/api";
 import { useAuthStore } from "@/stores/auth";
 import { useNotificationStore } from "@/stores/notification";
-
-// On importe notre composant
 import InputComponent from "@/components/InputComponent.vue";
 
 const router = useRouter();
 const auth = useAuthStore();
 const notification = useNotificationStore();
-
 const validityLogin = ref({
     identifiant: false,
     motDePasse: false,
@@ -37,12 +34,8 @@ const emailRegister = ref("");
 const isLoading = ref(false);
 const isRegister = ref(true);
 
-// Le back peut renvoyer un message texte ; sinon on affiche un message générique
-function messageErreur(e: any, messageParDefaut: string): string {
-    const data = e.response?.data;
-    return typeof data === "string" && data.trim() !== ""
-        ? data
-        : messageParDefaut;
+function messageErreur(e: any, parDefaut: string): string {
+    return e.response?.data?.message || parDefaut;
 }
 
 async function login() {
@@ -65,17 +58,23 @@ async function login() {
 async function register() {
     isLoading.value = true;
     try {
-        await api.post("/auth/register", {
+        const { data } = await api.post("/auth/register", {
             pseudo: pseudoRegister.value,
             identifiant: identifiantRegister.value,
             motDePasse: motDePasseRegister.value,
             email: emailRegister.value,
         });
-        notification.success("Votre compte a été créé avec succès.");
-        isRegister.value = true;
+        notification.success("Un code vous a été envoyé par e-mail.");
+        await router.push({
+            name: "verification",
+            params: { jeton: data.jeton },
+        });
     } catch (e: any) {
         notification.error(
-            messageErreur(e, "Une erreur est survenue lors de la création du compte.")
+            messageErreur(
+                e,
+                "Une erreur est survenue lors de la création du compte."
+            )
         );
     } finally {
         isLoading.value = false;
@@ -97,10 +96,10 @@ async function register() {
                     label="Identifiant"
                     placeholder="Votre identifiant"
                     :required="true"
-                    :min-length="1"
+                    :min-length="8"
                     :max-length="30"
                     :regex="/^[a-zA-Z0-9_-]+$/"
-                    regex-message="Lettres, chiffres, _ et - uniquement."
+                    regex-message="Entre 8 et 30 caractères, lettres, chiffres, _ et - uniquement."
                     @valid="validityLogin.identifiant = $event"
                 />
 
@@ -110,9 +109,8 @@ async function register() {
                     label="Mot de passe"
                     :required="true"
                     :min-length="8"
-                    :max-length="30"
                     :regex="/^(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,30}$/"
-                    regex-message="8-30 caractères, avec au moins une majuscule, un chiffre et un caractère spécial."
+                    regex-message="8 caractères minimum, avec au moins une majuscule, un chiffre et un caractère spécial."
                     @valid="validityLogin.motDePasse = $event"
                 />
 
@@ -143,10 +141,10 @@ async function register() {
                     label="Pseudonyme"
                     placeholder="Votre pseudo en jeu"
                     :required="true"
-                    :min-length="2"
-                    :max-length="20"
+                    :min-length="1"
+                    :max-length="30"
                     :regex="/^[a-zA-Z0-9_-]+$/"
-                    regex-message="Lettres, chiffres, _ et - uniquement."
+                    regex-message="Entre 1 et 30 caractères, lettres, chiffres, _ et - uniquement."
                     @valid="validityRegister.pseudo = $event"
                 />
 
@@ -155,10 +153,10 @@ async function register() {
                     label="Identifiant"
                     placeholder="Votre identifiant de connexion"
                     :required="true"
-                    :min-length="3"
+                    :min-length="8"
                     :max-length="30"
                     :regex="/^[a-zA-Z0-9_-]+$/"
-                    regex-message="Lettres, chiffres, _ et - uniquement."
+                    regex-message="Entre 8 et 30 caractères, lettres, chiffres, _ et - uniquement."
                     @valid="validityRegister.identifiant = $event"
                 />
 
@@ -167,8 +165,9 @@ async function register() {
                     type="password"
                     label="Mot de passe"
                     :required="true"
+                    :min-length="8"
                     :regex="/^(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,30}$/"
-                    regex-message="8-30 caractères, avec au moins une majuscule, un chiffre et un caractère spécial."
+                    regex-message="8 caractères minimum, avec au moins une majuscule, un chiffre et un caractère spécial."
                     @valid="validityRegister.motDePasse = $event"
                 />
 

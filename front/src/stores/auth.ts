@@ -3,7 +3,6 @@ import { ref, computed } from "vue";
 
 function decodeToken(token: string) {
     try {
-        console.log("token", token);
         const payload = token.split(".")[1];
         return JSON.parse(atob(payload));
     } catch {
@@ -24,6 +23,12 @@ export const useAuthStore = defineStore("auth", () => {
     const roles = ref<string[]>(parseRoles());
 
     const isAuthenticated = computed(() => !!token.value);
+
+    // Le champ "exp" du JWT est en secondes, Date.now() en millisecondes
+    function isTokenExpired(): boolean {
+        const exp = decodeToken(token.value)?.exp;
+        return typeof exp !== "number" || exp * 1000 <= Date.now();
+    }
 
     function setAuth(rawToken: string) {
         const payload = decodeToken(rawToken);
@@ -47,5 +52,13 @@ export const useAuthStore = defineStore("auth", () => {
         localStorage.removeItem("roles");
     }
 
-    return { token, identifiant, roles, isAuthenticated, setAuth, logout };
+    return {
+        token,
+        identifiant,
+        roles,
+        isAuthenticated,
+        isTokenExpired,
+        setAuth,
+        logout,
+    };
 });
