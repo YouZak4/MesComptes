@@ -17,7 +17,6 @@ coverage
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
-.idea
 *.suo
 *.ntvs*
 *.njsproj
@@ -37,3 +36,5 @@ __screenshots__/
 
 # Vite
 *.timestamp-*-*.mjs
+
+pnpm-lock.yaml
