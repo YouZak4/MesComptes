@@ -1,0 +1,23 @@
+package com.mescomptes.backend.repository;
+
+import com.mescomptes.backend.model.entities.Utilisateur;
+import org.springframework.data.jpa.repository.EntityGraph;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import java.util.Optional;
+
+public interface UtilisateurRepository extends JpaRepository<Utilisateur, Long> {
+
+    boolean existsByPseudo(String pseudo);
+
+    Optional<Utilisateur> findByEmail(String email);
+
+    boolean existsByEmail(String email);
+
+    boolean existsByIdentifiant(String identifiant);
+
+    @EntityGraph(attributePaths = "roles")
+    Optional<Utilisateur> findByIdentifiant(String identifiant);
+}
+
+
