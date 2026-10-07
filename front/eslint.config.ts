@@ -4,34 +4,34 @@ import pluginVue from "eslint-plugin-vue";
 import pluginPrettier from "eslint-plugin-prettier";
 
 export default [
-  {
-    ignores: ["**/node_modules/**", "**/dist/**", "**/build/**"],
-  },
-  {
-    files: ["**/*.{ts,vue}"],
-    languageOptions: {
-      ecmaVersion: "latest",
-      sourceType: "module",
-      parser: tsEslint,
+    {
+        ignores: ["**/node_modules/**", "**/dist/**", "**/build/**"],
     },
-    rules: {
-      "prettier/prettier": ["error", { semi: true }],
+    {
+        files: ["**/*.{ts,vue}"],
+        languageOptions: {
+            ecmaVersion: "latest",
+            sourceType: "module",
+            parser: tsEslint,
+        },
+        rules: {
+            "prettier/prettier": ["error", { semi: true }],
+        },
+        plugins: {
+            prettier: pluginPrettier,
+        },
     },
-    plugins: {
-      prettier: pluginPrettier,
+    ...pluginVue.configs["flat/essential"],
+    {
+        files: ["**/*.vue"],
+        languageOptions: {
+            parser: vueParser,
+            parserOptions: {
+                parser: tsEslint,
+            },
+        },
+        rules: {
+            "vue/multi-word-component-names": "off",
+        },
     },
-  },
-  ...pluginVue.configs["flat/essential"],
-  {
-    files: ["**/*.vue"],
-    languageOptions: {
-      parser: vueParser,
-      parserOptions: {
-        parser: tsEslint,
-      },
-    },
-    rules: {
-      "vue/multi-word-component-names": "off",
-    },
-  },
 ];
