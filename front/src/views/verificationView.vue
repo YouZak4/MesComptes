@@ -57,9 +57,7 @@ async function renvoyerCode() {
         codeVerification.value = "";
         demarrerMinuteur(data.secondesAvantRenvoi);
     } catch (e: any) {
-        notification.error(
-            messageErreur(e, "Impossible de renvoyer le code.")
-        );
+        notification.error(messageErreur(e, "Impossible de renvoyer le code."));
     } finally {
         isLoading.value = false;
     }
