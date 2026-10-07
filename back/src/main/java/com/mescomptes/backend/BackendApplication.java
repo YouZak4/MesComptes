@@ -1,4 +1,4 @@
-package com.demon_invasion.backend;
+package com.mescomptes.backend;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
