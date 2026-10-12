@@ -21,7 +21,7 @@ public interface CategorieRepository extends JpaRepository<Categorie, Long> {
     @Query("SELECT c FROM Categorie c WHERE c.id = :id AND (c.utilisateur IS NULL OR c.utilisateur.id = :utilisateurId)")
     Optional<Categorie> findVisible(@Param("id") Long id, @Param("utilisateurId") Long utilisateurId);
 
-    // Un nom ne doit exister ni parmi les fournies ni parmi les personnelles de l'utilisateur
-    @Query("SELECT COUNT(c) > 0 FROM Categorie c WHERE c.nomNormalise = :nomNormalise AND (c.utilisateur IS NULL OR c.utilisateur.id = :utilisateurId)")
-    boolean existsNom(@Param("nomNormalise") String nomNormalise, @Param("utilisateurId") Long utilisateurId);
+    // Catégories visibles portant ce nom : un nom ne doit exister ni parmi les fournies ni parmi les personnelles
+    @Query("SELECT c FROM Categorie c WHERE c.nomNormalise = :nomNormalise AND (c.utilisateur IS NULL OR c.utilisateur.id = :utilisateurId)")
+    List<Categorie> findVisiblesParNom(@Param("nomNormalise") String nomNormalise, @Param("utilisateurId") Long utilisateurId);
 }

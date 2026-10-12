@@ -15,6 +15,10 @@ public interface RecurrenceRepository extends JpaRepository<Recurrence, Long> {
 
     Optional<Recurrence> findByIdAndUtilisateurId(Long id, Long utilisateurId);
 
+    boolean existsByCategorieId(Long categorieId);
+
+    boolean existsByLibelleId(Long libelleId);
+
     // Récurrences dont au moins une occurrence est arrivée à échéance (tâche planifiée)
     @Query("SELECT r FROM Recurrence r WHERE r.prochaineOccurrence <= :date AND (r.dateFin IS NULL OR r.prochaineOccurrence <= r.dateFin)")
     List<Recurrence> findAGenerer(@Param("date") LocalDate date);
