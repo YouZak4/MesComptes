@@ -1,6 +1,8 @@
 import { createRouter, createWebHistory } from "vue-router";
+import { useAuthStore } from "@/stores/auth";
 import PageAccueil from "@/views/pageAccueil.vue";
 import LoginView from "@/views/loginView.vue";
+import VerificationView from "@/views/verificationView.vue";
 
 const router = createRouter({
     history: createWebHistory(import.meta.env.BASE_URL),
@@ -11,15 +13,36 @@ const router = createRouter({
             component: PageAccueil,
             meta: { requiresAuth: true },
         },
-        { path: "/login", name: "login", component: LoginView },
+        {
+            path: "/login",
+            name: "login",
+            component: LoginView,
+        },
+        {
+            path: "/verification/:jeton",
+            name: "verification",
+            component: VerificationView,
+        },
     ],
 });
 
-// Guard global : redirige vers /login si pas de token
 router.beforeEach((to) => {
-    const token = localStorage.getItem("token");
-    if (to.meta.requiresAuth && !token) {
+    const auth = useAuthStore();
+
+    // Un token expiré ne doit plus compter comme une session active
+    if (auth.isAuthenticated && auth.isTokenExpired()) {
+        auth.logout();
+    }
+
+    if (to.meta.requiresAuth && !auth.isAuthenticated) {
         return { name: "login" };
+    }
+
+    if (
+        auth.isAuthenticated &&
+        (to.name === "login" || to.name === "verification")
+    ) {
+        return { name: "accueil" };
     }
 });
 

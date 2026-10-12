@@ -38,3 +38,6 @@ __screenshots__/
 *.timestamp-*-*.mjs
 
 pnpm-lock.yaml
+
+# Claude Code (local settings)
+.claude/settings.local.json
