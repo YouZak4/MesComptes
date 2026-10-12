@@ -25,6 +25,9 @@ public interface OperationRepository extends JpaRepository<Operation, Long>, Jpa
             """)
     List<Object[]> sommeMouvementsParCompte(@Param("utilisateurId") Long utilisateurId, @Param("revenu") TypeOperation revenu);
 
+    // Dernière opération saisie par l'utilisateur (id le plus grand), pour proposer son compte par défaut
+    Optional<Operation> findFirstByCompte_Utilisateur_IdOrderByIdDesc(Long utilisateurId);
+
     boolean existsByCompteId(Long compteId);
 
     boolean existsByCategorieId(Long categorieId);

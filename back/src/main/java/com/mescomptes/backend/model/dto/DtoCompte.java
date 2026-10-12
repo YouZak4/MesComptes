@@ -18,4 +18,6 @@ public class DtoCompte {
     private boolean archive;
     // Solde initial + revenus - dépenses datés après la date du solde initial
     private BigDecimal solde;
+    // Compte de la dernière opération saisie : proposé par défaut à la saisie
+    private boolean dernierUtilise;
 }

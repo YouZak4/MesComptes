@@ -20,4 +20,11 @@ public final class Noms {
     public static String normaliser(String nom) {
         return nettoyer(nom).toLowerCase(Locale.ROOT);
     }
+
+    /**
+     * Texte de recherche normalisé, prêt pour un LIKE … ESCAPE '\' : % et _ y sont pris littéralement.
+     */
+    public static String motifRecherche(String texte) {
+        return normaliser(texte).replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_");
+    }
 }

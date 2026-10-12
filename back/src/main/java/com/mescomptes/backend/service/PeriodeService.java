@@ -102,8 +102,7 @@ public class PeriodeService {
         if (dto.getDateDebut() == null || dto.getDateFin() == null) throw new BusinessRuleException("Les dates de début et de fin sont obligatoires.");
         if (dto.getDateFin().isBefore(dto.getDateDebut())) throw new BusinessRuleException(DATES_INCOHERENTES);
 
-        Periode periode = periodeRepository.findByIdAndUtilisateurId(id, utilisateurId)
-                .orElseThrow(() -> new ResourceNotFoundException(PERIODE_INTROUVABLE));
+        Periode periode = trouver(utilisateurId, id);
 
         if (!dto.getDateDebut().equals(periode.getDateDebut())) {
             periodeRepository.findFirstByUtilisateurIdAndDateFinLessThanOrderByDateFinDesc(utilisateurId, periode.getDateDebut())
@@ -156,6 +155,15 @@ public class PeriodeService {
             fin = finParDefaut(debut);
             enregistrer(utilisateurId, nomParDefaut(fin), debut, fin);
         }
+    }
+
+    /**
+     * Retourne une période de l'utilisateur, ou une 404 si elle n'existe pas ou appartient à un autre utilisateur.
+     */
+    @Transactional(readOnly = true)
+    public Periode trouver(Long utilisateurId, Long id) {
+        return periodeRepository.findByIdAndUtilisateurId(id, utilisateurId)
+                .orElseThrow(() -> new ResourceNotFoundException(PERIODE_INTROUVABLE));
     }
 
     private Periode enregistrer(Long utilisateurId, String nom, LocalDate debut, LocalDate fin) {

@@ -65,9 +65,7 @@ public class LibelleService {
     public List<DtoLibelle> rechercher(Long utilisateurId, String texte) {
         Set<Long> libellesMasques = masquageRepository.findIdsMasques(utilisateurId, TypeElement.LIBELLE);
         Set<Long> categoriesMasquees = masquageRepository.findIdsMasques(utilisateurId, TypeElement.CATEGORIE);
-        String motif = Noms.normaliser(texte).replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_");
-
-        return libelleRepository.rechercher(utilisateurId, motif).stream()
+        return libelleRepository.rechercher(utilisateurId, Noms.motifRecherche(texte)).stream()
                 .filter(libelle -> !libellesMasques.contains(libelle.getId()))
                 .filter(libelle -> !categoriesMasquees.contains(libelle.getCategorieParDefaut().getId()))
                 .filter(libelle -> !libelle.getCategorieParDefaut().isArchive())

@@ -42,8 +42,15 @@ public class CompteService {
     public List<DtoCompte> lister(Long utilisateurId) {
         Map<Long, BigDecimal> mouvements = operationRepository.sommeMouvementsParCompte(utilisateurId, TypeOperation.REVENU).stream()
                 .collect(Collectors.toMap(ligne -> (Long) ligne[0], ligne -> (BigDecimal) ligne[1]));
+        Long dernierCompteId = operationRepository.findFirstByCompte_Utilisateur_IdOrderByIdDesc(utilisateurId)
+                .map(operation -> operation.getCompte().getId())
+                .orElse(null);
         return compteRepository.findByUtilisateurIdOrderByNom(utilisateurId).stream()
-                .map(compte -> versDto(compte, mouvements.getOrDefault(compte.getId(), BigDecimal.ZERO)))
+                .map(compte -> {
+                    DtoCompte dto = versDto(compte, mouvements.getOrDefault(compte.getId(), BigDecimal.ZERO));
+                    dto.setDernierUtilise(compte.getId().equals(dernierCompteId));
+                    return dto;
+                })
                 .toList();
     }
 
@@ -138,6 +145,6 @@ public class CompteService {
 
     private DtoCompte versDto(Compte compte, BigDecimal mouvements) {
         return new DtoCompte(compte.getId(), compte.getNom(), compte.getSoldeInitial(), compte.getDateSoldeInitial(),
-                compte.isArchive(), compte.getSoldeInitial().add(mouvements));
+                compte.isArchive(), compte.getSoldeInitial().add(mouvements), false);
     }
 }
