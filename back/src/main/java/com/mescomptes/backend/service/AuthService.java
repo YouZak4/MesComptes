@@ -55,6 +55,7 @@ public class AuthService {
     private final JwtService jwtService;
     private final InscriptionEnAttenteRepository inscriptionEnAttenteRepository;
     private final MailService mailService;
+    private final CompteService compteService;
     @Value("${app.verification.expiration-minutes}")
     private long expirationMinutes;
     @Value("${app.verification.max-tentatives}")
@@ -209,6 +210,7 @@ public class AuthService {
             // Deux validations simultanées : les vérifs ci-dessus sont passées, mais la contrainte unique en base a bloqué la seconde
             throw new AlreadyExist(COMPTE_CREE_ENTRE_TEMPS);
         }
+        compteService.creerCompteParDefaut(u);
         inscriptionEnAttenteRepository.delete(attente);
 
         DtoUtilisateur res = new DtoUtilisateur();

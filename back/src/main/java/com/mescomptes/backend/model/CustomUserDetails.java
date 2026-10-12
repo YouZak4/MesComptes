@@ -35,6 +35,11 @@ public class CustomUserDetails implements UserDetails {
                 .collect(Collectors.toList());
     }
 
+    // Id de l'utilisateur connecté, pour limiter chaque requête à ses propres données
+    public Long getId() {
+        return utilisateur.getId();
+    }
+
     @Override
     @NonNull
     public Collection<? extends GrantedAuthority> getAuthorities() {

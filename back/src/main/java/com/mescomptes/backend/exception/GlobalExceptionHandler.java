@@ -30,6 +30,16 @@ public class GlobalExceptionHandler {
         return buildResponse(HttpStatus.CONFLICT, "RESOURCE_ALREADY_EXISTS", ex.getMessage(), request);
     }
 
+    @ExceptionHandler(ResourceNotFoundException.class)
+    public ResponseEntity<DtoApiError> handleNotFound(ResourceNotFoundException ex, HttpServletRequest request) {
+        return buildResponse(HttpStatus.NOT_FOUND, "RESOURCE_NOT_FOUND", ex.getMessage(), request);
+    }
+
+    @ExceptionHandler(BusinessRuleException.class)
+    public ResponseEntity<DtoApiError> handleBusinessRule(BusinessRuleException ex, HttpServletRequest request) {
+        return buildResponse(HttpStatus.UNPROCESSABLE_CONTENT, "BUSINESS_RULE_VIOLATION", ex.getMessage(), request);
+    }
+
     @ExceptionHandler(InvalidCredentialsException.class)
     public ResponseEntity<DtoApiError> handleInvalidCreds(InvalidCredentialsException ex, HttpServletRequest request) {
         return buildResponse(HttpStatus.UNAUTHORIZED, "AUTH_FAILED", ex.getMessage(), request);
