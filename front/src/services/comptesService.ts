@@ -3,6 +3,8 @@ import type {
     Categorie,
     Compte,
     Libelle,
+    Operation,
+    OperationSaisie,
     Periode,
     TableauDeBord,
 } from "@/types/comptes.ts";
@@ -20,6 +22,28 @@ export const comptesService = {
 
     async getLibelles(): Promise<Libelle[]> {
         const response = await api.get<Libelle[]>("/libelles");
+        return response.data;
+    },
+
+    // Autocomplétion : les libellés visibles contenant le texte, les plus utilisés d'abord
+    async rechercherLibelles(texte: string): Promise<Libelle[]> {
+        const response = await api.get<Libelle[]>("/libelles", {
+            params: { q: texte },
+        });
+        return response.data;
+    },
+
+    // Libellé personnel créé à la volée depuis la saisie
+    async creerLibelle(nom: string, categorieId: number): Promise<Libelle> {
+        const response = await api.post<Libelle>("/libelles", {
+            nom,
+            categorieId,
+        });
+        return response.data;
+    },
+
+    async creerOperation(saisie: OperationSaisie): Promise<Operation> {
+        const response = await api.post<Operation>("/operations", saisie);
         return response.data;
     },
 

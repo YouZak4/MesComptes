@@ -88,3 +88,12 @@ export interface TableauDeBord {
     soldeComptesFinPeriode: number;
     dernieresOperations: Operation[];
 }
+
+export interface OperationSaisie {
+    compteId: number;
+    date: string;
+    montant: number;
+    categorieId: number;
+    libelleId: number | null;
+    note: string | null;
+}

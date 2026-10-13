@@ -3,6 +3,7 @@ import { computed, onMounted, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { comptesService } from "@/services/comptesService.ts";
 import { useNotificationStore } from "@/stores/notification";
+import { useSaisieStore } from "@/stores/saisie";
 import EnTeteComponent from "@/components/EnTeteComponent.vue";
 import type {
     Categorie,
@@ -26,6 +27,7 @@ import {
 const route = useRoute();
 const router = useRouter();
 const notification = useNotificationStore();
+const saisie = useSaisieStore();
 
 const tableau = ref<TableauDeBord | null>(null);
 const comptes = ref<Compte[]>([]);
@@ -99,6 +101,19 @@ onMounted(async () => {
 });
 
 watch([periodeId, compteId], chargerTableau);
+// Une opération saisie depuis la saisie rapide : les totaux changent, et un libellé a pu être créé
+watch(
+    () => saisie.nbEnregistrees,
+    async () => {
+        try {
+            await chargerReferentiels();
+        } catch (e) {
+            // Les anciens référentiels restent utilisables
+            console.error(e);
+        }
+        await chargerTableau();
+    }
+);
 
 function allerALaPeriode(id: number | null) {
     if (id === null) return;
@@ -365,6 +380,7 @@ async function creerPremierePeriode() {
                                 ></div>
                             </div>
                             <span
+                                v-if="tableau.periodePrecedenteId !== null"
                                 class="ecart"
                                 :class="classeEcart(t)"
                                 :title="`Période précédente : ${formatMontant(t.totalPrecedent)}`"
@@ -404,6 +420,7 @@ async function creerPremierePeriode() {
                                     ></div>
                                 </div>
                                 <span
+                                    v-if="tableau.periodePrecedenteId !== null"
                                     class="ecart"
                                     :class="classeEcart(t)"
                                     :title="`Période précédente : ${formatMontant(t.totalPrecedent)}`"
