@@ -17,11 +17,11 @@ public interface OperationRepository extends JpaRepository<Operation, Long>, Jpa
     @Query("SELECT o FROM Operation o WHERE o.id = :id AND o.compte.utilisateur.id = :utilisateurId")
     Optional<Operation> findByIdAndUtilisateurId(@Param("id") Long id, @Param("utilisateurId") Long utilisateurId);
 
-    // Revenus - dépenses de chaque compte de l'utilisateur, datés après la date du solde initial : [compteId, mouvement]
+    // Revenus - dépenses de chaque compte de l'utilisateur, datés à partir de la date du solde initial (solde du matin) : [compteId, mouvement]
     @Query("""
             SELECT o.compte.id, SUM(CASE WHEN o.type = :revenu THEN o.montant ELSE -o.montant END)
             FROM Operation o
-            WHERE o.compte.utilisateur.id = :utilisateurId AND o.date > o.compte.dateSoldeInitial
+            WHERE o.compte.utilisateur.id = :utilisateurId AND o.date >= o.compte.dateSoldeInitial
             GROUP BY o.compte.id
             """)
     List<Object[]> sommeMouvementsParCompte(@Param("utilisateurId") Long utilisateurId, @Param("revenu") TypeOperation revenu);
@@ -30,7 +30,7 @@ public interface OperationRepository extends JpaRepository<Operation, Long>, Jpa
     @Query("""
             SELECT o.compte.id, SUM(CASE WHEN o.type = :revenu THEN o.montant ELSE -o.montant END)
             FROM Operation o
-            WHERE o.compte.utilisateur.id = :utilisateurId AND o.date > o.compte.dateSoldeInitial AND o.date <= :jusqua
+            WHERE o.compte.utilisateur.id = :utilisateurId AND o.date >= o.compte.dateSoldeInitial AND o.date <= :jusqua
             GROUP BY o.compte.id
             """)
     List<Object[]> sommeMouvementsParCompteJusqua(@Param("utilisateurId") Long utilisateurId, @Param("revenu") TypeOperation revenu,

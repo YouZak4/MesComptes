@@ -37,12 +37,13 @@ class CompteEtPeriodeControllerTests extends ApiTestBase {
         Categorie courses = categorieFournie("Courses");
         operation(compte, salaire, null, "2026-02-01", "200.00");
         operation(compte, courses, null, "2026-02-02", "50.25");
-        // Datée le jour du solde initial : déjà comprise dans celui-ci
-        operation(compte, courses, null, "2026-01-01", "999.00");
+        // Le solde initial est celui du matin : une opération du jour même compte, celle de la veille non
+        operation(compte, courses, null, "2026-01-01", "10.00");
+        operation(compte, courses, null, "2025-12-31", "999.00");
 
         mvc.perform(en(moi, get("/comptes")))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].solde").value(1150.25));
+                .andExpect(jsonPath("$[0].solde").value(1140.25));
     }
 
     @Test

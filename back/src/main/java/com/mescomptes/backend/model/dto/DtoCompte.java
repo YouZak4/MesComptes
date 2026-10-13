@@ -16,7 +16,7 @@ public class DtoCompte {
     private BigDecimal soldeInitial;
     private LocalDate dateSoldeInitial;
     private boolean archive;
-    // Solde initial + revenus - dépenses datés après la date du solde initial
+    // Solde initial (au matin de sa date) + revenus - dépenses datés à partir de cette date
     private BigDecimal solde;
     // Compte de la dernière opération saisie : proposé par défaut à la saisie
     private boolean dernierUtilise;
