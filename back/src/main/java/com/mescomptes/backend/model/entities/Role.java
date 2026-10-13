@@ -5,10 +5,10 @@ import lombok.*;
 
 @Entity
 @Table(name = "role")
-@Data
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode
+@ToString
 public class Role {
 
     @Getter

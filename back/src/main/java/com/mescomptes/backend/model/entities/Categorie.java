@@ -25,7 +25,7 @@ public class Categorie {
     @JoinColumn(name = "utilisateur_id")
     private Utilisateur utilisateur;
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 50)
     private String nom;
 
     // lower(trim(nom)) : sert à l'unicité sans tenir compte de la casse ni des espaces
