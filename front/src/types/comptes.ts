@@ -138,3 +138,35 @@ export interface RecurrenceSaisie {
     dateDebut: string;
     dateFin: string | null;
 }
+
+// archive : ignoré à la création ; false désarchive un compte
+export interface CompteSaisie {
+    nom: string;
+    soldeInitial: number;
+    dateSoldeInitial: string;
+    archive: boolean;
+}
+
+// Nom vide : mois de la date de fin
+export interface PeriodeSaisie {
+    nom: string | null;
+    dateDebut: string;
+    dateFin: string;
+}
+
+export interface CategorieSaisie {
+    nom: string;
+    type: TypeOperation;
+    icone: string | null;
+    couleur: string | null;
+    archive: boolean;
+}
+
+export interface LibelleSaisie {
+    nom: string;
+    categorieId: number;
+    archive: boolean;
+}
+
+// Éléments fournis (communs à tous) que l'utilisateur peut masquer
+export type TypeMasquable = "categorie" | "libelle";

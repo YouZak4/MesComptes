@@ -1,19 +1,21 @@
 <script setup lang="ts">
-import { onMounted, ref } from "vue";
+import { computed, onMounted } from "vue";
 import { useRouter } from "vue-router";
-import { utilisateurService } from "@/services/utilisateurService.ts";
 import { useAuthStore } from "@/stores/auth";
 import { useNotificationStore } from "@/stores/notification";
+import { useProfilStore } from "@/stores/profil";
 
 const router = useRouter();
 const auth = useAuthStore();
 const notification = useNotificationStore();
+const profil = useProfilStore();
 
-const pseudo = ref<string | null>(null);
+// Dans le store : un changement de pseudo dans les réglages s'affiche tout de suite
+const pseudo = computed(() => profil.utilisateur?.pseudo ?? null);
 
 onMounted(async () => {
     try {
-        pseudo.value = (await utilisateurService.getMoi()).pseudo;
+        await profil.charger();
     } catch (error) {
         // Le pseudo n'est qu'un confort : l'en-tête reste utilisable sans
         console.error(error);
@@ -23,6 +25,7 @@ onMounted(async () => {
 // replace (et non push) : le bouton "Précédent" ne ramène pas sur la page protégée
 async function deconnexion() {
     auth.logout();
+    profil.vider();
     notification.success("Vous êtes déconnecté.");
     await router.replace({ name: "login" });
 }
@@ -37,6 +40,7 @@ async function deconnexion() {
             <RouterLink :to="{ name: 'accueil' }">Tableau de bord</RouterLink>
             <RouterLink :to="{ name: 'operations' }">Opérations</RouterLink>
             <RouterLink :to="{ name: 'recurrences' }">Récurrences</RouterLink>
+            <RouterLink :to="{ name: 'reglages' }">Réglages</RouterLink>
         </nav>
         <div class="utilisateur">
             <span v-if="pseudo" class="pseudo">{{ pseudo }}</span>

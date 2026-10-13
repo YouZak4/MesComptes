@@ -1,16 +1,21 @@
 import api from "./api";
 import type {
     Categorie,
+    CategorieSaisie,
     Compte,
+    CompteSaisie,
     FiltreOperations,
     Frequence,
     Libelle,
+    LibelleSaisie,
     Operation,
     OperationSaisie,
     Periode,
+    PeriodeSaisie,
     Recurrence,
     RecurrenceSaisie,
     TableauDeBord,
+    TypeMasquable,
 } from "@/types/comptes.ts";
 
 export const comptesService = {
@@ -133,5 +138,75 @@ export const comptesService = {
     async arreterRecurrence(id: number): Promise<Recurrence | null> {
         const response = await api.delete<Recurrence>(`/recurrences/${id}`);
         return response.status === 204 ? null : response.data;
+    },
+
+    // ── Réglages ──
+
+    async creerCompte(saisie: CompteSaisie): Promise<Compte> {
+        const response = await api.post<Compte>("/comptes", saisie);
+        return response.data;
+    },
+
+    // archive : false désarchive le compte
+    async modifierCompte(id: number, saisie: CompteSaisie): Promise<Compte> {
+        const response = await api.put<Compte>(`/comptes/${id}`, saisie);
+        return response.data;
+    },
+
+    // Le compte archivé s'il a des opérations, null s'il a été supprimé
+    async supprimerCompte(id: number): Promise<Compte | null> {
+        const response = await api.delete<Compte>(`/comptes/${id}`);
+        return response.status === 204 ? null : response.data;
+    },
+
+    // Sans dates : la période qui suit la dernière, d'un mois
+    async ajouterPeriodeSuivante(): Promise<Periode> {
+        const response = await api.post<Periode>("/periodes", {});
+        return response.data;
+    },
+
+    // Déplacer une limite déplace aussi celle de la période voisine
+    async modifierPeriode(id: number, saisie: PeriodeSaisie): Promise<Periode> {
+        const response = await api.put<Periode>(`/periodes/${id}`, saisie);
+        return response.data;
+    },
+
+    async creerCategorie(saisie: CategorieSaisie): Promise<Categorie> {
+        const response = await api.post<Categorie>("/categories", saisie);
+        return response.data;
+    },
+
+    async modifierCategorie(
+        id: number,
+        saisie: CategorieSaisie
+    ): Promise<Categorie> {
+        const response = await api.put<Categorie>(`/categories/${id}`, saisie);
+        return response.data;
+    },
+
+    // La catégorie archivée si elle est utilisée, null si elle a été supprimée
+    async supprimerCategorie(id: number): Promise<Categorie | null> {
+        const response = await api.delete<Categorie>(`/categories/${id}`);
+        return response.status === 204 ? null : response.data;
+    },
+
+    async modifierLibelle(id: number, saisie: LibelleSaisie): Promise<Libelle> {
+        const response = await api.put<Libelle>(`/libelles/${id}`, saisie);
+        return response.data;
+    },
+
+    // Le libellé archivé s'il est utilisé, null s'il a été supprimé
+    async supprimerLibelle(id: number): Promise<Libelle | null> {
+        const response = await api.delete<Libelle>(`/libelles/${id}`);
+        return response.status === 204 ? null : response.data;
+    },
+
+    // Cache un élément fourni (catégorie ou libellé) ; afficher le fait réapparaître
+    async masquer(type: TypeMasquable, id: number): Promise<void> {
+        await api.put(`/masquages/${type}/${id}`);
+    },
+
+    async afficher(type: TypeMasquable, id: number): Promise<void> {
+        await api.delete(`/masquages/${type}/${id}`);
     },
 };

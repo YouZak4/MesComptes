@@ -5,6 +5,7 @@ import LoginView from "@/views/loginView.vue";
 import VerificationView from "@/views/verificationView.vue";
 import OperationsView from "@/views/operationsView.vue";
 import RecurrencesView from "@/views/recurrencesView.vue";
+import ReglagesView from "@/views/reglagesView.vue";
 
 const router = createRouter({
     history: createWebHistory(import.meta.env.BASE_URL),
@@ -25,6 +26,12 @@ const router = createRouter({
             path: "/recurrences",
             name: "recurrences",
             component: RecurrencesView,
+            meta: { requiresAuth: true },
+        },
+        {
+            path: "/reglages",
+            name: "reglages",
+            component: ReglagesView,
             meta: { requiresAuth: true },
         },
         {
