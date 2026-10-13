@@ -3,8 +3,11 @@ package com.mescomptes.backend.controller;
 import com.mescomptes.backend.model.CustomUserDetails;
 import com.mescomptes.backend.model.dto.DtoOperation;
 import com.mescomptes.backend.model.dto.DtoOperationSaisie;
+import com.mescomptes.backend.model.dto.DtoRecurrence;
 import com.mescomptes.backend.model.dto.FiltreOperations;
+import com.mescomptes.backend.model.enums.Frequence;
 import com.mescomptes.backend.service.OperationService;
+import com.mescomptes.backend.service.RecurrenceService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -20,6 +23,7 @@ import java.util.List;
 public class OperationController {
 
     private final OperationService operationService;
+    private final RecurrenceService recurrenceService;
 
     // Filtres facultatifs : ?periodeId=&compteId=&categorieId=&libelleId=&q=
     @GetMapping
@@ -37,6 +41,13 @@ public class OperationController {
     public DtoOperation modifier(@AuthenticationPrincipal CustomUserDetails utilisateur,
                                  @PathVariable Long id, @Valid @RequestBody DtoOperationSaisie dto) {
         return operationService.modifier(utilisateur.getId(), id, dto);
+    }
+
+    // « Répéter chaque mois » : l'opération devient la première occurrence d'une nouvelle récurrence
+    @PostMapping("/{id}/repeter")
+    public ResponseEntity<DtoRecurrence> repeter(@AuthenticationPrincipal CustomUserDetails utilisateur, @PathVariable Long id,
+                                                 @RequestParam(defaultValue = "MENSUELLE") Frequence frequence) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(recurrenceService.repeter(utilisateur.getId(), id, frequence));
     }
 
     @DeleteMapping("/{id}")

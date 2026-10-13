@@ -4,6 +4,7 @@ import com.mescomptes.backend.exception.AlreadyExist;
 import com.mescomptes.backend.exception.InvalidCredentialsException;
 import com.mescomptes.backend.exception.InvalidVerificationCodeException;
 import com.mescomptes.backend.exception.TooManyRequestsException;
+import com.mescomptes.backend.model.CustomUserDetails;
 import com.mescomptes.backend.model.dto.DtoInscriptionEnAttente;
 import com.mescomptes.backend.model.dto.DtoLogin;
 import com.mescomptes.backend.model.dto.DtoRegister;
@@ -17,6 +18,7 @@ import com.mescomptes.backend.repository.InscriptionEnAttenteRepository;
 import com.mescomptes.backend.security.CustomUserDetailsService;
 import com.mescomptes.backend.security.JwtService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -35,6 +37,7 @@ import java.time.LocalDateTime;
 import java.util.Set;
 import java.util.UUID;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class AuthService {
@@ -56,6 +59,7 @@ public class AuthService {
     private final InscriptionEnAttenteRepository inscriptionEnAttenteRepository;
     private final MailService mailService;
     private final CompteService compteService;
+    private final PlanificationRecurrences planificationRecurrences;
     @Value("${app.verification.expiration-minutes}")
     private long expirationMinutes;
     @Value("${app.verification.max-tentatives}")
@@ -248,11 +252,26 @@ public class AuthService {
             );
 
             SecurityContextHolder.getContext().setAuthentication(authentication);
+            rattraperRecurrences(authentication);
 
             return jwtService.generateToken(authentication);
 
         } catch (BadCredentialsException e) {
             throw new InvalidCredentialsException("Pseudo ou mot de passe incorrect.");
+        }
+    }
+
+    /**
+     * Génère les occurrences de récurrences manquées pendant que le serveur était arrêté.
+     * Un échec ne doit jamais empêcher la connexion : la tâche de nuit rattrapera.
+     */
+    private void rattraperRecurrences(Authentication authentication) {
+        try {
+            if (authentication.getPrincipal() instanceof CustomUserDetails utilisateur) {
+                planificationRecurrences.rattraper(utilisateur.getId());
+            }
+        } catch (RuntimeException e) {
+            log.warn("Rattrapage des récurrences impossible à la connexion : {}", e.getMessage());
         }
     }
 }

@@ -6,9 +6,6 @@ import com.mescomptes.backend.model.Noms;
 import com.mescomptes.backend.model.dto.DtoOperation;
 import com.mescomptes.backend.model.dto.DtoOperationSaisie;
 import com.mescomptes.backend.model.dto.FiltreOperations;
-import com.mescomptes.backend.model.entities.Categorie;
-import com.mescomptes.backend.model.entities.Compte;
-import com.mescomptes.backend.model.entities.Libelle;
 import com.mescomptes.backend.model.entities.Operation;
 import com.mescomptes.backend.model.entities.Periode;
 import com.mescomptes.backend.repository.OperationRepository;
@@ -19,12 +16,9 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 import static com.mescomptes.backend.repository.OperationSpecifications.*;
 
@@ -36,9 +30,7 @@ public class OperationService {
     private static final Sort PLUS_RECENTES_D_ABORD = Sort.by(Sort.Order.desc("date"), Sort.Order.desc("id"));
 
     private final OperationRepository operationRepository;
-    private final CompteService compteService;
-    private final CategorieService categorieService;
-    private final LibelleService libelleService;
+    private final SaisieOperationResolver resolver;
     private final PeriodeService periodeService;
 
     /**
@@ -114,53 +106,29 @@ public class OperationService {
         operationRepository.delete(trouver(utilisateurId, id));
     }
 
-    private Operation trouver(Long utilisateurId, Long id) {
+    /**
+     * Retourne une opération de l'utilisateur, ou une 404.
+     */
+    public Operation trouver(Long utilisateurId, Long id) {
         return operationRepository.findByIdAndUtilisateurId(id, utilisateurId)
                 .orElseThrow(() -> new ResourceNotFoundException(OPERATION_INTROUVABLE));
     }
 
-    /**
-     * Applique la saisie à l'opération. Un compte, une catégorie ou un libellé archivé n'est plus proposé à la saisie :
-     * il est refusé, sauf s'il était déjà sur l'opération (on peut corriger le montant d'une vieille opération).
-     */
+    // Applique la saisie à l'opération selon les règles communes (voir SaisieOperationResolver)
     private void appliquer(Long utilisateurId, Operation operation, DtoOperationSaisie dto) {
-        Compte compte = compteService.trouver(utilisateurId, dto.getCompteId());
-        if (compte.isArchive() && change(operation.getCompte() == null ? null : operation.getCompte().getId(), compte.getId())) {
-            throw new BusinessRuleException("Le compte « " + compte.getNom() + " » est archivé.");
-        }
+        SaisieOperationResolver.Resolue existant = operation.getId() == null ? null
+                : new SaisieOperationResolver.Resolue(operation.getCompte(), operation.getCategorie(), operation.getLibelle(), operation.getMontant());
+        SaisieOperationResolver.Resolue saisie = resolver.resoudre(utilisateurId,
+                new SaisieOperationResolver.Saisie(dto.getCompteId(), dto.getCategorieId(), dto.getLibelleId(), dto.getMontant()), existant);
 
-        Libelle libelle = dto.getLibelleId() == null ? null : libelleService.trouverVisible(utilisateurId, dto.getLibelleId());
-        if (libelle != null && libelle.isArchive()
-                && change(operation.getLibelle() == null ? null : operation.getLibelle().getId(), libelle.getId())) {
-            throw new BusinessRuleException("Le libellé « " + libelle.getNom() + " » est archivé.");
-        }
-
-        // Catégorie saisie, sinon celle proposée par le libellé
-        Long categorieId = dto.getCategorieId() != null ? dto.getCategorieId()
-                : libelle != null ? libelle.getCategorieParDefaut().getId() : null;
-        if (categorieId == null) throw new BusinessRuleException("La catégorie est obligatoire.");
-        Categorie categorie = categorieService.trouverVisible(utilisateurId, categorieId);
-        if (categorie.isArchive() && change(operation.getCategorie() == null ? null : operation.getCategorie().getId(), categorie.getId())) {
-            throw new BusinessRuleException("La catégorie « " + categorie.getNom() + " » est archivée.");
-        }
-
-        // Arrondi au centime : -93,1375 € de l'Excel devient 93,14 €
-        BigDecimal montant = dto.getMontant().setScale(2, RoundingMode.HALF_UP);
-        if (montant.signum() <= 0) throw new BusinessRuleException("Le montant arrondi au centime doit être d'au moins 0,01 €.");
-
-        operation.setCompte(compte);
+        operation.setCompte(saisie.compte());
         operation.setDate(dto.getDate() != null ? dto.getDate() : LocalDate.now());
-        operation.setType(categorie.getType());
-        operation.setMontant(montant);
-        operation.setCategorie(categorie);
-        operation.setLibelle(libelle);
-        operation.setNote(dto.getNote() == null || dto.getNote().isBlank() ? null : dto.getNote().trim());
+        operation.setType(saisie.categorie().getType());
+        operation.setMontant(saisie.montant());
+        operation.setCategorie(saisie.categorie());
+        operation.setLibelle(saisie.libelle());
+        operation.setNote(SaisieOperationResolver.nettoyerNote(dto.getNote()));
     }
-
-    private static boolean change(Long ancienId, Long nouvelId) {
-        return !Objects.equals(ancienId, nouvelId);
-    }
-
     private DtoOperation versDto(Operation operation) {
         return new DtoOperation(operation.getId(), operation.getCompte().getId(), operation.getDate(), operation.getType(),
                 operation.getMontant(), operation.getCategorie().getId(),

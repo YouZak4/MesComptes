@@ -49,6 +49,10 @@ public interface OperationRepository extends JpaRepository<Operation, Long>, Jpa
     // Dernière opération saisie par l'utilisateur (id le plus grand), pour proposer son compte par défaut
     Optional<Operation> findFirstByCompte_Utilisateur_IdOrderByIdDesc(Long utilisateurId);
 
+    boolean existsByRecurrenceIdAndDate(Long recurrenceId, LocalDate date);
+
+    boolean existsByRecurrenceId(Long recurrenceId);
+
     boolean existsByCompteId(Long compteId);
 
     boolean existsByCategorieId(Long categorieId);
