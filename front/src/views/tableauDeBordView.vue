@@ -228,7 +228,7 @@ async function creerPremierePeriode() {
         </p>
 
         <section v-else-if="sansPeriode" class="carte premiere-periode">
-            <h1>Bienvenue sur MesComptes</h1>
+            <h1>Bienvenue sur Mes comptes</h1>
             <p>
                 Pour commencer, définissez votre première période : votre « mois
                 de compte », par exemple d'un jour de paie au suivant.

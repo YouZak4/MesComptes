@@ -31,7 +31,7 @@ async function deconnexion() {
 <template>
     <header class="en-tete">
         <RouterLink :to="{ name: 'accueil' }" class="logo">
-            MesComptes
+            Mes comptes
         </RouterLink>
         <div class="utilisateur">
             <span v-if="pseudo" class="pseudo">{{ pseudo }}</span>

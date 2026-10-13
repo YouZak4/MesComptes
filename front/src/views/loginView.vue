@@ -84,12 +84,12 @@ async function register() {
 
 <template>
     <div class="main-container">
-        <h1>Demon invasion</h1>
+        <h1>Bienvenue sur votre outil de gestion de vos comptes</h1>
 
         <!-- ── Formulaire de connexion ── -->
         <div v-if="isRegister" class="login-container">
             <form @submit.prevent="login">
-                <h2>Se connecter à Demon invasion</h2>
+                <h2>Se connecter à Mes comptes</h2>
 
                 <InputComponent
                     v-model="identifiantLogin"
@@ -134,7 +134,7 @@ async function register() {
         <!-- ── Formulaire d'inscription ── -->
         <div v-if="!isRegister" class="register-container">
             <form @submit.prevent="register">
-                <h2>Créez un compte pour jouer à Demon invasion</h2>
+                <h2>Créez un compte pour utiliser Mes comptes</h2>
 
                 <InputComponent
                     v-model="pseudoRegister"
