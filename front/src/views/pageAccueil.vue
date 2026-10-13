@@ -10,16 +10,16 @@ const router = useRouter();
 const auth = useAuthStore();
 const notification = useNotificationStore();
 
-const utilisateurs = ref<Utilisateur[]>([]);
+const utilisateur = ref<Utilisateur | null>(null);
 const isLoading = ref(false);
 const errorMessage = ref<string | null>(null);
 
 onMounted(async () => {
     isLoading.value = true;
     try {
-        utilisateurs.value = await utilisateurService.getAllUsers();
+        utilisateur.value = await utilisateurService.getMoi();
     } catch (error) {
-        errorMessage.value = "Impossible de charger les utilisateurs.";
+        errorMessage.value = "Impossible de charger votre profil.";
         console.error(error);
     } finally {
         isLoading.value = false;
@@ -38,7 +38,7 @@ async function deconnexion() {
     <main>
         <button type="button" @click="deconnexion">Deconnexion</button>
 
-        <h1>Liste des utilisateurs</h1>
+        <h1>Accueil</h1>
 
         <p v-if="isLoading">Chargement...</p>
 
@@ -46,12 +46,8 @@ async function deconnexion() {
             {{ errorMessage }}
         </p>
 
-        <ul v-else-if="utilisateurs.length > 0">
-            <li v-for="user in utilisateurs" :key="user.id">
-                <strong>{{ user.name }}</strong> — {{ user.email }}
-            </li>
-        </ul>
-
-        <p v-else>Aucun utilisateur trouvé.</p>
+        <p v-else-if="utilisateur">
+            Bonjour <strong>{{ utilisateur.pseudo }}</strong> — {{ utilisateur.email }}
+        </p>
     </main>
 </template>

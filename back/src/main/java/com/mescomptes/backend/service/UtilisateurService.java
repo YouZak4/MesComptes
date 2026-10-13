@@ -1,11 +1,14 @@
 package com.mescomptes.backend.service;
 
+import com.mescomptes.backend.exception.ResourceNotFoundException;
+import com.mescomptes.backend.model.dto.DtoUtilisateur;
 import com.mescomptes.backend.model.entities.Utilisateur;
 import com.mescomptes.backend.repository.UtilisateurRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
+import java.util.LinkedHashSet;
 import java.util.Optional;
 
 @Service
@@ -15,12 +18,16 @@ public class UtilisateurService {
     private final UtilisateurRepository utilisateurRepository;
 
     /**
-     * Retourne tous les utilisateurs contenus en base de données.
+     * Retourne l'utilisateur connecté, sans son mot de passe ni son identifiant de connexion.
      *
-     * @return une liste d'utilisateurs
+     * @param id id de l'utilisateur
+     * @return l'utilisateur
      */
-    public List<Utilisateur> getAllUtilisateurs() {
-        return utilisateurRepository.findAll();
+    @Transactional(readOnly = true)
+    public DtoUtilisateur moi(Long id) {
+        Utilisateur u = utilisateurRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Utilisateur introuvable."));
+        return new DtoUtilisateur(u.getId(), u.getPseudo(), u.getEmail(), new LinkedHashSet<>(u.getRoles()));
     }
 
     /**
