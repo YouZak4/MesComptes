@@ -1,11 +1,16 @@
 package com.mescomptes.backend.service;
 
+import com.mescomptes.backend.exception.AlreadyExist;
+import com.mescomptes.backend.exception.BusinessRuleException;
 import com.mescomptes.backend.exception.ResourceNotFoundException;
+import com.mescomptes.backend.model.dto.DtoMotDePasseSaisie;
+import com.mescomptes.backend.model.dto.DtoProfilSaisie;
 import com.mescomptes.backend.model.dto.DtoUtilisateur;
 import com.mescomptes.backend.model.entities.Role;
 import com.mescomptes.backend.model.entities.Utilisateur;
 import com.mescomptes.backend.repository.UtilisateurRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,6 +24,7 @@ import java.util.stream.Collectors;
 public class UtilisateurService {
 
     private final UtilisateurRepository utilisateurRepository;
+    private final PasswordEncoder passwordEncoder;
 
     /**
      * Retourne l'utilisateur connecté, sans son mot de passe ni son identifiant de connexion.
@@ -28,9 +34,46 @@ public class UtilisateurService {
      */
     @Transactional(readOnly = true)
     public DtoUtilisateur moi(Long id) {
-        Utilisateur u = utilisateurRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Utilisateur introuvable."));
+        return versDto(trouver(id));
+    }
+
+    /**
+     * Change le pseudo de l'utilisateur connecté. Le token reste valable : il porte l'identifiant de connexion.
+     *
+     * @param id  id de l'utilisateur
+     * @param dto nouveau pseudo
+     * @return l'utilisateur modifié
+     */
+    @Transactional
+    public DtoUtilisateur modifierProfil(Long id, DtoProfilSaisie dto) {
+        Utilisateur u = trouver(id);
+        String pseudo = dto.getPseudo().trim();
+        if (!pseudo.equals(u.getPseudo()) && utilisateurRepository.existsByPseudo(pseudo)) {
+            throw new AlreadyExist("Le pseudonyme que vous avez saisi est déjà pris.");
+        }
+        u.setPseudo(pseudo);
         return versDto(u);
+    }
+
+    /**
+     * Change le mot de passe de l'utilisateur connecté, après vérification de l'actuel.
+     * Un mot de passe actuel faux répond 422 et non 401 : la session, elle, est valide (le front déconnecte sur 401).
+     *
+     * @param id  id de l'utilisateur
+     * @param dto mot de passe actuel et nouveau
+     */
+    @Transactional
+    public void changerMotDePasse(Long id, DtoMotDePasseSaisie dto) {
+        Utilisateur u = trouver(id);
+        if (!passwordEncoder.matches(dto.getMotDePasseActuel(), u.getMotDePasse())) {
+            throw new BusinessRuleException("Le mot de passe actuel est incorrect.");
+        }
+        u.setMotDePasse(passwordEncoder.encode(dto.getNouveauMotDePasse()));
+    }
+
+    private Utilisateur trouver(Long id) {
+        return utilisateurRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Utilisateur introuvable."));
     }
 
     /**
