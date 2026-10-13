@@ -1,6 +1,6 @@
 import { createRouter, createWebHistory } from "vue-router";
 import { useAuthStore } from "@/stores/auth";
-import PageAccueil from "@/views/pageAccueil.vue";
+import TableauDeBordView from "@/views/tableauDeBordView.vue";
 import LoginView from "@/views/loginView.vue";
 import VerificationView from "@/views/verificationView.vue";
 
@@ -10,7 +10,7 @@ const router = createRouter({
         {
             path: "/",
             name: "accueil",
-            component: PageAccueil,
+            component: TableauDeBordView,
             meta: { requiresAuth: true },
         },
         {

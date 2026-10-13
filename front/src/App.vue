@@ -6,3 +6,10 @@ import NotificationComponent from "@/components/NotificationComponent.vue";
     <RouterView />
     <NotificationComponent />
 </template>
+
+<style>
+body {
+    margin: 0;
+    font-family: Arial, Helvetica, sans-serif;
+}
+</style>
