@@ -4,6 +4,7 @@ import TableauDeBordView from "@/views/tableauDeBordView.vue";
 import LoginView from "@/views/loginView.vue";
 import VerificationView from "@/views/verificationView.vue";
 import OperationsView from "@/views/operationsView.vue";
+import RecurrencesView from "@/views/recurrencesView.vue";
 
 const router = createRouter({
     history: createWebHistory(import.meta.env.BASE_URL),
@@ -18,6 +19,12 @@ const router = createRouter({
             path: "/operations",
             name: "operations",
             component: OperationsView,
+            meta: { requiresAuth: true },
+        },
+        {
+            path: "/recurrences",
+            name: "recurrences",
+            component: RecurrencesView,
             meta: { requiresAuth: true },
         },
         {

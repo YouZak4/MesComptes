@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, nextTick, onMounted, onUnmounted, ref, watch } from "vue";
 import { comptesService } from "@/services/comptesService.ts";
+import ChampLibelleComponent from "@/components/ChampLibelleComponent.vue";
 import { useNotificationStore } from "@/stores/notification";
 import { type OperationAModifier, useSaisieStore } from "@/stores/saisie";
 import type { Categorie, Compte, Libelle } from "@/types/comptes.ts";
@@ -18,7 +19,8 @@ const erreur = ref<string | null>(null);
 
 const montantTexte = ref("");
 const libelleTexte = ref("");
-const libelleChoisi = ref<Libelle | null>(null);
+// Libellé existant désigné par le texte tapé, null pour un nouveau libellé
+const libelleExistant = ref<Libelle | null>(null);
 const categorieId = ref<number | null>(null);
 const date = ref(versIso(new Date()));
 const compteId = ref<number | null>(null);
@@ -45,6 +47,8 @@ function surTouche(event: KeyboardEvent) {
     if (event.repeat) return;
     if (event.ctrlKey || event.metaKey || event.altKey) return;
     if (event.key !== "n" && event.key !== "N") return;
+    // Une autre fenêtre est déjà ouverte (formulaire de récurrence…)
+    if (document.querySelector('[aria-modal="true"]')) return;
     // Taper un « n » dans un champ ne doit pas ouvrir la saisie
     if (estUnChampDeSaisie(event.target)) return;
     event.preventDefault();
@@ -70,7 +74,7 @@ watch(
 async function preremplir({ operation, libelle }: OperationAModifier) {
     montantTexte.value = String(operation.montant).replace(".", ",");
     if (libelle) {
-        libelleChoisi.value = libelle;
+        libelleExistant.value = libelle;
         libelleTexte.value = libelle.nom;
     }
     date.value = operation.date;
@@ -120,12 +124,10 @@ async function chargerReferentiels() {
 function reinitialiser(complete: boolean) {
     montantTexte.value = "";
     libelleTexte.value = "";
-    libelleChoisi.value = null;
+    libelleExistant.value = null;
     categorieId.value = null;
     note.value = "";
     erreur.value = null;
-    suggestions.value = [];
-    fermerSuggestions();
     if (complete) {
         date.value = versIso(new Date());
         compteId.value = null;
@@ -143,87 +145,7 @@ const categoriesRevenus = computed(() =>
     categories.value.filter((c) => c.type === "REVENU")
 );
 
-// ── Autocomplétion du libellé ──
-
-const suggestions = ref<Libelle[]>([]);
-const suggestionsOuvertes = ref(false);
-const suggestionActive = ref(-1);
-let minuterieRecherche: ReturnType<typeof setTimeout> | undefined;
-// Seule la réponse à la dernière recherche compte, même si une plus ancienne arrive après
-let numeroRecherche = 0;
-
-// Même règle que le back : sans tenir compte des majuscules ni des espaces en trop
-function normaliser(nom: string): string {
-    return nom.trim().replace(/\s+/g, " ").toLowerCase();
-}
-
-function surSaisieLibelle() {
-    libelleChoisi.value = null;
-    clearTimeout(minuterieRecherche);
-    const texte = libelleTexte.value.trim();
-    if (texte === "") {
-        suggestions.value = [];
-        fermerSuggestions();
-        return;
-    }
-    minuterieRecherche = setTimeout(() => rechercher(texte), 150);
-}
-
-async function rechercher(texte: string) {
-    const numero = ++numeroRecherche;
-    try {
-        const resultats = await comptesService.rechercherLibelles(texte);
-        if (numero !== numeroRecherche) return;
-        suggestions.value = resultats;
-        suggestionActive.value = resultats.length > 0 ? 0 : -1;
-        suggestionsOuvertes.value = resultats.length > 0;
-    } catch (e) {
-        // Sans suggestions, la saisie reste possible (le libellé sera créé)
-        console.error(e);
-    }
-}
-
-function choisirLibelle(libelle: Libelle) {
-    libelleChoisi.value = libelle;
-    libelleTexte.value = libelle.nom;
-    // La catégorie du libellé est proposée, et reste modifiable
-    categorieId.value = libelle.categorieId;
-    fermerSuggestions();
-}
-
-function fermerSuggestions() {
-    suggestionsOuvertes.value = false;
-    suggestionActive.value = -1;
-}
-
-function surToucheLibelle(event: KeyboardEvent) {
-    if (!suggestionsOuvertes.value) return;
-    const nb = suggestions.value.length;
-    if (event.key === "ArrowDown") {
-        event.preventDefault();
-        suggestionActive.value = (suggestionActive.value + 1) % nb;
-    } else if (event.key === "ArrowUp") {
-        event.preventDefault();
-        suggestionActive.value = (suggestionActive.value - 1 + nb) % nb;
-    } else if (event.key === "Enter" && suggestionActive.value >= 0) {
-        // Entrée choisit la suggestion ; une seconde Entrée enregistrera
-        event.preventDefault();
-        choisirLibelle(suggestions.value[suggestionActive.value]);
-    } else if (event.key === "Escape") {
-        // Échap ferme d'abord la liste, puis la fenêtre
-        event.preventDefault();
-        event.stopPropagation();
-        fermerSuggestions();
-    }
-}
-
-// Libellé tapé qui correspond exactement à une suggestion, sans l'avoir choisie dans la liste
-const libelleExistant = computed<Libelle | null>(() => {
-    if (libelleChoisi.value) return libelleChoisi.value;
-    const nom = normaliser(libelleTexte.value);
-    if (nom === "") return null;
-    return suggestions.value.find((l) => normaliser(l.nom) === nom) ?? null;
-});
+// ── Libellé ──
 
 const nouveauLibelle = computed(
     () => libelleTexte.value.trim() !== "" && libelleExistant.value === null
@@ -278,7 +200,7 @@ async function enregistrer(enAjouterUneAutre: boolean) {
             );
             libelleId = cree.id;
             // Le libellé existe maintenant : une nouvelle tentative ne le recréera pas
-            choisirLibelle(cree);
+            libelleExistant.value = cree;
         }
         const valeurs = {
             compteId: compteId.value,
@@ -365,54 +287,11 @@ async function enregistrer(enAjouterUneAutre: boolean) {
                         </span>
                     </label>
 
-                    <div class="champ libelle">
-                        <label for="saisie-libelle">Libellé</label>
-                        <!-- Conteneur de la liste : elle s'ouvre juste sous le champ, par-dessus le reste -->
-                        <div class="zone-libelle">
-                            <input
-                                id="saisie-libelle"
-                                v-model="libelleTexte"
-                                type="text"
-                                autocomplete="off"
-                                placeholder="Netflix, Supermarché…"
-                                maxlength="100"
-                                role="combobox"
-                                aria-autocomplete="list"
-                                aria-controls="saisie-suggestions"
-                                :aria-expanded="suggestionsOuvertes"
-                                @input="surSaisieLibelle"
-                                @keydown="surToucheLibelle"
-                                @blur="fermerSuggestions"
-                            />
-                            <ul
-                                v-if="suggestionsOuvertes"
-                                id="saisie-suggestions"
-                                class="suggestions"
-                                role="listbox"
-                            >
-                                <!-- mousedown (et non click) : passe avant le blur qui ferme la liste -->
-                                <li
-                                    v-for="(libelle, index) in suggestions"
-                                    :key="libelle.id"
-                                    role="option"
-                                    :aria-selected="index === suggestionActive"
-                                    :class="{
-                                        active: index === suggestionActive,
-                                    }"
-                                    @mousedown.prevent="choisirLibelle(libelle)"
-                                >
-                                    {{ libelle.nom }}
-                                </li>
-                            </ul>
-                        </div>
-                        <p
-                            v-if="nouveauLibelle && !suggestionsOuvertes"
-                            class="aide"
-                        >
-                            Nouveau libellé : il sera créé avec la catégorie
-                            choisie.
-                        </p>
-                    </div>
+                    <ChampLibelleComponent
+                        id="saisie-libelle"
+                        v-model:texte="libelleTexte"
+                        v-model:libelle="libelleExistant"
+                    />
 
                     <label class="champ">
                         Catégorie
@@ -621,44 +500,6 @@ select:focus {
 .devise {
     font-size: 1.5rem;
     font-weight: bold;
-}
-
-.zone-libelle {
-    position: relative;
-    display: flex;
-    flex-direction: column;
-}
-
-.suggestions {
-    position: absolute;
-    top: 100%;
-    left: 0;
-    right: 0;
-    z-index: 1;
-    margin: 0.25rem 0 0;
-    padding: 0.25rem 0;
-    list-style: none;
-    max-height: 14rem;
-    overflow-y: auto;
-    border: 1px solid #45335c;
-    border-radius: 10px;
-    background: #ffffff;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-}
-
-.suggestions li {
-    padding: 0.45rem 0.75rem;
-    cursor: pointer;
-}
-
-.suggestions li.active {
-    background: #e3d3f1;
-}
-
-.aide {
-    margin: 0;
-    font-size: 0.85rem;
-    color: #81758e;
 }
 
 .erreur {

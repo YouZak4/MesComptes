@@ -107,3 +107,34 @@ export interface FiltreOperations {
     libelleId?: number;
     q?: string;
 }
+
+export interface Recurrence {
+    id: number;
+    compteId: number;
+    type: TypeOperation;
+    montant: number;
+    categorieId: number;
+    libelleId: number | null;
+    note: string | null;
+    frequence: Frequence;
+    // 1 à 31 ; un jour absent du mois devient le dernier jour du mois
+    jour: number;
+    dateDebut: string;
+    dateFin: string | null;
+    prochaineOccurrence: string;
+    // Faux une fois la date de fin dépassée (récurrence arrêtée, prêt remboursé)
+    active: boolean;
+}
+
+// Une récurrence annuelle tombe chaque année dans le mois de sa date de début
+export interface RecurrenceSaisie {
+    compteId: number;
+    montant: number;
+    categorieId: number;
+    libelleId: number | null;
+    note: string | null;
+    frequence: Frequence;
+    jour: number;
+    dateDebut: string;
+    dateFin: string | null;
+}

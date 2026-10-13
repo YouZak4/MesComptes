@@ -36,6 +36,7 @@ async function deconnexion() {
         <nav class="navigation">
             <RouterLink :to="{ name: 'accueil' }">Tableau de bord</RouterLink>
             <RouterLink :to="{ name: 'operations' }">Opérations</RouterLink>
+            <RouterLink :to="{ name: 'recurrences' }">Récurrences</RouterLink>
         </nav>
         <div class="utilisateur">
             <span v-if="pseudo" class="pseudo">{{ pseudo }}</span>

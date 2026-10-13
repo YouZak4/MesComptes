@@ -8,6 +8,8 @@ import type {
     Operation,
     OperationSaisie,
     Periode,
+    Recurrence,
+    RecurrenceSaisie,
     TableauDeBord,
 } from "@/types/comptes.ts";
 
@@ -101,5 +103,35 @@ export const comptesService = {
             params: { periodeId, compteId },
         });
         return response.data;
+    },
+
+    // Arrêtées comprises, triées par jour du mois
+    async getRecurrences(): Promise<Recurrence[]> {
+        const response = await api.get<Recurrence[]>("/recurrences");
+        return response.data;
+    },
+
+    // Les opérations déjà échues depuis la date de début sont créées tout de suite
+    async creerRecurrence(saisie: RecurrenceSaisie): Promise<Recurrence> {
+        const response = await api.post<Recurrence>("/recurrences", saisie);
+        return response.data;
+    },
+
+    // Ne touche que les occurrences futures
+    async modifierRecurrence(
+        id: number,
+        saisie: RecurrenceSaisie
+    ): Promise<Recurrence> {
+        const response = await api.put<Recurrence>(
+            `/recurrences/${id}`,
+            saisie
+        );
+        return response.data;
+    },
+
+    // La récurrence arrêtée (l'historique reste), ou null si elle n'avait rien généré et a été supprimée
+    async arreterRecurrence(id: number): Promise<Recurrence | null> {
+        const response = await api.delete<Recurrence>(`/recurrences/${id}`);
+        return response.status === 204 ? null : response.data;
     },
 };

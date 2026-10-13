@@ -1,12 +1,12 @@
 import { computed, ref } from "vue";
 import { comptesService } from "@/services/comptesService.ts";
-import type {
-    Categorie,
-    Compte,
-    Libelle,
-    Occurrence,
+import type { Categorie, Compte, Libelle, Operation } from "@/types/comptes.ts";
+
+// Opération, occurrence à venir ou récurrence : tout ce qui porte un compte, une catégorie, un libellé et une note
+type Affichable = Pick<
     Operation,
-} from "@/types/comptes.ts";
+    "compteId" | "categorieId" | "libelleId" | "note"
+>;
 
 // Comptes, catégories et libellés de l'utilisateur, pour afficher des opérations qui ne portent que des ids
 export function useReferentiels() {
@@ -31,7 +31,7 @@ export function useReferentiels() {
     );
 
     // Le libellé s'il y en a un, sinon la catégorie
-    function titre(op: Operation | Occurrence): string {
+    function titre(op: Affichable): string {
         if (op.libelleId !== null) {
             const libelle = libelles.value.get(op.libelleId);
             if (libelle) return libelle.nom;
@@ -44,7 +44,7 @@ export function useReferentiels() {
     }
 
     // Catégorie (seulement si le titre est un libellé), compte (si demandé) et note
-    function details(op: Operation | Occurrence, avecCompte: boolean): string {
+    function details(op: Affichable, avecCompte: boolean): string {
         const morceaux: string[] = [];
         if (op.libelleId !== null && libelles.value.has(op.libelleId)) {
             const categorie = categories.value.get(op.categorieId);

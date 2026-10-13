@@ -451,11 +451,17 @@ async function repeter(op: Operation) {
                             <div class="texte">
                                 <span class="titre">
                                     {{ titre(op) }}
-                                    <span
+                                    <RouterLink
                                         v-if="op.recurrenceId !== null"
+                                        :to="{
+                                            name: 'recurrences',
+                                            query: {
+                                                recurrence: op.recurrenceId,
+                                            },
+                                        }"
                                         class="badge"
-                                        title="Générée par une récurrence"
-                                        >🔁</span
+                                        title="Générée par une récurrence (voir la récurrence)"
+                                        >🔁</RouterLink
                                     >
                                 </span>
                                 <span v-if="details(op)" class="details">
@@ -706,6 +712,7 @@ li:last-child {
 .badge {
     font-size: 0.8rem;
     margin-left: 0.25rem;
+    text-decoration: none;
 }
 
 .details {
