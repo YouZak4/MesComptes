@@ -1,7 +1,10 @@
 package com.mescomptes.backend.controller;
 
+import com.mescomptes.backend.repository.RoleRepository;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 
+import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.hasKey;
 import static org.hamcrest.Matchers.not;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -9,6 +12,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 class UtilisateurControllerTests extends ApiTestBase {
+
+    @Autowired
+    private RoleRepository roleRepository;
 
     @Test
     void moiRenvoieLUtilisateurConnecteSansSesSecrets() throws Exception {
@@ -19,6 +25,16 @@ class UtilisateurControllerTests extends ApiTestBase {
                 .andExpect(jsonPath("$.email").value(moi.getEmail()))
                 .andExpect(jsonPath("$", not(hasKey("motDePasse"))))
                 .andExpect(jsonPath("$", not(hasKey("identifiant"))));
+    }
+
+    @Test
+    void lesRolesSontExposesParLeurNom() throws Exception {
+        moi.getRoles().add(roleRepository.findByNom("ROLE_UTILISATEUR").orElseThrow());
+        utilisateurRepository.save(moi);
+
+        mvc.perform(en(moi, get("/utilisateurs/moi")))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.roles").value(contains("ROLE_UTILISATEUR")));
     }
 
     @Test

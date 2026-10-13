@@ -217,9 +217,7 @@ public class AuthService {
         compteService.creerCompteParDefaut(u);
         inscriptionEnAttenteRepository.delete(attente);
 
-        DtoUtilisateur res = new DtoUtilisateur();
-        BeanUtils.copyProperties(u, res);
-        return res;
+        return utilisateurService.versDto(u);
     }
 
 
