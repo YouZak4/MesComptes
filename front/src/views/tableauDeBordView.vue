@@ -2,13 +2,11 @@
 import { computed, onMounted, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { comptesService } from "@/services/comptesService.ts";
+import { useReferentiels } from "@/composables/useReferentiels.ts";
 import { useNotificationStore } from "@/stores/notification";
 import { useSaisieStore } from "@/stores/saisie";
 import EnTeteComponent from "@/components/EnTeteComponent.vue";
 import type {
-    Categorie,
-    Compte,
-    Libelle,
     Occurrence,
     Operation,
     TableauDeBord,
@@ -23,6 +21,8 @@ import {
     formatMontantSigne,
     versIso,
 } from "@/utils/format.ts";
+import { messageErreur } from "@/utils/erreurs.ts";
+import { idDepuisQuery } from "@/utils/routage.ts";
 
 const route = useRoute();
 const router = useRouter();
@@ -30,9 +30,13 @@ const notification = useNotificationStore();
 const saisie = useSaisieStore();
 
 const tableau = ref<TableauDeBord | null>(null);
-const comptes = ref<Compte[]>([]);
-const categories = ref(new Map<number, Categorie>());
-const libelles = ref(new Map<number, Libelle>());
+const {
+    comptes,
+    chargerReferentiels,
+    titre,
+    icone,
+    details: detailsOperation,
+} = useReferentiels();
 const isLoading = ref(true);
 const errorMessage = ref<string | null>(null);
 // Aucune période encore définie : on propose de créer la première
@@ -41,26 +45,6 @@ const sansPeriode = ref(false);
 // Période et compte affichés sont dans l'URL : un rechargement garde la sélection
 const periodeId = computed(() => idDepuisQuery(route.query.periode));
 const compteId = computed(() => idDepuisQuery(route.query.compte));
-
-function idDepuisQuery(valeur: unknown): number | undefined {
-    const id = Number(valeur);
-    return Number.isInteger(id) && id > 0 ? id : undefined;
-}
-
-function messageErreur(e: any, parDefaut: string): string {
-    return e.response?.data?.message || parDefaut;
-}
-
-async function chargerReferentiels() {
-    const [listeComptes, listeCategories, listeLibelles] = await Promise.all([
-        comptesService.getComptes(),
-        comptesService.getCategories(),
-        comptesService.getLibelles(),
-    ]);
-    comptes.value = listeComptes;
-    categories.value = new Map(listeCategories.map((c) => [c.id, c]));
-    libelles.value = new Map(listeLibelles.map((l) => [l.id, l]));
-}
 
 async function chargerTableau() {
     isLoading.value = true;
@@ -133,10 +117,6 @@ const comptesProposes = computed(() =>
     comptes.value.filter((c) => !c.archive || c.id === compteId.value)
 );
 
-const nomsComptes = computed(
-    () => new Map(comptes.value.map((c) => [c.id, c.nom]))
-);
-
 const depensesParCategorie = computed(() => totauxDuType("DEPENSE"));
 const revenusParCategorie = computed(() => totauxDuType("REVENU"));
 
@@ -157,32 +137,12 @@ function classeEcart(t: TotalCategorie): string {
     return hausse === (t.type === "REVENU") ? "favorable" : "defavorable";
 }
 
-function titre(op: Operation | Occurrence): string {
-    if (op.libelleId !== null) {
-        const libelle = libelles.value.get(op.libelleId);
-        if (libelle) return libelle.nom;
-    }
-    return categories.value.get(op.categorieId)?.nom ?? "Opération";
-}
-
-function icone(categorieId: number): string {
-    return categories.value.get(categorieId)?.icone ?? "•";
-}
-
+// Avec tous les comptes affichés, on précise celui de chaque opération
 function details(op: Operation | Occurrence): string {
-    const morceaux: string[] = [];
-    // La catégorie n'est répétée que si le titre est un libellé
-    if (op.libelleId !== null) {
-        const categorie = categories.value.get(op.categorieId);
-        if (categorie) morceaux.push(categorie.nom);
-    }
-    // Avec tous les comptes affichés, on précise lequel
-    if (compteId.value === undefined && comptes.value.length > 1) {
-        const compte = nomsComptes.value.get(op.compteId);
-        if (compte) morceaux.push(compte);
-    }
-    if (op.note) morceaux.push(op.note);
-    return morceaux.join(" · ");
+    return detailsOperation(
+        op,
+        compteId.value === undefined && comptes.value.length > 1
+    );
 }
 
 function classeMontant(type: TypeOperation): string {

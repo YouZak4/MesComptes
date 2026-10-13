@@ -97,3 +97,13 @@ export interface OperationSaisie {
     libelleId: number | null;
     note: string | null;
 }
+
+export type Frequence = "MENSUELLE" | "ANNUELLE";
+
+export interface FiltreOperations {
+    periodeId?: number;
+    compteId?: number;
+    categorieId?: number;
+    libelleId?: number;
+    q?: string;
+}

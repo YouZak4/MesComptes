@@ -33,6 +33,10 @@ async function deconnexion() {
         <RouterLink :to="{ name: 'accueil' }" class="logo">
             Mes comptes
         </RouterLink>
+        <nav class="navigation">
+            <RouterLink :to="{ name: 'accueil' }">Tableau de bord</RouterLink>
+            <RouterLink :to="{ name: 'operations' }">Opérations</RouterLink>
+        </nav>
         <div class="utilisateur">
             <span v-if="pseudo" class="pseudo">{{ pseudo }}</span>
             <button type="button" class="deconnexion" @click="deconnexion">
@@ -57,6 +61,30 @@ async function deconnexion() {
     font-weight: bold;
     color: inherit;
     text-decoration: none;
+}
+
+.navigation {
+    flex: 1;
+    display: flex;
+    gap: 0.25rem;
+    margin-left: 2rem;
+}
+
+.navigation a {
+    padding: 0.4rem 0.75rem;
+    border-radius: 8px;
+    color: #e3d3f1;
+    text-decoration: none;
+}
+
+.navigation a:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+/* Page en cours (classe posée par RouterLink quand la route correspond exactement) */
+.navigation a.router-link-exact-active {
+    background: rgba(255, 255, 255, 0.18);
+    color: #ffffff;
 }
 
 .utilisateur {

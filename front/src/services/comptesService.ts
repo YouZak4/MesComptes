@@ -2,6 +2,8 @@ import api from "./api";
 import type {
     Categorie,
     Compte,
+    FiltreOperations,
+    Frequence,
     Libelle,
     Operation,
     OperationSaisie,
@@ -45,6 +47,41 @@ export const comptesService = {
     async creerOperation(saisie: OperationSaisie): Promise<Operation> {
         const response = await api.post<Operation>("/operations", saisie);
         return response.data;
+    },
+
+    async getPeriodes(): Promise<Periode[]> {
+        const response = await api.get<Periode[]>("/periodes");
+        return response.data;
+    },
+
+    // Opérations les plus récentes d'abord ; chaque filtre est facultatif
+    async getOperations(filtre: FiltreOperations): Promise<Operation[]> {
+        const response = await api.get<Operation[]>("/operations", {
+            params: filtre,
+        });
+        return response.data;
+    },
+
+    async modifierOperation(
+        id: number,
+        saisie: OperationSaisie
+    ): Promise<Operation> {
+        const response = await api.put<Operation>(`/operations/${id}`, saisie);
+        return response.data;
+    },
+
+    async supprimerOperation(id: number): Promise<void> {
+        await api.delete(`/operations/${id}`);
+    },
+
+    // « Répéter chaque mois » : l'opération devient la première occurrence d'une récurrence
+    async repeterOperation(
+        id: number,
+        frequence: Frequence = "MENSUELLE"
+    ): Promise<void> {
+        await api.post(`/operations/${id}/repeter`, null, {
+            params: { frequence },
+        });
     },
 
     async creerPeriode(dateDebut: string, dateFin: string): Promise<Periode> {

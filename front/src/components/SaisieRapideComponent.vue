@@ -2,9 +2,10 @@
 import { computed, nextTick, onMounted, onUnmounted, ref, watch } from "vue";
 import { comptesService } from "@/services/comptesService.ts";
 import { useNotificationStore } from "@/stores/notification";
-import { useSaisieStore } from "@/stores/saisie";
+import { type OperationAModifier, useSaisieStore } from "@/stores/saisie";
 import type { Categorie, Compte, Libelle } from "@/types/comptes.ts";
 import { versIso } from "@/utils/format.ts";
+import { messageErreur } from "@/utils/erreurs.ts";
 
 const saisie = useSaisieStore();
 const notification = useNotificationStore();
@@ -58,11 +59,30 @@ watch(
     async (ouverte) => {
         if (!ouverte) return;
         reinitialiser(true);
+        if (saisie.aModifier) await preremplir(saisie.aModifier);
         await nextTick();
         champMontant.value?.focus();
         await chargerReferentiels();
     }
 );
+
+// Modification : le formulaire reprend l'opération telle qu'elle est
+async function preremplir({ operation, libelle }: OperationAModifier) {
+    montantTexte.value = String(operation.montant).replace(".", ",");
+    if (libelle) {
+        libelleChoisi.value = libelle;
+        libelleTexte.value = libelle.nom;
+    }
+    date.value = operation.date;
+    compteId.value = operation.compteId;
+    note.value = operation.note ?? "";
+    // Après la mise à jour qui suit le choix du libellé, qui propose sa catégorie par défaut :
+    // l'opération garde la sienne, même si elle a été changée à la saisie
+    await nextTick();
+    categorieId.value = operation.categorieId;
+}
+
+const enModification = computed(() => saisie.aModifier !== null);
 
 // Rechargés à chaque ouverture : un compte ou une catégorie a pu être créé entre-temps
 async function chargerReferentiels() {
@@ -72,9 +92,13 @@ async function chargerReferentiels() {
             comptesService.getComptes(),
             comptesService.getCategories(),
         ]);
-        comptes.value = listeComptes.filter((c) => !c.archive);
+        // Un compte ou une catégorie archivé(e) ou masqué(e) reste proposé(e) s'il est déjà celui de l'opération modifiée
+        const actuelle = saisie.aModifier?.operation;
+        comptes.value = listeComptes.filter(
+            (c) => !c.archive || c.id === actuelle?.compteId
+        );
         categories.value = listeCategories.filter(
-            (c) => !c.masquee && !c.archive
+            (c) => (!c.masquee && !c.archive) || c.id === actuelle?.categorieId
         );
         // Compte par défaut : celui de la dernière opération saisie
         if (
@@ -222,10 +246,6 @@ function lireMontant(texte: string): number | null {
     return montant > 0 ? montant : null;
 }
 
-function messageErreur(e: any, parDefaut: string): string {
-    return e.response?.data?.message || parDefaut;
-}
-
 async function enregistrer(enAjouterUneAutre: boolean) {
     if (enregistrementEnCours.value) return;
     erreur.value = null;
@@ -260,16 +280,28 @@ async function enregistrer(enAjouterUneAutre: boolean) {
             // Le libellé existe maintenant : une nouvelle tentative ne le recréera pas
             choisirLibelle(cree);
         }
-        await comptesService.creerOperation({
+        const valeurs = {
             compteId: compteId.value,
             date: date.value,
             montant,
             categorieId: categorieId.value,
             libelleId,
             note: note.value.trim() || null,
-        });
+        };
+        if (saisie.aModifier) {
+            await comptesService.modifierOperation(
+                saisie.aModifier.operation.id,
+                valeurs
+            );
+        } else {
+            await comptesService.creerOperation(valeurs);
+        }
         saisie.signalerEnregistrement();
-        notification.success("Opération enregistrée.");
+        notification.success(
+            enModification.value
+                ? "Opération modifiée."
+                : "Opération enregistrée."
+        );
 
         if (enAjouterUneAutre) {
             reinitialiser(false);
@@ -308,7 +340,13 @@ async function enregistrer(enAjouterUneAutre: boolean) {
                 aria-modal="true"
                 aria-labelledby="titre-saisie"
             >
-                <h2 id="titre-saisie">Nouvelle opération</h2>
+                <h2 id="titre-saisie">
+                    {{
+                        enModification
+                            ? "Modifier l'opération"
+                            : "Nouvelle opération"
+                    }}
+                </h2>
 
                 <form @submit.prevent="enregistrer(false)">
                     <label class="champ">
@@ -463,6 +501,7 @@ async function enregistrer(enAjouterUneAutre: boolean) {
                         <button
                             type="button"
                             class="bouton-secondaire"
+                            v-if="!enModification"
                             :disabled="enregistrementEnCours"
                             @click="enregistrer(true)"
                         >

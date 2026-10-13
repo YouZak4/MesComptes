@@ -3,6 +3,7 @@ import { useAuthStore } from "@/stores/auth";
 import TableauDeBordView from "@/views/tableauDeBordView.vue";
 import LoginView from "@/views/loginView.vue";
 import VerificationView from "@/views/verificationView.vue";
+import OperationsView from "@/views/operationsView.vue";
 
 const router = createRouter({
     history: createWebHistory(import.meta.env.BASE_URL),
@@ -11,6 +12,12 @@ const router = createRouter({
             path: "/",
             name: "accueil",
             component: TableauDeBordView,
+            meta: { requiresAuth: true },
+        },
+        {
+            path: "/operations",
+            name: "operations",
+            component: OperationsView,
             meta: { requiresAuth: true },
         },
         {
