@@ -1,6 +1,7 @@
 package com.mescomptes.backend.security;
 
 import com.mescomptes.backend.model.CustomUserDetails;
+import io.jsonwebtoken.JwtParser;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
@@ -17,16 +18,16 @@ import java.util.List;
 @Service
 public class JwtService {
 
-    // Lit la clé depuis application.properties
-    @Value("${jwt.secret}")
-    private String secret;
+    private final long expiration;
+    // Construits une seule fois : le parseur sert à chaque requête authentifiée
+    private final SecretKey signingKey;
+    private final JwtParser parser;
 
-    @Value("${jwt.expiration}")
-    private long expiration;
-
-    // Génère la clé cryptographique à partir de la chaîne de caractères
-    private SecretKey getSigningKey() {
-        return Keys.hmacShaKeyFor(secret.getBytes());
+    // Lit la clé et la durée de validité depuis application.properties
+    public JwtService(@Value("${jwt.secret}") String secret, @Value("${jwt.expiration}") long expiration) {
+        this.expiration = expiration;
+        this.signingKey = Keys.hmacShaKeyFor(secret.getBytes());
+        this.parser = Jwts.parser().verifyWith(signingKey).build();
     }
 
     // Génère un token pour un utilisateur
@@ -46,17 +47,14 @@ public class JwtService {
                 .claim("roles", roles)                                    // rôles dans le payload
                 .issuedAt(new Date())                                           // date de création
                 .expiration(new Date(System.currentTimeMillis() + expiration))  // date d'expiration
-                .signWith(getSigningKey())
+                .signWith(signingKey)
                 .compact();
     }
 
     // Vérifie la signature et l'expiration, puis rend l'identifiant (sujet) du jeton.
     // Lève ExpiredJwtException si le jeton a expiré, JwtException s'il est malformé ou mal signé.
     public String extractIdentifiant(String token) {
-        return Jwts.parser()
-                .verifyWith(getSigningKey())
-                .build()
-                .parseSignedClaims(token)
+        return parser.parseSignedClaims(token)
                 .getPayload()
                 .getSubject();
     }
