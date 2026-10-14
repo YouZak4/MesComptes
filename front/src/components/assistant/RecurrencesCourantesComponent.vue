@@ -186,6 +186,10 @@ async function creer() {
 <template>
     <p v-if="isLoading" class="message">Chargement...</p>
     <p v-else-if="errorMessage" class="message erreur">{{ errorMessage }}</p>
+    <!-- Atteint par l'URL après avoir retiré tous ses comptes -->
+    <p v-else-if="comptes.length === 0" class="message erreur">
+        Vous n'avez aucun compte : ajoutez-en un à l'étape précédente.
+    </p>
 
     <section v-else class="carte">
         <h2>Vos dépenses et revenus réguliers</h2>

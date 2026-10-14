@@ -6,7 +6,7 @@ import ReglagesComptesComponent from "@/components/reglages/ReglagesComptesCompo
 import RecurrencesCourantesComponent from "@/components/assistant/RecurrencesCourantesComponent.vue";
 import { comptesService } from "@/services/comptesService.ts";
 import { useNotificationStore } from "@/stores/notification";
-import type { Periode } from "@/types/comptes.ts";
+import type { Compte, Periode } from "@/types/comptes.ts";
 import { versIso } from "@/utils/format.ts";
 import { messageErreur } from "@/utils/erreurs.ts";
 import "@/styles/reglages.css";
@@ -89,6 +89,15 @@ async function creerPeriode() {
     }
 }
 
+// ── Étape 2 : il faut au moins un compte proposé à la saisie pour continuer ──
+
+// null tant que les comptes ne sont pas chargés
+const nbComptesActifs = ref<number | null>(null);
+
+function comptesCharges(comptes: Compte[]) {
+    nbComptesActifs.value = comptes.filter((c) => !c.archive).length;
+}
+
 // ── Fin ──
 
 function terminer(nbRecurrences: number) {
@@ -159,16 +168,29 @@ function terminer(nbRecurrences: number) {
 
         <!-- Étape 2 : comptes -->
         <template v-else-if="etape === 2">
-            <p class="aide">
+            <p v-if="nbComptesActifs === 0" class="aide">
+                Ajoutez le compte que vous voulez suivre (compte courant,
+                livret…) avec son solde actuel.
+            </p>
+            <p v-else class="aide">
                 Un premier compte a été créé à votre inscription : renommez-le
                 et donnez son solde actuel avec ✏️, puis ajoutez vos autres
                 comptes (livret, compte joint…).
             </p>
-            <ReglagesComptesComponent />
+            <ReglagesComptesComponent @charges="comptesCharges" />
             <div class="actions navigation">
+                <span v-if="nbComptesActifs === 0" class="aide">
+                    Ajoutez au moins un compte pour continuer.
+                </span>
                 <button
                     type="button"
                     class="bouton-principal"
+                    :disabled="!nbComptesActifs"
+                    :title="
+                        nbComptesActifs === 0
+                            ? 'Ajoutez au moins un compte pour continuer'
+                            : undefined
+                    "
                     @click="allerA(3)"
                 >
                     Continuer

@@ -207,6 +207,10 @@
     background: #5a4377;
 }
 
+.reglages .bouton-principal:disabled {
+    background: #81758e;
+}
+
 .reglages .bouton-secondaire {
     border: 1px solid #45335c;
     background: transparent;

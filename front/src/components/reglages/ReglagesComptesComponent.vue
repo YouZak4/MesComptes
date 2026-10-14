@@ -7,6 +7,11 @@ import type { Compte } from "@/types/comptes.ts";
 import { formatDateLongue, formatMontant, versIso } from "@/utils/format.ts";
 import { messageErreur } from "@/utils/erreurs.ts";
 
+const emit = defineEmits<{
+    // Après chaque chargement : l'assistant de première connexion exige un compte
+    charges: [comptes: Compte[]];
+}>();
+
 const notification = useNotificationStore();
 
 const comptes = ref<Compte[]>([]);
@@ -17,6 +22,7 @@ async function charger() {
     try {
         comptes.value = await comptesService.getComptes();
         errorMessage.value = null;
+        emit("charges", comptes.value);
     } catch (e: any) {
         errorMessage.value = messageErreur(
             e,
