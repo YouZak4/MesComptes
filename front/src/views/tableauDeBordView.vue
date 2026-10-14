@@ -20,7 +20,7 @@ import {
     formatMontantSigne,
 } from "@/utils/format.ts";
 import { messageErreur } from "@/utils/erreurs.ts";
-import { idDepuisQuery } from "@/utils/routage.ts";
+import { idConnu, idDepuisQuery } from "@/utils/routage.ts";
 
 const route = useRoute();
 const router = useRouter();
@@ -29,6 +29,7 @@ const saisie = useSaisieStore();
 const tableau = ref<TableauDeBord | null>(null);
 const {
     comptes,
+    nomsComptes,
     chargerReferentiels,
     titre,
     icone,
@@ -37,11 +38,14 @@ const {
 const isLoading = ref(true);
 const errorMessage = ref<string | null>(null);
 
-// Période et compte affichés sont dans l'URL : un rechargement garde la sélection
+// Période et compte affichés sont dans l'URL : un rechargement garde la sélection ; un compte inconnu est ignoré
 const periodeId = computed(() => idDepuisQuery(route.query.periode));
-const compteId = computed(() => idDepuisQuery(route.query.compte));
+const compteId = computed(() => idConnu(route.query.compte, nomsComptes.value));
+// Le compte n'est connu qu'une fois les référentiels chargés : pas de tableau avant
+const referentielsCharges = ref(false);
 
 async function chargerTableau() {
+    if (!referentielsCharges.value) return;
     isLoading.value = true;
     errorMessage.value = null;
     try {
@@ -76,6 +80,7 @@ onMounted(async () => {
         isLoading.value = false;
         return;
     }
+    referentielsCharges.value = true;
     await chargerTableau();
 });
 

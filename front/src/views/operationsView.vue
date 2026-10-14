@@ -14,7 +14,7 @@ import {
     versIso,
 } from "@/utils/format.ts";
 import { messageErreur } from "@/utils/erreurs.ts";
-import { idDepuisQuery } from "@/utils/routage.ts";
+import { idConnu, idDepuisQuery } from "@/utils/routage.ts";
 
 const route = useRoute();
 const router = useRouter();
@@ -25,6 +25,7 @@ const {
     comptes,
     categories,
     libelles,
+    nomsComptes,
     chargerReferentiels,
     titre,
     icone,
@@ -36,10 +37,12 @@ const operations = ref<Operation[]>([]);
 const isLoading = ref(true);
 const errorMessage = ref<string | null>(null);
 
-// Filtres dans l'URL : un rechargement ou un lien les garde
-const compteId = computed(() => idDepuisQuery(route.query.compte));
-const categorieId = computed(() => idDepuisQuery(route.query.categorie));
-const libelleId = computed(() => idDepuisQuery(route.query.libelle));
+// Filtres dans l'URL : un rechargement ou un lien les garde ; un id inconnu est ignoré
+const compteId = computed(() => idConnu(route.query.compte, nomsComptes.value));
+const categorieId = computed(() =>
+    idConnu(route.query.categorie, categories.value)
+);
+const libelleId = computed(() => idConnu(route.query.libelle, libelles.value));
 const recherche = computed(() =>
     typeof route.query.q === "string" ? route.query.q : ""
 );
@@ -105,27 +108,9 @@ async function chargerOperations() {
     }
 }
 
-// Un filtre qui ne désigne plus rien (élément supprimé depuis, vieux lien) est retiré de l'URL,
-// sinon le back répond 404 et la liste ne s'affiche pas. Rend true si l'URL a changé.
-async function retirerFiltresInconnus(): Promise<boolean> {
-    const query = { ...route.query };
-    if (
-        compteId.value !== undefined &&
-        !comptes.value.some((c) => c.id === compteId.value)
-    )
-        delete query.compte;
-    if (
-        categorieId.value !== undefined &&
-        !categories.value.has(categorieId.value)
-    )
-        delete query.categorie;
-    if (libelleId.value !== undefined && !libelles.value.has(libelleId.value))
-        delete query.libelle;
-    if (Object.keys(query).length === Object.keys(route.query).length)
-        return false;
-    await router.replace({ query });
-    return true;
-}
+// Augmente à chaque chargement complet : le watch des filtres recharge alors la liste,
+// une seule fois même si la période ou les filtres changent en même temps
+const nbChargements = ref(0);
 
 async function toutCharger() {
     isLoading.value = true;
@@ -135,24 +120,28 @@ async function toutCharger() {
             chargerReferentiels(),
         ]);
         periodes.value = listePeriodes;
+        nbChargements.value++;
     } catch (e: any) {
         errorMessage.value = messageErreur(
             e,
             "Impossible de charger vos comptes."
         );
         isLoading.value = false;
-        return;
     }
-    // Si l'URL change, le watch des filtres recharge la liste
-    if (await retirerFiltresInconnus()) return;
-    await chargerOperations();
 }
 
 onMounted(toutCharger);
 
 // Sur l'id de la période : recharger la liste des périodes ne doit pas relancer la recherche
 watch(
-    [() => periode.value?.id, compteId, categorieId, libelleId, recherche],
+    [
+        () => periode.value?.id,
+        compteId,
+        categorieId,
+        libelleId,
+        recherche,
+        nbChargements,
+    ],
     () => chargerOperations()
 );
 // Une opération saisie ou modifiée : un libellé ou une période a pu être créé
