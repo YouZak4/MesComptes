@@ -1,5 +1,5 @@
 export interface Utilisateur {
-    id: number;
+    id: string; // UUID
     nom: string;
     // Facultatif : un pseudo peut tenir dans le nom seul
     prenom: string | null;

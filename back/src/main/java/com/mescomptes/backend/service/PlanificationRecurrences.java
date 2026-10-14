@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.UUID;
 
 /**
  * Déclenche la génération des récurrences : chaque nuit, au démarrage du serveur et à la connexion
@@ -37,7 +38,7 @@ public class PlanificationRecurrences {
      *
      * @param utilisateurId id de l'utilisateur qui se connecte
      */
-    public void rattraper(Long utilisateurId) {
+    public void rattraper(UUID utilisateurId) {
         generer(recurrenceRepository.findAGenererPour(utilisateurId, LocalDate.now()));
     }
 

@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.Objects;
+import java.util.UUID;
 import java.util.function.Function;
 
 /**
@@ -39,7 +40,7 @@ public class SaisieOperationResolver {
      * @param saisie   identifiants et montant saisis
      * @param existant valeurs actuelles de l'élément modifié (null à la création)
      */
-    public Resolue resoudre(Long utilisateurId, Saisie saisie, Resolue existant) {
+    public Resolue resoudre(UUID utilisateurId, Saisie saisie, Resolue existant) {
         Compte compte = compteService.trouver(utilisateurId, saisie.compteId());
         if (compte.isArchive() && change(existant == null ? null : existant.compte(), compte.getId(), Compte::getId)) {
             throw new BusinessRuleException("Le compte « " + compte.getNom() + " » est archivé.");

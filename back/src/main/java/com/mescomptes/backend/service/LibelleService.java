@@ -22,6 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -46,7 +47,7 @@ public class LibelleService {
      * @return les libellés triés par nom
      */
     @Transactional(readOnly = true)
-    public List<DtoLibelle> lister(Long utilisateurId) {
+    public List<DtoLibelle> lister(UUID utilisateurId) {
         Set<Long> masques = masquageRepository.findIdsMasques(utilisateurId, TypeElement.LIBELLE);
         return libelleRepository.findVisibles(utilisateurId).stream()
                 .map(libelle -> versDto(libelle, masques.contains(libelle.getId())))
@@ -62,7 +63,7 @@ public class LibelleService {
      * @return au plus 20 libellés
      */
     @Transactional(readOnly = true)
-    public List<DtoLibelle> rechercher(Long utilisateurId, String texte) {
+    public List<DtoLibelle> rechercher(UUID utilisateurId, String texte) {
         Set<Long> libellesMasques = masquageRepository.findIdsMasques(utilisateurId, TypeElement.LIBELLE);
         Set<Long> categoriesMasquees = masquageRepository.findIdsMasques(utilisateurId, TypeElement.CATEGORIE);
         return libelleRepository.rechercher(utilisateurId, Noms.motifRecherche(texte)).stream()
@@ -82,7 +83,7 @@ public class LibelleService {
      * @return le libellé créé
      */
     @Transactional
-    public DtoLibelle creer(Long utilisateurId, DtoLibelleSaisie dto) {
+    public DtoLibelle creer(UUID utilisateurId, DtoLibelleSaisie dto) {
         verifierNomLibre(utilisateurId, dto.getNom(), null);
         Libelle libelle = new Libelle();
         libelle.setUtilisateur(utilisateurRepository.getReferenceById(utilisateurId));
@@ -101,7 +102,7 @@ public class LibelleService {
      * @return le libellé modifié
      */
     @Transactional
-    public DtoLibelle modifier(Long utilisateurId, Long id, DtoLibelleSaisie dto) {
+    public DtoLibelle modifier(UUID utilisateurId, Long id, DtoLibelleSaisie dto) {
         Libelle libelle = trouverPersonnel(utilisateurId, id);
         verifierNomLibre(utilisateurId, dto.getNom(), id);
         appliquer(utilisateurId, libelle, dto);
@@ -117,7 +118,7 @@ public class LibelleService {
      * @return le libellé archivé, ou vide s'il a été supprimé
      */
     @Transactional
-    public Optional<DtoLibelle> supprimer(Long utilisateurId, Long id) {
+    public Optional<DtoLibelle> supprimer(UUID utilisateurId, Long id) {
         Libelle libelle = trouverPersonnel(utilisateurId, id);
         if (operationRepository.existsByLibelleId(id) || recurrenceRepository.existsByLibelleId(id)) {
             libelle.setArchive(true);
@@ -131,19 +132,19 @@ public class LibelleService {
      * Retourne un libellé fourni ou appartenant à l'utilisateur, ou une 404.
      */
     @Transactional(readOnly = true)
-    public Libelle trouverVisible(Long utilisateurId, Long id) {
+    public Libelle trouverVisible(UUID utilisateurId, Long id) {
         return libelleRepository.findVisible(id, utilisateurId)
                 .orElseThrow(() -> new ResourceNotFoundException(LIBELLE_INTROUVABLE));
     }
 
-    private Libelle trouverPersonnel(Long utilisateurId, Long id) {
+    private Libelle trouverPersonnel(UUID utilisateurId, Long id) {
         Libelle libelle = trouverVisible(utilisateurId, id);
         if (libelle.isFourni()) throw new BusinessRuleException(LIBELLE_FOURNI);
         return libelle;
     }
 
     // Le nom ne doit exister ni parmi les libellés fournis ni parmi ceux de l'utilisateur (hors lui-même)
-    private void verifierNomLibre(Long utilisateurId, String nom, Long idModifie) {
+    private void verifierNomLibre(UUID utilisateurId, String nom, Long idModifie) {
         boolean pris = libelleRepository.findVisiblesParNom(Noms.normaliser(nom), utilisateurId).stream()
                 .anyMatch(existant -> !existant.getId().equals(idModifie));
         if (pris) throw new AlreadyExist(nomDejaPris(nom));
@@ -162,7 +163,7 @@ public class LibelleService {
         return "Le libellé « " + Noms.nettoyer(nom) + " » existe déjà.";
     }
 
-    private void appliquer(Long utilisateurId, Libelle libelle, DtoLibelleSaisie dto) {
+    private void appliquer(UUID utilisateurId, Libelle libelle, DtoLibelleSaisie dto) {
         Categorie categorie = categorieService.trouverVisible(utilisateurId, dto.getCategorieId());
         // On laisse un libellé existant sur sa catégorie archivée, mais on n'en choisit pas une nouvellement
         boolean changeDeCategorie = libelle.getCategorieParDefaut() == null || !libelle.getCategorieParDefaut().getId().equals(categorie.getId());

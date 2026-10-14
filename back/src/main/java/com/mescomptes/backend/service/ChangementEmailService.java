@@ -24,6 +24,7 @@ import java.security.SecureRandom;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Optional;
+import java.util.UUID;
 
 /**
  * Changement de l'adresse mail de l'utilisateur connecté, en deux temps comme l'inscription :
@@ -55,7 +56,7 @@ public class ChangementEmailService {
      * @return le changement en attente, vide s'il n'y en a pas
      */
     @Transactional(readOnly = true)
-    public Optional<DtoChangementEmail> enCours(Long utilisateurId) {
+    public Optional<DtoChangementEmail> enCours(UUID utilisateurId) {
         return changementEmailRepository.findByUtilisateurId(utilisateurId).map(this::versDto);
     }
 
@@ -68,7 +69,7 @@ public class ChangementEmailService {
      * @return le changement en attente
      */
     @Transactional
-    public DtoChangementEmail demander(Long utilisateurId, DtoChangementEmailSaisie dto) {
+    public DtoChangementEmail demander(UUID utilisateurId, DtoChangementEmailSaisie dto) {
         Utilisateur u = utilisateurRepository.findById(utilisateurId)
                 .orElseThrow(() -> new ResourceNotFoundException("Utilisateur introuvable."));
         if (!passwordEncoder.matches(dto.getMotDePasse(), u.getMotDePasse())) {
@@ -100,7 +101,7 @@ public class ChangementEmailService {
      * @return le changement en attente
      */
     @Transactional
-    public DtoChangementEmail renvoyerCode(Long utilisateurId) {
+    public DtoChangementEmail renvoyerCode(UUID utilisateurId) {
         ChangementEmail changement = trouver(utilisateurId);
         verifierDelaiRenvoi(changement);
         genererEtEnvoyerCode(changement);
@@ -115,7 +116,7 @@ public class ChangementEmailService {
      * @return l'utilisateur, avec sa nouvelle adresse
      */
     @Transactional(noRollbackFor = InvalidVerificationCodeException.class) // sinon la tentative ratée n'est pas comptée
-    public DtoUtilisateur verifier(Long utilisateurId, DtoCodeSaisie dto) {
+    public DtoUtilisateur verifier(UUID utilisateurId, DtoCodeSaisie dto) {
         ChangementEmail changement = trouver(utilisateurId);
 
         if (changement.getExpiration().isBefore(LocalDateTime.now())) {
@@ -157,11 +158,11 @@ public class ChangementEmailService {
      * @param utilisateurId id de l'utilisateur connecté
      */
     @Transactional
-    public void annuler(Long utilisateurId) {
+    public void annuler(UUID utilisateurId) {
         changementEmailRepository.findByUtilisateurId(utilisateurId).ifPresent(changementEmailRepository::delete);
     }
 
-    private ChangementEmail trouver(Long utilisateurId) {
+    private ChangementEmail trouver(UUID utilisateurId) {
         return changementEmailRepository.findByUtilisateurId(utilisateurId)
                 .orElseThrow(() -> new InvalidVerificationCodeException(AUCUN_CHANGEMENT));
     }

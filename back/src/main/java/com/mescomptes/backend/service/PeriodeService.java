@@ -17,6 +17,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
+import java.util.UUID;
 
 /**
  * Les périodes d'un utilisateur se suivent sans trou ni chevauchement :
@@ -41,7 +42,7 @@ public class PeriodeService {
      * @return la liste des périodes (vide à la première connexion)
      */
     @Transactional(readOnly = true)
-    public List<DtoPeriode> lister(Long utilisateurId) {
+    public List<DtoPeriode> lister(UUID utilisateurId) {
         return periodeRepository.findByUtilisateurIdOrderByDateDebut(utilisateurId).stream().map(this::versDto).toList();
     }
 
@@ -59,7 +60,7 @@ public class PeriodeService {
      * @return la période créée
      */
     @Transactional
-    public DtoPeriode creer(Long utilisateurId, DtoPeriodeSaisie dto) {
+    public DtoPeriode creer(UUID utilisateurId, DtoPeriodeSaisie dto) {
         Optional<Periode> derniere = periodeRepository.findFirstByUtilisateurIdOrderByDateFinDesc(utilisateurId);
         LocalDate debut;
         LocalDate fin;
@@ -98,7 +99,7 @@ public class PeriodeService {
      * @return la période modifiée
      */
     @Transactional
-    public DtoPeriode modifier(Long utilisateurId, Long id, DtoPeriodeSaisie dto) {
+    public DtoPeriode modifier(UUID utilisateurId, Long id, DtoPeriodeSaisie dto) {
         if (dto.getDateDebut() == null || dto.getDateFin() == null) throw new BusinessRuleException("Les dates de début et de fin sont obligatoires.");
         if (dto.getDateFin().isBefore(dto.getDateDebut())) throw new BusinessRuleException(DATES_INCOHERENTES);
 
@@ -145,7 +146,7 @@ public class PeriodeService {
      * @param date          date à couvrir
      */
     @Transactional
-    public void couvrirJusqua(Long utilisateurId, LocalDate date) {
+    public void couvrirJusqua(UUID utilisateurId, LocalDate date) {
         Optional<Periode> derniere = periodeRepository.findFirstByUtilisateurIdOrderByDateFinDesc(utilisateurId);
         // Aucune période (assistant de première connexion non terminé) : on part du mois de la date
         LocalDate fin = derniere.map(Periode::getDateFin).orElse(date.withDayOfMonth(1).minusDays(1));
@@ -161,12 +162,12 @@ public class PeriodeService {
      * Retourne une période de l'utilisateur, ou une 404 si elle n'existe pas ou appartient à un autre utilisateur.
      */
     @Transactional(readOnly = true)
-    public Periode trouver(Long utilisateurId, Long id) {
+    public Periode trouver(UUID utilisateurId, Long id) {
         return periodeRepository.findByIdAndUtilisateurId(id, utilisateurId)
                 .orElseThrow(() -> new ResourceNotFoundException(PERIODE_INTROUVABLE));
     }
 
-    private Periode enregistrer(Long utilisateurId, String nom, LocalDate debut, LocalDate fin) {
+    private Periode enregistrer(UUID utilisateurId, String nom, LocalDate debut, LocalDate fin) {
         Periode periode = new Periode();
         periode.setUtilisateur(utilisateurRepository.getReferenceById(utilisateurId));
         periode.setNom(nom);

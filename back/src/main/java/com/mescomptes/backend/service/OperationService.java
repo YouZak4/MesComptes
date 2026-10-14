@@ -19,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import static com.mescomptes.backend.repository.OperationSpecifications.*;
 
@@ -41,7 +42,7 @@ public class OperationService {
      * @return la liste filtrée
      */
     @Transactional(readOnly = true)
-    public List<DtoOperation> lister(Long utilisateurId, FiltreOperations filtre) {
+    public List<DtoOperation> lister(UUID utilisateurId, FiltreOperations filtre) {
         List<Specification<Operation>> criteres = new ArrayList<>();
         criteres.add(deLUtilisateur(utilisateurId));
         if (filtre.periodeId() != null) {
@@ -66,7 +67,7 @@ public class OperationService {
      * @return l'opération créée
      */
     @Transactional
-    public DtoOperation creer(Long utilisateurId, DtoOperationSaisie dto) {
+    public DtoOperation creer(UUID utilisateurId, DtoOperationSaisie dto) {
         Operation operation = new Operation();
         appliquer(utilisateurId, operation, dto);
         periodeService.couvrirJusqua(utilisateurId, operation.getDate());
@@ -83,7 +84,7 @@ public class OperationService {
      * @return l'opération modifiée
      */
     @Transactional
-    public DtoOperation modifier(Long utilisateurId, Long id, DtoOperationSaisie dto) {
+    public DtoOperation modifier(UUID utilisateurId, Long id, DtoOperationSaisie dto) {
         Operation operation = trouver(utilisateurId, id);
         appliquer(utilisateurId, operation, dto);
         periodeService.couvrirJusqua(utilisateurId, operation.getDate());
@@ -102,20 +103,20 @@ public class OperationService {
      * @param id            id de l'opération
      */
     @Transactional
-    public void supprimer(Long utilisateurId, Long id) {
+    public void supprimer(UUID utilisateurId, Long id) {
         operationRepository.delete(trouver(utilisateurId, id));
     }
 
     /**
      * Retourne une opération de l'utilisateur, ou une 404.
      */
-    public Operation trouver(Long utilisateurId, Long id) {
+    public Operation trouver(UUID utilisateurId, Long id) {
         return operationRepository.findByIdAndUtilisateurId(id, utilisateurId)
                 .orElseThrow(() -> new ResourceNotFoundException(OPERATION_INTROUVABLE));
     }
 
     // Applique la saisie à l'opération selon les règles communes (voir SaisieOperationResolver)
-    private void appliquer(Long utilisateurId, Operation operation, DtoOperationSaisie dto) {
+    private void appliquer(UUID utilisateurId, Operation operation, DtoOperationSaisie dto) {
         SaisieOperationResolver.Resolue existant = operation.getId() == null ? null
                 : new SaisieOperationResolver.Resolue(operation.getCompte(), operation.getCategorie(), operation.getLibelle(), operation.getMontant());
         SaisieOperationResolver.Resolue saisie = resolver.resoudre(utilisateurId,

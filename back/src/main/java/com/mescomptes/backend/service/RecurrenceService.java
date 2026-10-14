@@ -18,6 +18,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -39,7 +40,7 @@ public class RecurrenceService {
      * @return la liste des récurrences
      */
     @Transactional(readOnly = true)
-    public List<DtoRecurrence> lister(Long utilisateurId) {
+    public List<DtoRecurrence> lister(UUID utilisateurId) {
         return recurrenceRepository.findByUtilisateurIdOrderByJour(utilisateurId).stream().map(this::versDto).toList();
     }
 
@@ -51,7 +52,7 @@ public class RecurrenceService {
      * @return la récurrence créée
      */
     @Transactional
-    public DtoRecurrence creer(Long utilisateurId, DtoRecurrenceSaisie dto) {
+    public DtoRecurrence creer(UUID utilisateurId, DtoRecurrenceSaisie dto) {
         Recurrence recurrence = new Recurrence();
         recurrence.setUtilisateur(utilisateurRepository.getReferenceById(utilisateurId));
         appliquer(utilisateurId, recurrence, dto);
@@ -70,7 +71,7 @@ public class RecurrenceService {
      * @return la récurrence modifiée
      */
     @Transactional
-    public DtoRecurrence modifier(Long utilisateurId, Long id, DtoRecurrenceSaisie dto) {
+    public DtoRecurrence modifier(UUID utilisateurId, Long id, DtoRecurrenceSaisie dto) {
         Recurrence recurrence = trouver(utilisateurId, id);
         boolean etaitActive = estActive(recurrence);
         Frequence ancienneFrequence = recurrence.getFrequence();
@@ -103,7 +104,7 @@ public class RecurrenceService {
      * @return la récurrence arrêtée, ou vide si elle a été supprimée
      */
     @Transactional
-    public Optional<DtoRecurrence> supprimer(Long utilisateurId, Long id) {
+    public Optional<DtoRecurrence> supprimer(UUID utilisateurId, Long id) {
         Recurrence recurrence = trouver(utilisateurId, id);
         if (!operationRepository.existsByRecurrenceId(id)) {
             recurrenceRepository.delete(recurrence);
@@ -124,7 +125,7 @@ public class RecurrenceService {
      * @return la récurrence créée
      */
     @Transactional
-    public DtoRecurrence repeter(Long utilisateurId, Long operationId, Frequence frequence) {
+    public DtoRecurrence repeter(UUID utilisateurId, Long operationId, Frequence frequence) {
         Operation operation = operationService.trouver(utilisateurId, operationId);
         if (operation.getRecurrence() != null) throw new BusinessRuleException("Cette opération fait déjà partie d'une récurrence.");
         SaisieOperationResolver.Resolue saisie = resolver.resoudre(utilisateurId, new SaisieOperationResolver.Saisie(
@@ -147,12 +148,12 @@ public class RecurrenceService {
         return enregistrerEtGenerer(recurrence);
     }
 
-    private Recurrence trouver(Long utilisateurId, Long id) {
+    private Recurrence trouver(UUID utilisateurId, Long id) {
         return recurrenceRepository.findByIdAndUtilisateurId(id, utilisateurId)
                 .orElseThrow(() -> new ResourceNotFoundException(RECURRENCE_INTROUVABLE));
     }
 
-    private void appliquer(Long utilisateurId, Recurrence recurrence, DtoRecurrenceSaisie dto) {
+    private void appliquer(UUID utilisateurId, Recurrence recurrence, DtoRecurrenceSaisie dto) {
         if (dto.getDateFin() != null && dto.getDateFin().isBefore(dto.getDateDebut())) {
             throw new BusinessRuleException("La date de fin doit être postérieure ou égale à la date de début.");
         }

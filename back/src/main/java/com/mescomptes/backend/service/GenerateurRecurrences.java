@@ -10,6 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.UUID;
 
 /**
  * Crée les opérations des récurrences dont la date est arrivée.
@@ -46,7 +47,7 @@ public class GenerateurRecurrences {
             recurrence.setProchaineOccurrence(Occurrences.suivante(recurrence, date));
         }
         if (!dates.isEmpty()) {
-            Long utilisateurId = recurrence.getUtilisateur().getId();
+            UUID utilisateurId = recurrence.getUtilisateur().getId();
             // D'abord la première date : sans période existante, la première créée doit la contenir
             periodeService.couvrirJusqua(utilisateurId, dates.getFirst());
             periodeService.couvrirJusqua(utilisateurId, dates.getLast());

@@ -19,6 +19,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -39,7 +40,7 @@ public class CompteService {
      * @return la liste des comptes triée par nom
      */
     @Transactional(readOnly = true)
-    public List<DtoCompte> lister(Long utilisateurId) {
+    public List<DtoCompte> lister(UUID utilisateurId) {
         Map<Long, BigDecimal> mouvements = operationRepository.sommeMouvementsParCompte(utilisateurId, TypeOperation.REVENU).stream()
                 .collect(Collectors.toMap(ligne -> (Long) ligne[0], ligne -> (BigDecimal) ligne[1]));
         Long dernierCompteId = operationRepository.findFirstByCompte_Utilisateur_IdOrderByIdDesc(utilisateurId)
@@ -62,7 +63,7 @@ public class CompteService {
      * @return le compte créé
      */
     @Transactional
-    public DtoCompte creer(Long utilisateurId, DtoCompteSaisie dto) {
+    public DtoCompte creer(UUID utilisateurId, DtoCompteSaisie dto) {
         Compte compte = new Compte();
         compte.setUtilisateur(utilisateurRepository.getReferenceById(utilisateurId));
         appliquer(compte, dto);
@@ -79,7 +80,7 @@ public class CompteService {
      * @return le compte modifié, avec son solde recalculé
      */
     @Transactional
-    public DtoCompte modifier(Long utilisateurId, Long id, DtoCompteSaisie dto) {
+    public DtoCompte modifier(UUID utilisateurId, Long id, DtoCompteSaisie dto) {
         Compte compte = trouver(utilisateurId, id);
         appliquer(compte, dto);
         compte.setArchive(dto.isArchive());
@@ -94,7 +95,7 @@ public class CompteService {
      * @return le compte archivé, ou vide s'il a été supprimé
      */
     @Transactional
-    public Optional<DtoCompte> supprimer(Long utilisateurId, Long id) {
+    public Optional<DtoCompte> supprimer(UUID utilisateurId, Long id) {
         Compte compte = trouver(utilisateurId, id);
         if (operationRepository.existsByCompteId(id)) {
             compte.setArchive(true);
@@ -123,13 +124,13 @@ public class CompteService {
      * Retourne un compte de l'utilisateur, ou une 404 s'il n'existe pas ou appartient à un autre utilisateur.
      */
     @Transactional(readOnly = true)
-    public Compte trouver(Long utilisateurId, Long id) {
+    public Compte trouver(UUID utilisateurId, Long id) {
         return compteRepository.findByIdAndUtilisateurId(id, utilisateurId)
                 .orElseThrow(() -> new ResourceNotFoundException(COMPTE_INTROUVABLE));
     }
 
     // Relit le compte avec son solde, la date du solde initial ayant pu changer
-    private DtoCompte relire(Long utilisateurId, Long id) {
+    private DtoCompte relire(UUID utilisateurId, Long id) {
         compteRepository.flush();
         return lister(utilisateurId).stream()
                 .filter(c -> c.getId().equals(id))

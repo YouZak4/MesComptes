@@ -5,6 +5,7 @@ import lombok.*;
 
 import java.util.LinkedHashSet;
 import java.util.Set;
+import java.util.UUID;
 
 @Entity
 @Table(name = "utilisateurs")
@@ -15,10 +16,11 @@ import java.util.Set;
 @AllArgsConstructor
 public class Utilisateur {
 
+    // UUID plutôt qu'un compteur : un id exposé par l'API ne révèle ni le nombre d'inscrits ni l'ordre d'inscription
     @Id
     @Getter
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private UUID id;
 
     // Nom affiché ; il peut aussi servir de pseudo, le prénom étant facultatif
     @Setter

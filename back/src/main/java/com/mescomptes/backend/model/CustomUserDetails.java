@@ -12,6 +12,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 public class CustomUserDetails implements UserDetails {
@@ -36,7 +37,7 @@ public class CustomUserDetails implements UserDetails {
     }
 
     // Id de l'utilisateur connecté, pour limiter chaque requête à ses propres données
-    public Long getId() {
+    public UUID getId() {
         return utilisateur.getId();
     }
 

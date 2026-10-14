@@ -33,7 +33,7 @@ class UtilisateurControllerTests extends ApiTestBase {
     void moiRenvoieLUtilisateurConnecteSansSesSecrets() throws Exception {
         mvc.perform(en(moi, get("/utilisateurs/moi")))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(moi.getId()))
+                .andExpect(jsonPath("$.id").value(moi.getId().toString()))
                 .andExpect(jsonPath("$.nom").value(moi.getNom()))
                 .andExpect(jsonPath("$.prenom").value(nullValue()))
                 .andExpect(jsonPath("$.email").value(moi.getEmail()))

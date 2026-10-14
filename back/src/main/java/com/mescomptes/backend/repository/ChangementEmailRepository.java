@@ -8,9 +8,10 @@ import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
+import java.util.UUID;
 
 public interface ChangementEmailRepository extends JpaRepository<ChangementEmail, Long> {
-    Optional<ChangementEmail> findByUtilisateurId(Long utilisateurId);
+    Optional<ChangementEmail> findByUtilisateurId(UUID utilisateurId);
 
     // Suppression en une seule requête, sans charger chaque ligne en mémoire
     @Modifying

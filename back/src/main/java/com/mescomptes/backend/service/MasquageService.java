@@ -9,6 +9,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.UUID;
+
 /**
  * Un utilisateur masque les catégories et libellés fournis dont il ne se sert pas.
  * Les éléments personnels ne se masquent pas : ils s'archivent.
@@ -30,7 +32,7 @@ public class MasquageService {
      * @param elementId     id de l'élément
      */
     @Transactional
-    public void masquer(Long utilisateurId, TypeElement type, Long elementId) {
+    public void masquer(UUID utilisateurId, TypeElement type, Long elementId) {
         boolean fourni = switch (type) {
             case CATEGORIE -> categorieService.trouverVisible(utilisateurId, elementId).isFournie();
             case LIBELLE -> libelleService.trouverVisible(utilisateurId, elementId).isFourni();
@@ -54,7 +56,7 @@ public class MasquageService {
      * @param elementId     id de l'élément
      */
     @Transactional
-    public void afficher(Long utilisateurId, TypeElement type, Long elementId) {
+    public void afficher(UUID utilisateurId, TypeElement type, Long elementId) {
         masquageRepository.findByUtilisateurIdAndTypeElementAndElementId(utilisateurId, type, elementId)
                 .ifPresent(masquageRepository::delete);
     }

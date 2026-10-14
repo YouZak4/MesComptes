@@ -7,6 +7,7 @@ import jakarta.persistence.criteria.JoinType;
 import org.springframework.data.jpa.domain.Specification;
 
 import java.time.LocalDate;
+import java.util.UUID;
 
 // Briques de filtre de la liste des opérations, combinées par OperationService
 public final class OperationSpecifications {
@@ -14,7 +15,7 @@ public final class OperationSpecifications {
     private OperationSpecifications() {
     }
 
-    public static Specification<Operation> deLUtilisateur(Long utilisateurId) {
+    public static Specification<Operation> deLUtilisateur(UUID utilisateurId) {
         return (root, query, cb) -> cb.equal(root.get("compte").get("utilisateur").get("id"), utilisateurId);
     }
 

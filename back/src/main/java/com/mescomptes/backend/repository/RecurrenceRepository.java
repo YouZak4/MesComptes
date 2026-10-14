@@ -8,12 +8,13 @@ import org.springframework.data.repository.query.Param;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 public interface RecurrenceRepository extends JpaRepository<Recurrence, Long> {
 
-    List<Recurrence> findByUtilisateurIdOrderByJour(Long utilisateurId);
+    List<Recurrence> findByUtilisateurIdOrderByJour(UUID utilisateurId);
 
-    Optional<Recurrence> findByIdAndUtilisateurId(Long id, Long utilisateurId);
+    Optional<Recurrence> findByIdAndUtilisateurId(Long id, UUID utilisateurId);
 
     boolean existsByCategorieId(Long categorieId);
 
@@ -25,5 +26,5 @@ public interface RecurrenceRepository extends JpaRepository<Recurrence, Long> {
 
     // Même chose pour un seul utilisateur (rattrapage à la connexion)
     @Query("SELECT r FROM Recurrence r WHERE r.utilisateur.id = :utilisateurId AND r.prochaineOccurrence <= :date AND (r.dateFin IS NULL OR r.prochaineOccurrence <= r.dateFin)")
-    List<Recurrence> findAGenererPour(@Param("utilisateurId") Long utilisateurId, @Param("date") LocalDate date);
+    List<Recurrence> findAGenererPour(@Param("utilisateurId") UUID utilisateurId, @Param("date") LocalDate date);
 }

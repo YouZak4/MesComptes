@@ -22,6 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -45,7 +46,7 @@ public class CategorieService {
      * @return les catégories triées par type puis par nom
      */
     @Transactional(readOnly = true)
-    public List<DtoCategorie> lister(Long utilisateurId) {
+    public List<DtoCategorie> lister(UUID utilisateurId) {
         Set<Long> masquees = masquageRepository.findIdsMasques(utilisateurId, TypeElement.CATEGORIE);
         return categorieRepository.findVisibles(utilisateurId).stream()
                 .map(categorie -> versDto(categorie, masquees.contains(categorie.getId())))
@@ -60,7 +61,7 @@ public class CategorieService {
      * @return la catégorie créée
      */
     @Transactional
-    public DtoCategorie creer(Long utilisateurId, DtoCategorieSaisie dto) {
+    public DtoCategorie creer(UUID utilisateurId, DtoCategorieSaisie dto) {
         verifierNomLibre(utilisateurId, dto.getNom(), null);
         Categorie categorie = new Categorie();
         categorie.setUtilisateur(utilisateurRepository.getReferenceById(utilisateurId));
@@ -79,7 +80,7 @@ public class CategorieService {
      * @return la catégorie modifiée
      */
     @Transactional
-    public DtoCategorie modifier(Long utilisateurId, Long id, DtoCategorieSaisie dto) {
+    public DtoCategorie modifier(UUID utilisateurId, Long id, DtoCategorieSaisie dto) {
         Categorie categorie = trouverPersonnelle(utilisateurId, id);
         verifierNomLibre(utilisateurId, dto.getNom(), id);
         if (dto.getType() != categorie.getType()
@@ -100,7 +101,7 @@ public class CategorieService {
      * @return la catégorie archivée, ou vide si elle a été supprimée
      */
     @Transactional
-    public Optional<DtoCategorie> supprimer(Long utilisateurId, Long id) {
+    public Optional<DtoCategorie> supprimer(UUID utilisateurId, Long id) {
         Categorie categorie = trouverPersonnelle(utilisateurId, id);
         if (operationRepository.existsByCategorieId(id) || recurrenceRepository.existsByCategorieId(id)
                 || libelleRepository.existsByCategorieParDefautId(id)) {
@@ -115,19 +116,19 @@ public class CategorieService {
      * Retourne une catégorie fournie ou appartenant à l'utilisateur, ou une 404.
      */
     @Transactional(readOnly = true)
-    public Categorie trouverVisible(Long utilisateurId, Long id) {
+    public Categorie trouverVisible(UUID utilisateurId, Long id) {
         return categorieRepository.findVisible(id, utilisateurId)
                 .orElseThrow(() -> new ResourceNotFoundException(CATEGORIE_INTROUVABLE));
     }
 
-    private Categorie trouverPersonnelle(Long utilisateurId, Long id) {
+    private Categorie trouverPersonnelle(UUID utilisateurId, Long id) {
         Categorie categorie = trouverVisible(utilisateurId, id);
         if (categorie.isFournie()) throw new BusinessRuleException(CATEGORIE_FOURNIE);
         return categorie;
     }
 
     // Le nom ne doit exister ni parmi les catégories fournies ni parmi celles de l'utilisateur (hors elle-même)
-    private void verifierNomLibre(Long utilisateurId, String nom, Long idModifie) {
+    private void verifierNomLibre(UUID utilisateurId, String nom, Long idModifie) {
         boolean pris = categorieRepository.findVisiblesParNom(Noms.normaliser(nom), utilisateurId).stream()
                 .anyMatch(existante -> !existante.getId().equals(idModifie));
         if (pris) throw new AlreadyExist(nomDejaPris(nom));

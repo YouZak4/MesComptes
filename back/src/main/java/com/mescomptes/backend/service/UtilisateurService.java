@@ -16,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.LinkedHashSet;
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -32,7 +33,7 @@ public class UtilisateurService {
      * @return l'utilisateur
      */
     @Transactional(readOnly = true)
-    public DtoUtilisateur moi(Long id) {
+    public DtoUtilisateur moi(UUID id) {
         return versDto(trouver(id));
     }
 
@@ -44,7 +45,7 @@ public class UtilisateurService {
      * @return l'utilisateur modifié
      */
     @Transactional
-    public DtoUtilisateur modifierProfil(Long id, DtoProfilSaisie dto) {
+    public DtoUtilisateur modifierProfil(UUID id, DtoProfilSaisie dto) {
         Utilisateur u = trouver(id);
         u.setNom(dto.getNom().trim());
         u.setPrenom(prenomOuNull(dto.getPrenom()));
@@ -66,7 +67,7 @@ public class UtilisateurService {
      * @param dto mot de passe actuel et nouveau
      */
     @Transactional
-    public void changerMotDePasse(Long id, DtoMotDePasseSaisie dto) {
+    public void changerMotDePasse(UUID id, DtoMotDePasseSaisie dto) {
         Utilisateur u = trouver(id);
         if (!passwordEncoder.matches(dto.getMotDePasseActuel(), u.getMotDePasse())) {
             throw new BusinessRuleException("Le mot de passe actuel est incorrect.");
@@ -74,7 +75,7 @@ public class UtilisateurService {
         u.setMotDePasse(passwordEncoder.encode(dto.getNouveauMotDePasse()));
     }
 
-    private Utilisateur trouver(Long id) {
+    private Utilisateur trouver(UUID id) {
         return utilisateurRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Utilisateur introuvable."));
     }

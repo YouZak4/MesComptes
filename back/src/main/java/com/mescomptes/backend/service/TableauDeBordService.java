@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -55,7 +56,7 @@ public class TableauDeBordService {
      * @return totaux, totaux par catégorie, occurrences à venir, soldes prévus et dernières opérations
      */
     @Transactional(readOnly = true)
-    public DtoTableauDeBord construire(Long utilisateurId, Long periodeId, Long compteId) {
+    public DtoTableauDeBord construire(UUID utilisateurId, Long periodeId, Long compteId) {
         Periode periode = periodeId != null ? periodeService.trouver(utilisateurId, periodeId) : periodeParDefaut(utilisateurId);
         if (compteId != null) compteService.trouver(utilisateurId, compteId);
         Optional<Periode> precedente = periodeRepository.findFirstByUtilisateurIdAndDateFinLessThanOrderByDateFinDesc(utilisateurId, periode.getDateDebut());
@@ -111,13 +112,13 @@ public class TableauDeBordService {
                 dernieres);
     }
 
-    private Periode periodeParDefaut(Long utilisateurId) {
+    private Periode periodeParDefaut(UUID utilisateurId) {
         return periodeRepository.findContenant(utilisateurId, LocalDate.now())
                 .or(() -> periodeRepository.findFirstByUtilisateurIdOrderByDateFinDesc(utilisateurId))
                 .orElseThrow(() -> new BusinessRuleException("Aucune période n'est encore définie."));
     }
 
-    private Map<Long, BigDecimal> totauxParCategorie(Long utilisateurId, Long compteId, LocalDate debut, LocalDate fin) {
+    private Map<Long, BigDecimal> totauxParCategorie(UUID utilisateurId, Long compteId, LocalDate debut, LocalDate fin) {
         Map<Long, BigDecimal> totaux = new HashMap<>();
         for (Object[] ligne : operationRepository.totauxParCompteEtCategorie(utilisateurId, debut, fin)) {
             if (compteId == null || compteId.equals(ligne[0])) totaux.merge((Long) ligne[1], (BigDecimal) ligne[2], BigDecimal::add);
@@ -133,7 +134,7 @@ public class TableauDeBordService {
     }
 
     // Occurrences pas encore générées qui tombent dans la période, triées par date
-    private List<DtoOccurrence> occurrencesAVenir(Long utilisateurId, Long compteId, Periode periode) {
+    private List<DtoOccurrence> occurrencesAVenir(UUID utilisateurId, Long compteId, Periode periode) {
         return recurrenceRepository.findByUtilisateurIdOrderByJour(utilisateurId).stream()
                 .filter(r -> compteId == null || compteId.equals(r.getCompte().getId()))
                 .flatMap(r -> Occurrences.aGenererEntre(r, periode.getDateDebut(), periode.getDateFin()).stream()
@@ -144,7 +145,7 @@ public class TableauDeBordService {
     }
 
     // Solde initial + mouvements jusqu'à la date, pour le ou les comptes choisis
-    private BigDecimal soldeComptes(Long utilisateurId, Long compteId, LocalDate jusqua) {
+    private BigDecimal soldeComptes(UUID utilisateurId, Long compteId, LocalDate jusqua) {
         Map<Long, BigDecimal> mouvements = operationRepository.sommeMouvementsParCompteJusqua(utilisateurId, TypeOperation.REVENU, jusqua).stream()
                 .collect(Collectors.toMap(ligne -> (Long) ligne[0], ligne -> (BigDecimal) ligne[1]));
         return compteRepository.findByUtilisateurIdOrderByNom(utilisateurId).stream()
