@@ -1,13 +1,11 @@
 package com.mescomptes.backend.security;
 
 import com.mescomptes.backend.model.CustomUserDetails;
-import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import javax.crypto.SecretKey;
@@ -52,7 +50,8 @@ public class JwtService {
                 .compact();
     }
 
-    // Extrait l'identifiant depuis un token
+    // Vérifie la signature et l'expiration, puis rend l'identifiant (sujet) du jeton.
+    // Lève ExpiredJwtException si le jeton a expiré, JwtException s'il est malformé ou mal signé.
     public String extractIdentifiant(String token) {
         return Jwts.parser()
                 .verifyWith(getSigningKey())
@@ -60,25 +59,5 @@ public class JwtService {
                 .parseSignedClaims(token)
                 .getPayload()
                 .getSubject();
-    }
-
-    // Vérifie que le token est valide et correspond à l'utilisateur
-    public boolean isTokenValid(String token, UserDetails userDetails) {
-        try {
-            String identifiant = extractIdentifiant(token);
-            return identifiant.equals(userDetails.getUsername()) && !isTokenExpired(token);
-        } catch (JwtException e) {
-            return false;
-        }
-    }
-
-    private boolean isTokenExpired(String token) {
-        Date expDate = Jwts.parser()
-                .verifyWith(getSigningKey())
-                .build()
-                .parseSignedClaims(token)
-                .getPayload()
-                .getExpiration();
-        return expDate.before(new Date());
     }
 }

@@ -67,6 +67,18 @@ class SecuriteTests extends ApiTestBase {
     }
 
     @Test
+    void unJetonSansIdentifiantRepond401() throws Exception {
+        String sansSujet = Jwts.builder()
+                .issuedAt(new Date())
+                .expiration(new Date(System.currentTimeMillis() + UNE_HEURE))
+                .signWith(Keys.hmacShaKeyFor(secret.getBytes()))
+                .compact();
+        mvc.perform(get("/comptes").header("Authorization", "Bearer " + sansSujet))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.error").value("INVALID_TOKEN"));
+    }
+
+    @Test
     void leJetonDUnUtilisateurQuiNExistePlusRepond401() throws Exception {
         mvc.perform(get("/comptes").header("Authorization", "Bearer " + jeton("identifiant-inexistant", UNE_HEURE, secret)))
                 .andExpect(status().isUnauthorized())

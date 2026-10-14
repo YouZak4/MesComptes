@@ -53,7 +53,7 @@ public class OpenApiConfig {
     /**
      * Complète chaque route avec les réponses communes, que les annotations ne disent pas :
      * les erreurs ont le format DtoApiError (springdoc leur donnerait sinon le schéma de la réponse normale),
-     * un 204 n'a pas de corps, et chaque route reçoit les erreurs qui la concernent (validation, jeton, introuvable).
+     * un 204 n'a pas de corps, et chaque route reçoit les erreurs qui la concernent (validation, jeton, rôle, introuvable).
      */
     @Bean
     public OpenApiCustomizer reponsesCommunes() {
@@ -66,6 +66,7 @@ public class OpenApiConfig {
                 }
                 if (!estPublique(operation)) {
                     reponses.putIfAbsent("401", erreur("JWT absent, invalide ou expiré (AUTH_REQUIRED, INVALID_TOKEN, TOKEN_EXPIRED)"));
+                    reponses.putIfAbsent("403", erreur("Utilisateur connecté sans le rôle requis (ACCESS_DENIED)"));
                 }
                 if (chemin.contains("{id}")) {
                     reponses.putIfAbsent("404", erreur("Introuvable, ou appartient à un autre utilisateur"));

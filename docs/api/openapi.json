@@ -303,6 +303,16 @@
               }
             },
             "description" : "JWT absent, invalide ou expiré (AUTH_REQUIRED, INVALID_TOKEN, TOKEN_EXPIRED)"
+          },
+          "403" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DtoApiError"
+                }
+              }
+            },
+            "description" : "Utilisateur connecté sans le rôle requis (ACCESS_DENIED)"
           }
         },
         "summary" : "Liste les catégories fournies et personnelles",
@@ -350,6 +360,16 @@
               }
             },
             "description" : "JWT absent, invalide ou expiré (AUTH_REQUIRED, INVALID_TOKEN, TOKEN_EXPIRED)"
+          },
+          "403" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DtoApiError"
+                }
+              }
+            },
+            "description" : "Utilisateur connecté sans le rôle requis (ACCESS_DENIED)"
           },
           "409" : {
             "content" : {
@@ -402,6 +422,16 @@
               }
             },
             "description" : "JWT absent, invalide ou expiré (AUTH_REQUIRED, INVALID_TOKEN, TOKEN_EXPIRED)"
+          },
+          "403" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DtoApiError"
+                }
+              }
+            },
+            "description" : "Utilisateur connecté sans le rôle requis (ACCESS_DENIED)"
           },
           "404" : {
             "content" : {
@@ -480,6 +510,16 @@
             },
             "description" : "JWT absent, invalide ou expiré (AUTH_REQUIRED, INVALID_TOKEN, TOKEN_EXPIRED)"
           },
+          "403" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DtoApiError"
+                }
+              }
+            },
+            "description" : "Utilisateur connecté sans le rôle requis (ACCESS_DENIED)"
+          },
           "404" : {
             "content" : {
               "application/json" : {
@@ -541,6 +581,16 @@
               }
             },
             "description" : "JWT absent, invalide ou expiré (AUTH_REQUIRED, INVALID_TOKEN, TOKEN_EXPIRED)"
+          },
+          "403" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DtoApiError"
+                }
+              }
+            },
+            "description" : "Utilisateur connecté sans le rôle requis (ACCESS_DENIED)"
           }
         },
         "summary" : "Liste les comptes, archivés compris, avec leur solde",
@@ -588,6 +638,16 @@
               }
             },
             "description" : "JWT absent, invalide ou expiré (AUTH_REQUIRED, INVALID_TOKEN, TOKEN_EXPIRED)"
+          },
+          "403" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DtoApiError"
+                }
+              }
+            },
+            "description" : "Utilisateur connecté sans le rôle requis (ACCESS_DENIED)"
           }
         },
         "summary" : "Crée un compte",
@@ -630,6 +690,16 @@
               }
             },
             "description" : "JWT absent, invalide ou expiré (AUTH_REQUIRED, INVALID_TOKEN, TOKEN_EXPIRED)"
+          },
+          "403" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DtoApiError"
+                }
+              }
+            },
+            "description" : "Utilisateur connecté sans le rôle requis (ACCESS_DENIED)"
           },
           "404" : {
             "content" : {
@@ -698,6 +768,16 @@
             },
             "description" : "JWT absent, invalide ou expiré (AUTH_REQUIRED, INVALID_TOKEN, TOKEN_EXPIRED)"
           },
+          "403" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DtoApiError"
+                }
+              }
+            },
+            "description" : "Utilisateur connecté sans le rôle requis (ACCESS_DENIED)"
+          },
           "404" : {
             "content" : {
               "application/json" : {
@@ -748,6 +828,16 @@
               }
             },
             "description" : "JWT absent, invalide ou expiré (AUTH_REQUIRED, INVALID_TOKEN, TOKEN_EXPIRED)"
+          },
+          "403" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DtoApiError"
+                }
+              }
+            },
+            "description" : "Utilisateur connecté sans le rôle requis (ACCESS_DENIED)"
           }
         },
         "summary" : "Liste les libellés, ou les cherche pour l'autocomplétion",
@@ -795,6 +885,16 @@
               }
             },
             "description" : "JWT absent, invalide ou expiré (AUTH_REQUIRED, INVALID_TOKEN, TOKEN_EXPIRED)"
+          },
+          "403" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DtoApiError"
+                }
+              }
+            },
+            "description" : "Utilisateur connecté sans le rôle requis (ACCESS_DENIED)"
           },
           "409" : {
             "content" : {
@@ -857,6 +957,16 @@
               }
             },
             "description" : "JWT absent, invalide ou expiré (AUTH_REQUIRED, INVALID_TOKEN, TOKEN_EXPIRED)"
+          },
+          "403" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DtoApiError"
+                }
+              }
+            },
+            "description" : "Utilisateur connecté sans le rôle requis (ACCESS_DENIED)"
           },
           "404" : {
             "content" : {
@@ -935,6 +1045,16 @@
             },
             "description" : "JWT absent, invalide ou expiré (AUTH_REQUIRED, INVALID_TOKEN, TOKEN_EXPIRED)"
           },
+          "403" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DtoApiError"
+                }
+              }
+            },
+            "description" : "Utilisateur connecté sans le rôle requis (ACCESS_DENIED)"
+          },
           "404" : {
             "content" : {
               "application/json" : {
@@ -1004,6 +1124,16 @@
             },
             "description" : "JWT absent, invalide ou expiré (AUTH_REQUIRED, INVALID_TOKEN, TOKEN_EXPIRED)"
           },
+          "403" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DtoApiError"
+                }
+              }
+            },
+            "description" : "Utilisateur connecté sans le rôle requis (ACCESS_DENIED)"
+          },
           "404" : {
             "content" : {
               "application/json" : {
@@ -1060,6 +1190,16 @@
               }
             },
             "description" : "JWT absent, invalide ou expiré (AUTH_REQUIRED, INVALID_TOKEN, TOKEN_EXPIRED)"
+          },
+          "403" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DtoApiError"
+                }
+              }
+            },
+            "description" : "Utilisateur connecté sans le rôle requis (ACCESS_DENIED)"
           },
           "404" : {
             "content" : {
@@ -1154,6 +1294,16 @@
             },
             "description" : "JWT absent, invalide ou expiré (AUTH_REQUIRED, INVALID_TOKEN, TOKEN_EXPIRED)"
           },
+          "403" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DtoApiError"
+                }
+              }
+            },
+            "description" : "Utilisateur connecté sans le rôle requis (ACCESS_DENIED)"
+          },
           "404" : {
             "content" : {
               "application/json" : {
@@ -1212,6 +1362,16 @@
             },
             "description" : "JWT absent, invalide ou expiré (AUTH_REQUIRED, INVALID_TOKEN, TOKEN_EXPIRED)"
           },
+          "403" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DtoApiError"
+                }
+              }
+            },
+            "description" : "Utilisateur connecté sans le rôle requis (ACCESS_DENIED)"
+          },
           "422" : {
             "content" : {
               "application/json" : {
@@ -1253,6 +1413,16 @@
               }
             },
             "description" : "JWT absent, invalide ou expiré (AUTH_REQUIRED, INVALID_TOKEN, TOKEN_EXPIRED)"
+          },
+          "403" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DtoApiError"
+                }
+              }
+            },
+            "description" : "Utilisateur connecté sans le rôle requis (ACCESS_DENIED)"
           },
           "404" : {
             "content" : {
@@ -1320,6 +1490,16 @@
               }
             },
             "description" : "JWT absent, invalide ou expiré (AUTH_REQUIRED, INVALID_TOKEN, TOKEN_EXPIRED)"
+          },
+          "403" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DtoApiError"
+                }
+              }
+            },
+            "description" : "Utilisateur connecté sans le rôle requis (ACCESS_DENIED)"
           },
           "404" : {
             "content" : {
@@ -1389,6 +1569,16 @@
             },
             "description" : "JWT absent, invalide ou expiré (AUTH_REQUIRED, INVALID_TOKEN, TOKEN_EXPIRED)"
           },
+          "403" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DtoApiError"
+                }
+              }
+            },
+            "description" : "Utilisateur connecté sans le rôle requis (ACCESS_DENIED)"
+          },
           "404" : {
             "content" : {
               "application/json" : {
@@ -1440,6 +1630,16 @@
               }
             },
             "description" : "JWT absent, invalide ou expiré (AUTH_REQUIRED, INVALID_TOKEN, TOKEN_EXPIRED)"
+          },
+          "403" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DtoApiError"
+                }
+              }
+            },
+            "description" : "Utilisateur connecté sans le rôle requis (ACCESS_DENIED)"
           }
         },
         "summary" : "Liste les périodes",
@@ -1488,6 +1688,16 @@
               }
             },
             "description" : "JWT absent, invalide ou expiré (AUTH_REQUIRED, INVALID_TOKEN, TOKEN_EXPIRED)"
+          },
+          "403" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DtoApiError"
+                }
+              }
+            },
+            "description" : "Utilisateur connecté sans le rôle requis (ACCESS_DENIED)"
           },
           "422" : {
             "content" : {
@@ -1558,6 +1768,16 @@
             },
             "description" : "JWT absent, invalide ou expiré (AUTH_REQUIRED, INVALID_TOKEN, TOKEN_EXPIRED)"
           },
+          "403" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DtoApiError"
+                }
+              }
+            },
+            "description" : "Utilisateur connecté sans le rôle requis (ACCESS_DENIED)"
+          },
           "404" : {
             "content" : {
               "application/json" : {
@@ -1609,6 +1829,16 @@
               }
             },
             "description" : "JWT absent, invalide ou expiré (AUTH_REQUIRED, INVALID_TOKEN, TOKEN_EXPIRED)"
+          },
+          "403" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DtoApiError"
+                }
+              }
+            },
+            "description" : "Utilisateur connecté sans le rôle requis (ACCESS_DENIED)"
           }
         },
         "summary" : "Liste les récurrences, actives et arrêtées",
@@ -1657,6 +1887,16 @@
               }
             },
             "description" : "JWT absent, invalide ou expiré (AUTH_REQUIRED, INVALID_TOKEN, TOKEN_EXPIRED)"
+          },
+          "403" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DtoApiError"
+                }
+              }
+            },
+            "description" : "Utilisateur connecté sans le rôle requis (ACCESS_DENIED)"
           },
           "422" : {
             "content" : {
@@ -1709,6 +1949,16 @@
               }
             },
             "description" : "JWT absent, invalide ou expiré (AUTH_REQUIRED, INVALID_TOKEN, TOKEN_EXPIRED)"
+          },
+          "403" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DtoApiError"
+                }
+              }
+            },
+            "description" : "Utilisateur connecté sans le rôle requis (ACCESS_DENIED)"
           },
           "404" : {
             "content" : {
@@ -1777,6 +2027,16 @@
             },
             "description" : "JWT absent, invalide ou expiré (AUTH_REQUIRED, INVALID_TOKEN, TOKEN_EXPIRED)"
           },
+          "403" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DtoApiError"
+                }
+              }
+            },
+            "description" : "Utilisateur connecté sans le rôle requis (ACCESS_DENIED)"
+          },
           "404" : {
             "content" : {
               "application/json" : {
@@ -1834,6 +2094,16 @@
             },
             "description" : "JWT absent, invalide ou expiré (AUTH_REQUIRED, INVALID_TOKEN, TOKEN_EXPIRED)"
           },
+          "403" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DtoApiError"
+                }
+              }
+            },
+            "description" : "Utilisateur connecté sans le rôle requis (ACCESS_DENIED)"
+          },
           "422" : {
             "content" : {
               "application/json" : {
@@ -1872,6 +2142,16 @@
               }
             },
             "description" : "JWT absent, invalide ou expiré (AUTH_REQUIRED, INVALID_TOKEN, TOKEN_EXPIRED)"
+          },
+          "403" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DtoApiError"
+                }
+              }
+            },
+            "description" : "Utilisateur connecté sans le rôle requis (ACCESS_DENIED)"
           }
         },
         "summary" : "Renvoie l'utilisateur connecté",
@@ -1920,6 +2200,16 @@
               }
             },
             "description" : "JWT absent, invalide ou expiré (AUTH_REQUIRED, INVALID_TOKEN, TOKEN_EXPIRED)"
+          },
+          "403" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DtoApiError"
+                }
+              }
+            },
+            "description" : "Utilisateur connecté sans le rôle requis (ACCESS_DENIED)"
           }
         },
         "summary" : "Modifie le nom et le prénom",
@@ -1943,6 +2233,16 @@
               }
             },
             "description" : "JWT absent, invalide ou expiré (AUTH_REQUIRED, INVALID_TOKEN, TOKEN_EXPIRED)"
+          },
+          "403" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DtoApiError"
+                }
+              }
+            },
+            "description" : "Utilisateur connecté sans le rôle requis (ACCESS_DENIED)"
           }
         },
         "summary" : "Annule le changement d'adresse en cours",
@@ -1973,6 +2273,16 @@
               }
             },
             "description" : "JWT absent, invalide ou expiré (AUTH_REQUIRED, INVALID_TOKEN, TOKEN_EXPIRED)"
+          },
+          "403" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DtoApiError"
+                }
+              }
+            },
+            "description" : "Utilisateur connecté sans le rôle requis (ACCESS_DENIED)"
           }
         },
         "summary" : "Renvoie le changement d'adresse en cours",
@@ -2021,6 +2331,16 @@
               }
             },
             "description" : "JWT absent, invalide ou expiré (AUTH_REQUIRED, INVALID_TOKEN, TOKEN_EXPIRED)"
+          },
+          "403" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DtoApiError"
+                }
+              }
+            },
+            "description" : "Utilisateur connecté sans le rôle requis (ACCESS_DENIED)"
           },
           "422" : {
             "content" : {
@@ -2080,6 +2400,16 @@
               }
             },
             "description" : "JWT absent, invalide ou expiré (AUTH_REQUIRED, INVALID_TOKEN, TOKEN_EXPIRED)"
+          },
+          "403" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DtoApiError"
+                }
+              }
+            },
+            "description" : "Utilisateur connecté sans le rôle requis (ACCESS_DENIED)"
           },
           "429" : {
             "content" : {
@@ -2141,6 +2471,16 @@
             },
             "description" : "JWT absent, invalide ou expiré (AUTH_REQUIRED, INVALID_TOKEN, TOKEN_EXPIRED)"
           },
+          "403" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DtoApiError"
+                }
+              }
+            },
+            "description" : "Utilisateur connecté sans le rôle requis (ACCESS_DENIED)"
+          },
           "409" : {
             "content" : {
               "application/json" : {
@@ -2193,6 +2533,16 @@
               }
             },
             "description" : "JWT absent, invalide ou expiré (AUTH_REQUIRED, INVALID_TOKEN, TOKEN_EXPIRED)"
+          },
+          "403" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DtoApiError"
+                }
+              }
+            },
+            "description" : "Utilisateur connecté sans le rôle requis (ACCESS_DENIED)"
           },
           "422" : {
             "content" : {
