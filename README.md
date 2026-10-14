@@ -42,3 +42,4 @@ L'application est servie sur le port 5173 par défaut.
 - [Document de conception](docs/conception/conception-mescomptes.md) : périmètre de la V1 et règles métier.
 - [Les objets du back](docs/conception/objets-back.md) : entités, DTO et leurs liens.
 - [Décisions d'architecture](docs/adr/README.md) : pourquoi les choix structurants ont été faits.
+- [API REST](docs/api/README.md) : toutes les routes, leurs règles et la description OpenAPI ; Swagger UI sur http://localhost:8085/api/swagger-ui.html.

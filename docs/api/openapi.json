@@ -1,0 +1,2633 @@
+{
+  "openapi" : "3.1.0",
+  "info" : {
+    "description" : "Suivi des dépenses : comptes, périodes, catégories et libellés, opérations, récurrences et tableau de bord. Une ressource d'un autre utilisateur répond 404. Les erreurs suivent toujours le format DtoApiError.",
+    "title" : "MesComptes API",
+    "version" : "v1"
+  },
+  "servers" : [ {
+    "url" : "/api"
+  } ],
+  "security" : [ {
+    "jwt" : [ ]
+  } ],
+  "tags" : [ {
+    "description" : "Inscription vérifiée par code envoyé par mail, puis connexion (routes publiques)",
+    "name" : "Authentification"
+  }, {
+    "description" : "Modèles d'opérations ajoutées d'elles-mêmes chaque mois ou chaque année",
+    "name" : "Récurrences"
+  }, {
+    "description" : "Profil de l'utilisateur connecté",
+    "name" : "Utilisateur"
+  }, {
+    "description" : "Synthèse d'une période",
+    "name" : "Tableau de bord"
+  }, {
+    "description" : "Masquer ou réafficher une catégorie ou un libellé fourni",
+    "name" : "Masquage"
+  }, {
+    "description" : "Dépenses et revenus ; le type est déduit de la catégorie",
+    "name" : "Opérations"
+  }, {
+    "description" : "Catégories fournies (communes, masquables) et personnelles",
+    "name" : "Catégories"
+  }, {
+    "description" : "Mois de compte aux dates réglables, contigus",
+    "name" : "Périodes"
+  }, {
+    "description" : "Comptes de l'utilisateur et leur solde",
+    "name" : "Comptes"
+  }, {
+    "description" : "Libellés fournis et personnels, chacun avec une catégorie par défaut",
+    "name" : "Libellés"
+  } ],
+  "paths" : {
+    "/auth/login" : {
+      "post" : {
+        "description" : "Le corps de la réponse est le jeton, en texte. Rattrape au passage les récurrences en retard.",
+        "operationId" : "login",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/DtoLogin"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              }
+            },
+            "description" : "Jeton JWT, valable 24 heures"
+          },
+          "400" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DtoApiError"
+                }
+              }
+            },
+            "description" : "Corps invalide : champ obligatoire manquant, format ou longueur"
+          },
+          "401" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DtoApiError"
+                }
+              }
+            },
+            "description" : "Identifiant ou mot de passe incorrect"
+          }
+        },
+        "security" : [ ],
+        "summary" : "Se connecte et obtient le JWT",
+        "tags" : [ "Authentification" ]
+      }
+    },
+    "/auth/register" : {
+      "post" : {
+        "description" : "Envoie un code à 6 chiffres par mail. Une adresse déjà inscrite reçoit une alerte au lieu du code, avec la même réponse.",
+        "operationId" : "register",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/DtoRegister"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "202" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DtoInscriptionEnAttente"
+                }
+              }
+            },
+            "description" : "Inscription en attente du code"
+          },
+          "400" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DtoApiError"
+                }
+              }
+            },
+            "description" : "Corps invalide : champ obligatoire manquant, format ou longueur"
+          }
+        },
+        "security" : [ ],
+        "summary" : "Démarre une inscription",
+        "tags" : [ "Authentification" ]
+      }
+    },
+    "/auth/register/resend" : {
+      "post" : {
+        "description" : "L'ancien code ne marche plus. Un envoi par minute au plus.",
+        "operationId" : "resend",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/DtoRenvoiCode"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "202" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DtoInscriptionEnAttente"
+                }
+              }
+            },
+            "description" : "Nouveau code envoyé"
+          },
+          "400" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DtoApiError"
+                }
+              }
+            },
+            "description" : "Corps invalide : champ obligatoire manquant, format ou longueur"
+          },
+          "429" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DtoApiError"
+                }
+              }
+            },
+            "description" : "Délai de renvoi pas encore écoulé"
+          }
+        },
+        "security" : [ ],
+        "summary" : "Renvoie un nouveau code",
+        "tags" : [ "Authentification" ]
+      }
+    },
+    "/auth/register/verify" : {
+      "post" : {
+        "description" : "Crée aussi un premier compte « Compte courant ».",
+        "operationId" : "verify",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/DtoVerification"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "201" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DtoUtilisateur"
+                }
+              }
+            },
+            "description" : "Utilisateur créé"
+          },
+          "400" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DtoApiError"
+                }
+              }
+            },
+            "description" : "Code incorrect, expiré, ou trop de tentatives"
+          },
+          "409" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DtoApiError"
+                }
+              }
+            },
+            "description" : "Identifiant ou adresse pris entre-temps"
+          }
+        },
+        "security" : [ ],
+        "summary" : "Valide le code et crée l'utilisateur",
+        "tags" : [ "Authentification" ]
+      }
+    },
+    "/auth/register/{jeton}" : {
+      "get" : {
+        "description" : "Pour réafficher la saisie du code après un rafraîchissement.",
+        "operationId" : "getInscriptionEnAttente",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "jeton",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DtoInscriptionEnAttente"
+                }
+              }
+            },
+            "description" : "Inscription en attente"
+          },
+          "400" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DtoApiError"
+                }
+              }
+            },
+            "description" : "Jeton inconnu ou inscription trop ancienne"
+          }
+        },
+        "security" : [ ],
+        "summary" : "Relit une inscription en attente",
+        "tags" : [ "Authentification" ]
+      }
+    },
+    "/categories" : {
+      "get" : {
+        "description" : "Avec les indicateurs fournie, masquée et archivée.",
+        "operationId" : "lister_5",
+        "responses" : {
+          "200" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/DtoCategorie"
+                  }
+                }
+              }
+            },
+            "description" : "OK"
+          },
+          "403" : {
+            "description" : "JWT absent"
+          }
+        },
+        "summary" : "Liste les catégories fournies et personnelles",
+        "tags" : [ "Catégories" ]
+      },
+      "post" : {
+        "operationId" : "creer_5",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/DtoCategorieSaisie"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "201" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DtoCategorie"
+                }
+              }
+            },
+            "description" : "Catégorie créée"
+          },
+          "400" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DtoApiError"
+                }
+              }
+            },
+            "description" : "Corps invalide : champ obligatoire manquant, format ou longueur"
+          },
+          "403" : {
+            "description" : "JWT absent"
+          },
+          "409" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DtoApiError"
+                }
+              }
+            },
+            "description" : "Nom déjà pris"
+          }
+        },
+        "summary" : "Crée une catégorie personnelle",
+        "tags" : [ "Catégories" ]
+      }
+    },
+    "/categories/{id}" : {
+      "delete" : {
+        "description" : "Supprimée si elle n'a jamais servi, archivée sinon.",
+        "operationId" : "supprimer_4",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "id",
+          "required" : true,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DtoCategorie"
+                }
+              }
+            },
+            "description" : "Catégorie archivée (déjà utilisée)"
+          },
+          "204" : {
+            "description" : "Catégorie supprimée"
+          },
+          "403" : {
+            "description" : "JWT absent"
+          },
+          "404" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DtoApiError"
+                }
+              }
+            },
+            "description" : "Introuvable, ou appartient à un autre utilisateur"
+          },
+          "422" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DtoApiError"
+                }
+              }
+            },
+            "description" : "Catégorie fournie"
+          }
+        },
+        "summary" : "Retire une catégorie personnelle",
+        "tags" : [ "Catégories" ]
+      },
+      "put" : {
+        "description" : "archive à false désarchive. Le type ne change plus une fois la catégorie utilisée.",
+        "operationId" : "modifier_5",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "id",
+          "required" : true,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/DtoCategorieSaisie"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DtoCategorie"
+                }
+              }
+            },
+            "description" : "Catégorie modifiée"
+          },
+          "400" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DtoApiError"
+                }
+              }
+            },
+            "description" : "Corps invalide : champ obligatoire manquant, format ou longueur"
+          },
+          "403" : {
+            "description" : "JWT absent"
+          },
+          "404" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DtoApiError"
+                }
+              }
+            },
+            "description" : "Introuvable, ou appartient à un autre utilisateur"
+          },
+          "409" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DtoApiError"
+                }
+              }
+            },
+            "description" : "Nom déjà pris"
+          },
+          "422" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DtoApiError"
+                }
+              }
+            },
+            "description" : "Catégorie fournie, ou type d'une catégorie utilisée"
+          }
+        },
+        "summary" : "Modifie une catégorie personnelle",
+        "tags" : [ "Catégories" ]
+      }
+    },
+    "/comptes" : {
+      "get" : {
+        "operationId" : "lister_4",
+        "responses" : {
+          "200" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/DtoCompte"
+                  }
+                }
+              }
+            },
+            "description" : "OK"
+          },
+          "403" : {
+            "description" : "JWT absent"
+          }
+        },
+        "summary" : "Liste les comptes, archivés compris, avec leur solde",
+        "tags" : [ "Comptes" ]
+      },
+      "post" : {
+        "operationId" : "creer_4",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/DtoCompteSaisie"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "201" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DtoCompte"
+                }
+              }
+            },
+            "description" : "Compte créé"
+          },
+          "400" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DtoApiError"
+                }
+              }
+            },
+            "description" : "Corps invalide : champ obligatoire manquant, format ou longueur"
+          },
+          "403" : {
+            "description" : "JWT absent"
+          }
+        },
+        "summary" : "Crée un compte",
+        "tags" : [ "Comptes" ]
+      }
+    },
+    "/comptes/{id}" : {
+      "delete" : {
+        "description" : "Supprimé s'il n'a aucune opération, archivé sinon.",
+        "operationId" : "supprimer_3",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "id",
+          "required" : true,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DtoCompte"
+                }
+              }
+            },
+            "description" : "Compte archivé (il a des opérations)"
+          },
+          "204" : {
+            "description" : "Compte supprimé"
+          },
+          "403" : {
+            "description" : "JWT absent"
+          },
+          "404" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DtoApiError"
+                }
+              }
+            },
+            "description" : "Introuvable, ou appartient à un autre utilisateur"
+          }
+        },
+        "summary" : "Retire un compte",
+        "tags" : [ "Comptes" ]
+      },
+      "put" : {
+        "description" : "archive à false désarchive le compte.",
+        "operationId" : "modifier_4",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "id",
+          "required" : true,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/DtoCompteSaisie"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DtoCompte"
+                }
+              }
+            },
+            "description" : "OK"
+          },
+          "400" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DtoApiError"
+                }
+              }
+            },
+            "description" : "Corps invalide : champ obligatoire manquant, format ou longueur"
+          },
+          "403" : {
+            "description" : "JWT absent"
+          },
+          "404" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DtoApiError"
+                }
+              }
+            },
+            "description" : "Introuvable, ou appartient à un autre utilisateur"
+          }
+        },
+        "summary" : "Modifie un compte",
+        "tags" : [ "Comptes" ]
+      }
+    },
+    "/libelles" : {
+      "get" : {
+        "description" : "Sans q : tous les libellés avec leurs indicateurs. Avec q : libellés visibles dont le nom contient q, les plus utilisés d'abord.",
+        "operationId" : "lister_3",
+        "parameters" : [ {
+          "in" : "query",
+          "name" : "q",
+          "required" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/DtoLibelle"
+                  }
+                }
+              }
+            },
+            "description" : "OK"
+          },
+          "403" : {
+            "description" : "JWT absent"
+          }
+        },
+        "summary" : "Liste les libellés, ou les cherche pour l'autocomplétion",
+        "tags" : [ "Libellés" ]
+      },
+      "post" : {
+        "operationId" : "creer_3",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/DtoLibelleSaisie"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "201" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DtoLibelle"
+                }
+              }
+            },
+            "description" : "Libellé créé"
+          },
+          "400" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DtoApiError"
+                }
+              }
+            },
+            "description" : "Corps invalide : champ obligatoire manquant, format ou longueur"
+          },
+          "403" : {
+            "description" : "JWT absent"
+          },
+          "409" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DtoApiError"
+                }
+              }
+            },
+            "description" : "Nom déjà pris"
+          },
+          "422" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DtoApiError"
+                }
+              }
+            },
+            "description" : "Catégorie archivée"
+          }
+        },
+        "summary" : "Crée un libellé personnel",
+        "tags" : [ "Libellés" ]
+      }
+    },
+    "/libelles/{id}" : {
+      "delete" : {
+        "description" : "Supprimé s'il n'a jamais servi, archivé sinon.",
+        "operationId" : "supprimer_2",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "id",
+          "required" : true,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DtoLibelle"
+                }
+              }
+            },
+            "description" : "Libellé archivé (déjà utilisé)"
+          },
+          "204" : {
+            "description" : "Libellé supprimé"
+          },
+          "403" : {
+            "description" : "JWT absent"
+          },
+          "404" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DtoApiError"
+                }
+              }
+            },
+            "description" : "Introuvable, ou appartient à un autre utilisateur"
+          },
+          "422" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DtoApiError"
+                }
+              }
+            },
+            "description" : "Libellé fourni"
+          }
+        },
+        "summary" : "Retire un libellé personnel",
+        "tags" : [ "Libellés" ]
+      },
+      "put" : {
+        "description" : "archive à false désarchive.",
+        "operationId" : "modifier_3",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "id",
+          "required" : true,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/DtoLibelleSaisie"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DtoLibelle"
+                }
+              }
+            },
+            "description" : "Libellé modifié"
+          },
+          "400" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DtoApiError"
+                }
+              }
+            },
+            "description" : "Corps invalide : champ obligatoire manquant, format ou longueur"
+          },
+          "403" : {
+            "description" : "JWT absent"
+          },
+          "404" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DtoApiError"
+                }
+              }
+            },
+            "description" : "Introuvable, ou appartient à un autre utilisateur"
+          },
+          "409" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DtoApiError"
+                }
+              }
+            },
+            "description" : "Nom déjà pris"
+          },
+          "422" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DtoApiError"
+                }
+              }
+            },
+            "description" : "Libellé fourni, ou nouvelle catégorie archivée"
+          }
+        },
+        "summary" : "Modifie un libellé personnel",
+        "tags" : [ "Libellés" ]
+      }
+    },
+    "/masquages/{type}/{id}" : {
+      "delete" : {
+        "description" : "type : categorie ou libelle. Sans effet s'il n'était pas masqué ou n'existe pas.",
+        "operationId" : "afficher",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "type",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "in" : "path",
+          "name" : "id",
+          "required" : true,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        } ],
+        "responses" : {
+          "204" : {
+            "description" : "Élément réaffiché, ou rien à faire"
+          },
+          "403" : {
+            "description" : "JWT absent"
+          },
+          "404" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DtoApiError"
+                }
+              }
+            },
+            "description" : "Type inconnu"
+          }
+        },
+        "summary" : "Réaffiche un élément fourni",
+        "tags" : [ "Masquage" ]
+      },
+      "put" : {
+        "description" : "type : categorie ou libelle. Sans effet s'il est déjà masqué.",
+        "operationId" : "masquer",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "type",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "in" : "path",
+          "name" : "id",
+          "required" : true,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        } ],
+        "responses" : {
+          "204" : {
+            "description" : "Élément masqué"
+          },
+          "403" : {
+            "description" : "JWT absent"
+          },
+          "404" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DtoApiError"
+                }
+              }
+            },
+            "description" : "Type ou élément inconnu"
+          },
+          "422" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DtoApiError"
+                }
+              }
+            },
+            "description" : "Élément personnel (il s'archive)"
+          }
+        },
+        "summary" : "Masque un élément fourni",
+        "tags" : [ "Masquage" ]
+      }
+    },
+    "/operations" : {
+      "get" : {
+        "description" : "Filtres facultatifs et combinables. q cherche dans la note et le libellé.",
+        "operationId" : "lister_2",
+        "parameters" : [ {
+          "in" : "query",
+          "name" : "periodeId",
+          "required" : false,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        }, {
+          "in" : "query",
+          "name" : "compteId",
+          "required" : false,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        }, {
+          "in" : "query",
+          "name" : "categorieId",
+          "required" : false,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        }, {
+          "in" : "query",
+          "name" : "libelleId",
+          "required" : false,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        }, {
+          "in" : "query",
+          "name" : "q",
+          "required" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/DtoOperation"
+                  }
+                }
+              }
+            },
+            "description" : "OK"
+          },
+          "403" : {
+            "description" : "JWT absent"
+          }
+        },
+        "summary" : "Liste les opérations, filtrées",
+        "tags" : [ "Opérations" ]
+      },
+      "post" : {
+        "description" : "Date vide : aujourd'hui. Catégorie vide : celle du libellé. Crée les périodes manquantes jusqu'à sa date.",
+        "operationId" : "creer_2",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/DtoOperationSaisie"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "201" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DtoOperation"
+                }
+              }
+            },
+            "description" : "Opération créée"
+          },
+          "400" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DtoApiError"
+                }
+              }
+            },
+            "description" : "Corps invalide : champ obligatoire manquant, format ou longueur"
+          },
+          "403" : {
+            "description" : "JWT absent"
+          },
+          "422" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DtoApiError"
+                }
+              }
+            },
+            "description" : "Compte, catégorie ou libellé archivé, ou catégorie manquante"
+          }
+        },
+        "summary" : "Crée une opération",
+        "tags" : [ "Opérations" ]
+      }
+    },
+    "/operations/{id}" : {
+      "delete" : {
+        "description" : "Une opération générée par une récurrence n'est pas recréée.",
+        "operationId" : "supprimer_1",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "id",
+          "required" : true,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        } ],
+        "responses" : {
+          "204" : {
+            "description" : "Opération supprimée"
+          },
+          "403" : {
+            "description" : "JWT absent"
+          },
+          "404" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DtoApiError"
+                }
+              }
+            },
+            "description" : "Introuvable, ou appartient à un autre utilisateur"
+          }
+        },
+        "summary" : "Supprime une opération",
+        "tags" : [ "Opérations" ]
+      },
+      "put" : {
+        "description" : "Une opération générée par une récurrence ne change qu'elle-même.",
+        "operationId" : "modifier_2",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "id",
+          "required" : true,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/DtoOperationSaisie"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DtoOperation"
+                }
+              }
+            },
+            "description" : "Opération modifiée"
+          },
+          "400" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DtoApiError"
+                }
+              }
+            },
+            "description" : "Corps invalide : champ obligatoire manquant, format ou longueur"
+          },
+          "403" : {
+            "description" : "JWT absent"
+          },
+          "404" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DtoApiError"
+                }
+              }
+            },
+            "description" : "Introuvable, ou appartient à un autre utilisateur"
+          },
+          "422" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DtoApiError"
+                }
+              }
+            },
+            "description" : "Élément archivé, ou la récurrence a déjà une opération à cette date"
+          }
+        },
+        "summary" : "Modifie une opération",
+        "tags" : [ "Opérations" ]
+      }
+    },
+    "/operations/{id}/repeter" : {
+      "post" : {
+        "description" : "L'opération devient la première occurrence d'une nouvelle récurrence.",
+        "operationId" : "repeter",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "id",
+          "required" : true,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        }, {
+          "in" : "query",
+          "name" : "frequence",
+          "required" : false,
+          "schema" : {
+            "type" : "string",
+            "default" : "MENSUELLE",
+            "enum" : [ "MENSUELLE", "ANNUELLE" ]
+          }
+        } ],
+        "responses" : {
+          "201" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DtoRecurrence"
+                }
+              }
+            },
+            "description" : "Récurrence créée"
+          },
+          "403" : {
+            "description" : "JWT absent"
+          },
+          "404" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DtoApiError"
+                }
+              }
+            },
+            "description" : "Introuvable, ou appartient à un autre utilisateur"
+          },
+          "422" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DtoApiError"
+                }
+              }
+            },
+            "description" : "L'opération fait déjà partie d'une récurrence"
+          }
+        },
+        "summary" : "Répète une opération (« Répéter chaque mois »)",
+        "tags" : [ "Opérations" ]
+      }
+    },
+    "/periodes" : {
+      "get" : {
+        "operationId" : "lister_1",
+        "responses" : {
+          "200" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/DtoPeriode"
+                  }
+                }
+              }
+            },
+            "description" : "OK"
+          },
+          "403" : {
+            "description" : "JWT absent"
+          }
+        },
+        "summary" : "Liste les périodes",
+        "tags" : [ "Périodes" ]
+      },
+      "post" : {
+        "description" : "Corps vide : la période suivante, d'un mois. Première période : la date de début est obligatoire.",
+        "operationId" : "creer_1",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/DtoPeriodeSaisie"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "201" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DtoPeriode"
+                }
+              }
+            },
+            "description" : "Période créée"
+          },
+          "400" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DtoApiError"
+                }
+              }
+            },
+            "description" : "Corps invalide : champ obligatoire manquant, format ou longueur"
+          },
+          "403" : {
+            "description" : "JWT absent"
+          },
+          "422" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DtoApiError"
+                }
+              }
+            },
+            "description" : "Dates incohérentes ou trou avec la période précédente"
+          }
+        },
+        "summary" : "Crée une période",
+        "tags" : [ "Périodes" ]
+      }
+    },
+    "/periodes/{id}" : {
+      "put" : {
+        "description" : "Déplacer une date déplace aussi la limite de la période voisine.",
+        "operationId" : "modifier_1",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "id",
+          "required" : true,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/DtoPeriodeSaisie"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DtoPeriode"
+                }
+              }
+            },
+            "description" : "Période modifiée (et sa voisine si une limite a bougé)"
+          },
+          "400" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DtoApiError"
+                }
+              }
+            },
+            "description" : "Corps invalide : champ obligatoire manquant, format ou longueur"
+          },
+          "403" : {
+            "description" : "JWT absent"
+          },
+          "404" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DtoApiError"
+                }
+              }
+            },
+            "description" : "Introuvable, ou appartient à un autre utilisateur"
+          },
+          "422" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DtoApiError"
+                }
+              }
+            },
+            "description" : "Dates incohérentes, ou une voisine perdrait tous ses jours"
+          }
+        },
+        "summary" : "Modifie une période",
+        "tags" : [ "Périodes" ]
+      }
+    },
+    "/recurrences" : {
+      "get" : {
+        "operationId" : "lister",
+        "responses" : {
+          "200" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/DtoRecurrence"
+                  }
+                }
+              }
+            },
+            "description" : "OK"
+          },
+          "403" : {
+            "description" : "JWT absent"
+          }
+        },
+        "summary" : "Liste les récurrences, actives et arrêtées",
+        "tags" : [ "Récurrences" ]
+      },
+      "post" : {
+        "description" : "Les occurrences passées depuis la date de début sont générées tout de suite.",
+        "operationId" : "creer",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/DtoRecurrenceSaisie"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "201" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DtoRecurrence"
+                }
+              }
+            },
+            "description" : "Récurrence créée"
+          },
+          "400" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DtoApiError"
+                }
+              }
+            },
+            "description" : "Corps invalide : champ obligatoire manquant, format ou longueur"
+          },
+          "403" : {
+            "description" : "JWT absent"
+          },
+          "422" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DtoApiError"
+                }
+              }
+            },
+            "description" : "Dates incohérentes ou élément archivé"
+          }
+        },
+        "summary" : "Crée une récurrence",
+        "tags" : [ "Récurrences" ]
+      }
+    },
+    "/recurrences/{id}" : {
+      "delete" : {
+        "description" : "Arrêtée à aujourd'hui si elle a généré des opérations (historique conservé), supprimée sinon.",
+        "operationId" : "supprimer",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "id",
+          "required" : true,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DtoRecurrence"
+                }
+              }
+            },
+            "description" : "Récurrence arrêtée"
+          },
+          "204" : {
+            "description" : "Récurrence supprimée (rien n'avait été généré)"
+          },
+          "403" : {
+            "description" : "JWT absent"
+          },
+          "404" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DtoApiError"
+                }
+              }
+            },
+            "description" : "Introuvable, ou appartient à un autre utilisateur"
+          }
+        },
+        "summary" : "Arrête une récurrence",
+        "tags" : [ "Récurrences" ]
+      },
+      "put" : {
+        "description" : "Ne touche que les occurrences futures ; les opérations déjà générées restent.",
+        "operationId" : "modifier",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "id",
+          "required" : true,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/DtoRecurrenceSaisie"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DtoRecurrence"
+                }
+              }
+            },
+            "description" : "OK"
+          },
+          "400" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DtoApiError"
+                }
+              }
+            },
+            "description" : "Corps invalide : champ obligatoire manquant, format ou longueur"
+          },
+          "403" : {
+            "description" : "JWT absent"
+          },
+          "404" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DtoApiError"
+                }
+              }
+            },
+            "description" : "Introuvable, ou appartient à un autre utilisateur"
+          }
+        },
+        "summary" : "Modifie une récurrence",
+        "tags" : [ "Récurrences" ]
+      }
+    },
+    "/tableau-de-bord" : {
+      "get" : {
+        "description" : "Sans periodeId : la période en cours. Sans compteId : tous les comptes.",
+        "operationId" : "construire",
+        "parameters" : [ {
+          "in" : "query",
+          "name" : "periodeId",
+          "required" : false,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        }, {
+          "in" : "query",
+          "name" : "compteId",
+          "required" : false,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DtoTableauDeBord"
+                }
+              }
+            },
+            "description" : "Tableau de bord de la période"
+          },
+          "403" : {
+            "description" : "JWT absent"
+          },
+          "422" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DtoApiError"
+                }
+              }
+            },
+            "description" : "Aucune période n'est encore définie"
+          }
+        },
+        "summary" : "Construit le tableau de bord d'une période",
+        "tags" : [ "Tableau de bord" ]
+      }
+    },
+    "/utilisateurs/moi" : {
+      "get" : {
+        "operationId" : "moi",
+        "responses" : {
+          "200" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DtoUtilisateur"
+                }
+              }
+            },
+            "description" : "OK"
+          },
+          "403" : {
+            "description" : "JWT absent"
+          }
+        },
+        "summary" : "Renvoie l'utilisateur connecté",
+        "tags" : [ "Utilisateur" ]
+      },
+      "put" : {
+        "description" : "Prénom vide : retiré.",
+        "operationId" : "modifierProfil",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/DtoProfilSaisie"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DtoUtilisateur"
+                }
+              }
+            },
+            "description" : "OK"
+          },
+          "400" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DtoApiError"
+                }
+              }
+            },
+            "description" : "Corps invalide : champ obligatoire manquant, format ou longueur"
+          },
+          "403" : {
+            "description" : "JWT absent"
+          }
+        },
+        "summary" : "Modifie le nom et le prénom",
+        "tags" : [ "Utilisateur" ]
+      }
+    },
+    "/utilisateurs/moi/email" : {
+      "delete" : {
+        "description" : "Sans changement en cours, ne fait rien.",
+        "operationId" : "annulerChangementEmail",
+        "responses" : {
+          "204" : {
+            "description" : "Changement annulé"
+          },
+          "403" : {
+            "description" : "JWT absent"
+          }
+        },
+        "summary" : "Annule le changement d'adresse en cours",
+        "tags" : [ "Utilisateur" ]
+      },
+      "get" : {
+        "operationId" : "changementEmailEnCours",
+        "responses" : {
+          "200" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DtoChangementEmail"
+                }
+              }
+            },
+            "description" : "Changement en attente du code"
+          },
+          "204" : {
+            "description" : "Aucun changement en cours"
+          },
+          "403" : {
+            "description" : "JWT absent"
+          }
+        },
+        "summary" : "Renvoie le changement d'adresse en cours",
+        "tags" : [ "Utilisateur" ]
+      },
+      "put" : {
+        "description" : "Exige le mot de passe. Un code est envoyé à la nouvelle adresse ; une adresse déjà prise reçoit une alerte au lieu du code, avec la même réponse.",
+        "operationId" : "demanderChangementEmail",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/DtoChangementEmailSaisie"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "202" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DtoChangementEmail"
+                }
+              }
+            },
+            "description" : "Code envoyé"
+          },
+          "400" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DtoApiError"
+                }
+              }
+            },
+            "description" : "Corps invalide : champ obligatoire manquant, format ou longueur"
+          },
+          "403" : {
+            "description" : "JWT absent"
+          },
+          "422" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DtoApiError"
+                }
+              }
+            },
+            "description" : "Mot de passe incorrect, ou adresse identique"
+          },
+          "429" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DtoApiError"
+                }
+              }
+            },
+            "description" : "Délai de renvoi pas encore écoulé"
+          }
+        },
+        "summary" : "Demande un changement d'adresse mail",
+        "tags" : [ "Utilisateur" ]
+      }
+    },
+    "/utilisateurs/moi/email/renvoi" : {
+      "post" : {
+        "operationId" : "renvoyerCodeChangementEmail",
+        "responses" : {
+          "202" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DtoChangementEmail"
+                }
+              }
+            },
+            "description" : "Nouveau code envoyé"
+          },
+          "400" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DtoApiError"
+                }
+              }
+            },
+            "description" : "Aucun changement en cours"
+          },
+          "403" : {
+            "description" : "JWT absent"
+          },
+          "429" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DtoApiError"
+                }
+              }
+            },
+            "description" : "Délai de renvoi pas encore écoulé"
+          }
+        },
+        "summary" : "Renvoie un nouveau code de changement d'adresse",
+        "tags" : [ "Utilisateur" ]
+      }
+    },
+    "/utilisateurs/moi/email/verification" : {
+      "post" : {
+        "description" : "L'ancienne adresse est prévenue par mail.",
+        "operationId" : "verifierChangementEmail",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/DtoCodeSaisie"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DtoUtilisateur"
+                }
+              }
+            },
+            "description" : "Adresse changée"
+          },
+          "400" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DtoApiError"
+                }
+              }
+            },
+            "description" : "Code incorrect ou expiré, trop de tentatives, ou aucun changement en cours"
+          },
+          "403" : {
+            "description" : "JWT absent"
+          },
+          "409" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DtoApiError"
+                }
+              }
+            },
+            "description" : "Adresse prise entre-temps"
+          }
+        },
+        "summary" : "Valide le code et change l'adresse",
+        "tags" : [ "Utilisateur" ]
+      }
+    },
+    "/utilisateurs/moi/mot-de-passe" : {
+      "put" : {
+        "description" : "Le mot de passe actuel est exigé.",
+        "operationId" : "changerMotDePasse",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/DtoMotDePasseSaisie"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "204" : {
+            "description" : "Mot de passe changé"
+          },
+          "400" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DtoApiError"
+                }
+              }
+            },
+            "description" : "Corps invalide : champ obligatoire manquant, format ou longueur"
+          },
+          "403" : {
+            "description" : "JWT absent"
+          },
+          "422" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DtoApiError"
+                }
+              }
+            },
+            "description" : "Mot de passe actuel incorrect"
+          }
+        },
+        "summary" : "Change le mot de passe",
+        "tags" : [ "Utilisateur" ]
+      }
+    }
+  },
+  "components" : {
+    "schemas" : {
+      "DtoApiError" : {
+        "properties" : {
+          "error" : {
+            "type" : "string"
+          },
+          "message" : {
+            "type" : "string"
+          },
+          "path" : {
+            "type" : "string"
+          },
+          "status" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "timestamp" : {
+            "type" : "string",
+            "format" : "date-time"
+          }
+        }
+      },
+      "DtoCategorie" : {
+        "type" : "object",
+        "properties" : {
+          "archive" : {
+            "type" : "boolean"
+          },
+          "couleur" : {
+            "type" : "string"
+          },
+          "fournie" : {
+            "type" : "boolean"
+          },
+          "icone" : {
+            "type" : "string"
+          },
+          "id" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "masquee" : {
+            "type" : "boolean"
+          },
+          "nom" : {
+            "type" : "string"
+          },
+          "type" : {
+            "type" : "string",
+            "enum" : [ "DEPENSE", "REVENU" ]
+          }
+        }
+      },
+      "DtoCategorieSaisie" : {
+        "type" : "object",
+        "properties" : {
+          "archive" : {
+            "type" : "boolean"
+          },
+          "couleur" : {
+            "type" : "string",
+            "pattern" : "^#[0-9A-Fa-f]{6}$"
+          },
+          "icone" : {
+            "type" : "string",
+            "maxLength" : 16,
+            "minLength" : 0
+          },
+          "nom" : {
+            "type" : "string",
+            "maxLength" : 50,
+            "minLength" : 0
+          },
+          "type" : {
+            "type" : "string",
+            "enum" : [ "DEPENSE", "REVENU" ]
+          }
+        },
+        "required" : [ "nom", "type" ]
+      },
+      "DtoChangementEmail" : {
+        "type" : "object",
+        "properties" : {
+          "nouvelEmail" : {
+            "type" : "string"
+          },
+          "secondesAvantRenvoi" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        }
+      },
+      "DtoChangementEmailSaisie" : {
+        "type" : "object",
+        "properties" : {
+          "motDePasse" : {
+            "type" : "string",
+            "minLength" : 1
+          },
+          "nouvelEmail" : {
+            "type" : "string",
+            "format" : "email",
+            "minLength" : 1
+          }
+        },
+        "required" : [ "motDePasse", "nouvelEmail" ]
+      },
+      "DtoCodeSaisie" : {
+        "type" : "object",
+        "properties" : {
+          "code" : {
+            "type" : "string",
+            "minLength" : 1
+          }
+        },
+        "required" : [ "code" ]
+      },
+      "DtoCompte" : {
+        "type" : "object",
+        "properties" : {
+          "archive" : {
+            "type" : "boolean"
+          },
+          "dateSoldeInitial" : {
+            "type" : "string",
+            "format" : "date"
+          },
+          "dernierUtilise" : {
+            "type" : "boolean"
+          },
+          "id" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "nom" : {
+            "type" : "string"
+          },
+          "solde" : {
+            "type" : "number"
+          },
+          "soldeInitial" : {
+            "type" : "number"
+          }
+        }
+      },
+      "DtoCompteSaisie" : {
+        "type" : "object",
+        "properties" : {
+          "archive" : {
+            "type" : "boolean"
+          },
+          "dateSoldeInitial" : {
+            "type" : "string",
+            "format" : "date"
+          },
+          "nom" : {
+            "type" : "string",
+            "maxLength" : 100,
+            "minLength" : 0
+          },
+          "soldeInitial" : {
+            "type" : "number"
+          }
+        },
+        "required" : [ "dateSoldeInitial", "nom", "soldeInitial" ]
+      },
+      "DtoInscriptionEnAttente" : {
+        "type" : "object",
+        "properties" : {
+          "emailMasque" : {
+            "type" : "string"
+          },
+          "jeton" : {
+            "type" : "string"
+          },
+          "secondesAvantRenvoi" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        }
+      },
+      "DtoLibelle" : {
+        "type" : "object",
+        "properties" : {
+          "archive" : {
+            "type" : "boolean"
+          },
+          "categorieId" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "fourni" : {
+            "type" : "boolean"
+          },
+          "id" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "masque" : {
+            "type" : "boolean"
+          },
+          "nom" : {
+            "type" : "string"
+          }
+        }
+      },
+      "DtoLibelleSaisie" : {
+        "type" : "object",
+        "properties" : {
+          "archive" : {
+            "type" : "boolean"
+          },
+          "categorieId" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "nom" : {
+            "type" : "string",
+            "maxLength" : 100,
+            "minLength" : 0
+          }
+        },
+        "required" : [ "categorieId", "nom" ]
+      },
+      "DtoLogin" : {
+        "type" : "object",
+        "properties" : {
+          "identifiant" : {
+            "type" : "string",
+            "minLength" : 1
+          },
+          "motDePasse" : {
+            "type" : "string",
+            "minLength" : 1
+          }
+        },
+        "required" : [ "identifiant", "motDePasse" ]
+      },
+      "DtoMotDePasseSaisie" : {
+        "type" : "object",
+        "properties" : {
+          "motDePasseActuel" : {
+            "type" : "string",
+            "minLength" : 1
+          },
+          "nouveauMotDePasse" : {
+            "type" : "string",
+            "minLength" : 1
+          }
+        },
+        "required" : [ "motDePasseActuel", "nouveauMotDePasse" ]
+      },
+      "DtoOccurrence" : {
+        "type" : "object",
+        "properties" : {
+          "categorieId" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "compteId" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "date" : {
+            "type" : "string",
+            "format" : "date"
+          },
+          "libelleId" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "montant" : {
+            "type" : "number"
+          },
+          "note" : {
+            "type" : "string"
+          },
+          "recurrenceId" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "type" : {
+            "type" : "string",
+            "enum" : [ "DEPENSE", "REVENU" ]
+          }
+        }
+      },
+      "DtoOperation" : {
+        "type" : "object",
+        "properties" : {
+          "categorieId" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "compteId" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "date" : {
+            "type" : "string",
+            "format" : "date"
+          },
+          "id" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "libelleId" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "montant" : {
+            "type" : "number"
+          },
+          "note" : {
+            "type" : "string"
+          },
+          "recurrenceId" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "type" : {
+            "type" : "string",
+            "enum" : [ "DEPENSE", "REVENU" ]
+          }
+        }
+      },
+      "DtoOperationSaisie" : {
+        "type" : "object",
+        "properties" : {
+          "categorieId" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "compteId" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "date" : {
+            "type" : "string",
+            "format" : "date"
+          },
+          "libelleId" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "montant" : {
+            "type" : "number",
+            "exclusiveMinimum" : 0,
+            "maximum" : 9999999999.99
+          },
+          "note" : {
+            "type" : "string",
+            "maxLength" : 255,
+            "minLength" : 0
+          }
+        },
+        "required" : [ "compteId", "montant" ]
+      },
+      "DtoPeriode" : {
+        "type" : "object",
+        "properties" : {
+          "dateDebut" : {
+            "type" : "string",
+            "format" : "date"
+          },
+          "dateFin" : {
+            "type" : "string",
+            "format" : "date"
+          },
+          "id" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "nom" : {
+            "type" : "string"
+          }
+        }
+      },
+      "DtoPeriodeSaisie" : {
+        "type" : "object",
+        "properties" : {
+          "dateDebut" : {
+            "type" : "string",
+            "format" : "date"
+          },
+          "dateFin" : {
+            "type" : "string",
+            "format" : "date"
+          },
+          "nom" : {
+            "type" : "string",
+            "maxLength" : 50,
+            "minLength" : 0
+          }
+        }
+      },
+      "DtoProfilSaisie" : {
+        "type" : "object",
+        "properties" : {
+          "nom" : {
+            "type" : "string",
+            "maxLength" : 100,
+            "minLength" : 0
+          },
+          "prenom" : {
+            "type" : "string",
+            "maxLength" : 100,
+            "minLength" : 0
+          }
+        },
+        "required" : [ "nom" ]
+      },
+      "DtoRecurrence" : {
+        "type" : "object",
+        "properties" : {
+          "active" : {
+            "type" : "boolean"
+          },
+          "categorieId" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "compteId" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "dateDebut" : {
+            "type" : "string",
+            "format" : "date"
+          },
+          "dateFin" : {
+            "type" : "string",
+            "format" : "date"
+          },
+          "frequence" : {
+            "type" : "string",
+            "enum" : [ "MENSUELLE", "ANNUELLE" ]
+          },
+          "id" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "jour" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "libelleId" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "montant" : {
+            "type" : "number"
+          },
+          "note" : {
+            "type" : "string"
+          },
+          "prochaineOccurrence" : {
+            "type" : "string",
+            "format" : "date"
+          },
+          "type" : {
+            "type" : "string",
+            "enum" : [ "DEPENSE", "REVENU" ]
+          }
+        }
+      },
+      "DtoRecurrenceSaisie" : {
+        "type" : "object",
+        "properties" : {
+          "categorieId" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "compteId" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "dateDebut" : {
+            "type" : "string",
+            "format" : "date"
+          },
+          "dateFin" : {
+            "type" : "string",
+            "format" : "date"
+          },
+          "frequence" : {
+            "type" : "string",
+            "enum" : [ "MENSUELLE", "ANNUELLE" ]
+          },
+          "jour" : {
+            "type" : "integer",
+            "format" : "int32",
+            "maximum" : 31,
+            "minimum" : 1
+          },
+          "libelleId" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "montant" : {
+            "type" : "number",
+            "exclusiveMinimum" : 0,
+            "maximum" : 9999999999.99
+          },
+          "note" : {
+            "type" : "string",
+            "maxLength" : 255,
+            "minLength" : 0
+          }
+        },
+        "required" : [ "compteId", "dateDebut", "frequence", "montant" ]
+      },
+      "DtoRegister" : {
+        "type" : "object",
+        "properties" : {
+          "email" : {
+            "type" : "string",
+            "format" : "email",
+            "minLength" : 1
+          },
+          "identifiant" : {
+            "type" : "string",
+            "minLength" : 1
+          },
+          "motDePasse" : {
+            "type" : "string",
+            "minLength" : 1
+          },
+          "nom" : {
+            "type" : "string",
+            "maxLength" : 100,
+            "minLength" : 0
+          },
+          "prenom" : {
+            "type" : "string",
+            "maxLength" : 100,
+            "minLength" : 0
+          }
+        },
+        "required" : [ "email", "identifiant", "motDePasse", "nom" ]
+      },
+      "DtoRenvoiCode" : {
+        "type" : "object",
+        "properties" : {
+          "jeton" : {
+            "type" : "string",
+            "minLength" : 1
+          }
+        },
+        "required" : [ "jeton" ]
+      },
+      "DtoTableauDeBord" : {
+        "type" : "object",
+        "properties" : {
+          "avenir" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/DtoOccurrence"
+            }
+          },
+          "compteId" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "depenses" : {
+            "type" : "number"
+          },
+          "dernieresOperations" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/DtoOperation"
+            }
+          },
+          "parCategorie" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/DtoTotalCategorie"
+            }
+          },
+          "periode" : {
+            "$ref" : "#/components/schemas/DtoPeriode"
+          },
+          "periodePrecedenteId" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "periodeSuivanteId" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "revenus" : {
+            "type" : "number"
+          },
+          "solde" : {
+            "type" : "number"
+          },
+          "soldeComptesFinPeriode" : {
+            "type" : "number"
+          },
+          "soldePrevu" : {
+            "type" : "number"
+          }
+        }
+      },
+      "DtoTotalCategorie" : {
+        "type" : "object",
+        "properties" : {
+          "categorieId" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "couleur" : {
+            "type" : "string"
+          },
+          "ecart" : {
+            "type" : "number"
+          },
+          "icone" : {
+            "type" : "string"
+          },
+          "nom" : {
+            "type" : "string"
+          },
+          "total" : {
+            "type" : "number"
+          },
+          "totalPrecedent" : {
+            "type" : "number"
+          },
+          "type" : {
+            "type" : "string",
+            "enum" : [ "DEPENSE", "REVENU" ]
+          }
+        }
+      },
+      "DtoUtilisateur" : {
+        "type" : "object",
+        "properties" : {
+          "email" : {
+            "type" : "string"
+          },
+          "id" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "nom" : {
+            "type" : "string"
+          },
+          "prenom" : {
+            "type" : "string"
+          },
+          "roles" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            },
+            "uniqueItems" : true
+          }
+        }
+      },
+      "DtoVerification" : {
+        "type" : "object",
+        "properties" : {
+          "code" : {
+            "type" : "string",
+            "minLength" : 1
+          },
+          "jeton" : {
+            "type" : "string",
+            "minLength" : 1
+          }
+        },
+        "required" : [ "code", "jeton" ]
+      }
+    },
+    "securitySchemes" : {
+      "jwt" : {
+        "bearerFormat" : "JWT",
+        "description" : "Jeton renvoyé par POST /auth/login, valable 24 heures.",
+        "scheme" : "bearer",
+        "type" : "http"
+      }
+    }
+  }
+}
