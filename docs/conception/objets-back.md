@@ -29,7 +29,7 @@ InscriptionEnAttente (isolée, avant la création de l'Utilisateur)
 ## 1. Les entités
 
 ### Utilisateur (`utilisateurs`)
-L'utilisateur connecté. Il a un `pseudo` (affiché), un `identifiant` (pour se connecter), un `motDePasse` haché et un `email`, tous uniques. Ses rôles sont reliés par une table de jointure `utilisateur_roles` (relation plusieurs à plusieurs avec `Role`).
+L'utilisateur connecté. Son `id` est un UUID généré par l'application, pour qu'un id exposé par l'API ne révèle ni le nombre d'inscrits ni leur ordre. Il a un `nom` obligatoire (qui peut servir de pseudo) et un `prenom` facultatif, affichés tels quels, un `identifiant` (pour se connecter) et un `email`, tous deux uniques, et un `motDePasse` haché. Ses rôles sont reliés par une table de jointure `utilisateur_roles` (relation plusieurs à plusieurs avec `Role`).
 
 Toutes les autres données (comptes, périodes, catégories perso…) pointent vers lui, ce qui permet de limiter chaque requête à ses propres données.
 
@@ -37,7 +37,7 @@ Toutes les autres données (comptes, périodes, catégories perso…) pointent v
 Un simple nom de rôle unique (ex. `ROLE_USER`). Il sert à Spring Security : `CustomUserDetails` transforme les rôles de l'utilisateur en autorisations.
 
 ### InscriptionEnAttente (`inscriptions_en_attente`)
-Une inscription pas encore confirmée par le code reçu par mail. Elle garde tout ce qu'il faut pour créer l'utilisateur ensuite (pseudo, identifiant, email, mot de passe **déjà haché**) plus la mécanique de vérification :
+Une inscription pas encore confirmée par le code reçu par mail. Elle garde tout ce qu'il faut pour créer l'utilisateur ensuite (nom, prénom, identifiant, email, mot de passe **déjà haché**) plus la mécanique de vérification :
 
 - `jeton` : identifiant opaque envoyé au front à la place de l'email ;
 - `codeHash` : le code de vérification, haché, jamais stocké en clair ;
@@ -108,12 +108,12 @@ Un modèle d'opération qui revient tout seul : loyer, salaire, abonnements. Ell
 ### Authentification et utilisateur
 | DTO | Sens | Rôle |
 |---|---|---|
-| `DtoRegister` | reçu | Inscription : pseudo, identifiant, mot de passe, email (tous obligatoires, email valide). |
+| `DtoRegister` | reçu | Inscription : nom, prénom (facultatif), identifiant, mot de passe, email (email valide). |
 | `DtoInscriptionEnAttente` | renvoyé | Réponse à l'inscription : le `jeton`, l'email **masqué** (jamais l'adresse complète) et `secondesAvantRenvoi` pour afficher le décompte, même après un rafraîchissement. |
 | `DtoVerification` | reçu | Le `jeton` et le `code` reçu par mail pour valider l'inscription. |
 | `DtoRenvoiCode` | reçu | Le `jeton` pour redemander un code. |
 | `DtoLogin` | reçu | Identifiant et mot de passe pour la connexion. |
-| `DtoUtilisateur` | renvoyé | L'utilisateur connecté (id, pseudo, email, rôles), renvoyé après vérification et par « moi ». |
+| `DtoUtilisateur` | renvoyé | L'utilisateur connecté (id UUID, nom, prénom, email, rôles), renvoyé après vérification et par « moi ». |
 | `DtoApiError` | renvoyé | Format unique de toutes les erreurs : date, code HTTP, type d'erreur, message, chemin appelé. Construit par `GlobalExceptionHandler`. |
 
 Le parcours : `DtoRegister` → `DtoInscriptionEnAttente` → (mail) → `DtoVerification` → `DtoUtilisateur`, puis `DtoLogin` pour se connecter et obtenir le jeton JWT.
