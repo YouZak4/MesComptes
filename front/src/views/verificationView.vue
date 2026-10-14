@@ -93,7 +93,8 @@ async function verifier() {
 
 <template>
     <div class="main-container">
-        <h1>Bienvenue sur votre outil de gestion de vos comptes</h1>
+        <h1>Bienvenue sur : Mes comptes</h1>
+        <h2>Votre outil de gestion de comptes</h2>
 
         <div class="register-container">
             <form @submit.prevent="verifier">
