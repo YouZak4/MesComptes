@@ -1,6 +1,5 @@
 package com.mescomptes.backend.service;
 
-import com.mescomptes.backend.exception.AlreadyExist;
 import com.mescomptes.backend.exception.BusinessRuleException;
 import com.mescomptes.backend.exception.ResourceNotFoundException;
 import com.mescomptes.backend.model.dto.DtoMotDePasseSaisie;
@@ -38,21 +37,25 @@ public class UtilisateurService {
     }
 
     /**
-     * Change le pseudo de l'utilisateur connecté. Le token reste valable : il porte l'identifiant de connexion.
+     * Change le nom et le prénom de l'utilisateur connecté. Le token reste valable : il porte l'identifiant de connexion.
      *
      * @param id  id de l'utilisateur
-     * @param dto nouveau pseudo
+     * @param dto nouveau nom, et prénom facultatif
      * @return l'utilisateur modifié
      */
     @Transactional
     public DtoUtilisateur modifierProfil(Long id, DtoProfilSaisie dto) {
         Utilisateur u = trouver(id);
-        String pseudo = dto.getPseudo().trim();
-        if (!pseudo.equals(u.getPseudo()) && utilisateurRepository.existsByPseudo(pseudo)) {
-            throw new AlreadyExist("Le pseudonyme que vous avez saisi est déjà pris.");
-        }
-        u.setPseudo(pseudo);
+        u.setNom(dto.getNom().trim());
+        u.setPrenom(prenomOuNull(dto.getPrenom()));
         return versDto(u);
+    }
+
+    /**
+     * Prénom facultatif : vide ou blanc devient null, sinon débarrassé de ses espaces autour.
+     */
+    public static String prenomOuNull(String prenom) {
+        return prenom == null || prenom.isBlank() ? null : prenom.trim();
     }
 
     /**
@@ -85,7 +88,7 @@ public class UtilisateurService {
      */
     public DtoUtilisateur versDto(Utilisateur u) {
         Set<String> roles = u.getRoles().stream().map(Role::getNom).collect(Collectors.toCollection(LinkedHashSet::new));
-        return new DtoUtilisateur(u.getId(), u.getPseudo(), u.getEmail(), roles);
+        return new DtoUtilisateur(u.getId(), u.getNom(), u.getPrenom(), u.getEmail(), roles);
     }
 
     /**
@@ -96,16 +99,6 @@ public class UtilisateurService {
      */
     public Optional<Utilisateur> findByIdentifiant(String identifiant) {
         return utilisateurRepository.findByIdentifiant(identifiant);
-    }
-
-    /**
-     * Vérifie si le pseudo en paramètre existe en base de donnée.
-     *
-     * @param pseudo pseudo de l'utilisateur
-     * @return un boolean
-     */
-    public boolean existsByPseudo(String pseudo) {
-        return utilisateurRepository.existsByPseudo(pseudo);
     }
 
     /**

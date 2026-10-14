@@ -20,10 +20,15 @@ public class Utilisateur {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    // Nom affiché ; il peut aussi servir de pseudo, le prénom étant facultatif
     @Setter
     @Getter
-    @Column(unique = true, nullable = false)
-    private String pseudo;
+    @Column(nullable = false)
+    private String nom;
+
+    @Setter
+    @Getter
+    private String prenom;
 
     @Setter
     @Getter

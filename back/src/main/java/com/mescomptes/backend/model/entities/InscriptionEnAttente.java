@@ -27,7 +27,8 @@ public class InscriptionEnAttente {
     @Column(unique = true, nullable = false)
     private String email;
     @Column(nullable = false)
-    private String pseudo;
+    private String nom;
+    private String prenom;
     @Column(nullable = false)
     private String identifiant;
     @ToString.Exclude

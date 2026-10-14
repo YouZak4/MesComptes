@@ -11,11 +11,13 @@ import com.mescomptes.backend.repository.CompteRepository;
 import com.mescomptes.backend.repository.LibelleRepository;
 import com.mescomptes.backend.repository.OperationRepository;
 import com.mescomptes.backend.repository.UtilisateurRepository;
+import com.mescomptes.backend.service.MailService;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.transaction.annotation.Transactional;
@@ -47,6 +49,9 @@ abstract class ApiTestBase {
     protected LibelleRepository libelleRepository;
     @Autowired
     protected OperationRepository operationRepository;
+    // Aucun mail réellement envoyé ; les tests lisent les codes passés au mock
+    @MockitoBean
+    protected MailService mailService;
 
     protected Utilisateur moi;
     protected Utilisateur autre;
@@ -65,7 +70,7 @@ abstract class ApiTestBase {
     protected Utilisateur creerUtilisateur() {
         String suffixe = UUID.randomUUID().toString().substring(0, 8);
         Utilisateur u = new Utilisateur();
-        u.setPseudo("test-" + suffixe);
+        u.setNom("test-" + suffixe);
         u.setIdentifiant("test-" + suffixe);
         u.setEmail("test-" + suffixe + "@mescomptes.local");
         u.setMotDePasse("inutilisé");

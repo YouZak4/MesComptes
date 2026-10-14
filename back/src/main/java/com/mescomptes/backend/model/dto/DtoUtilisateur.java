@@ -11,7 +11,8 @@ import java.util.Set;
 @NoArgsConstructor
 public class DtoUtilisateur {
     private Long id;
-    private String pseudo;
+    private String nom;
+    private String prenom; // null si non renseigné
     private String email;
     private Set<String> roles; // noms des rôles, ex. ROLE_UTILISATEUR
 }
