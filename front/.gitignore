@@ -41,3 +41,8 @@ pnpm-lock.yaml
 
 # Claude Code (local settings)
 .claude/settings.local.json
+
+# Variables d'environnement locales (modèle versionné : .env.example)
+.env
+.env.*
+!.env.example
