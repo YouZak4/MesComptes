@@ -3,7 +3,6 @@ import { computed, onMounted, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { comptesService } from "@/services/comptesService.ts";
 import { useReferentiels } from "@/composables/useReferentiels.ts";
-import { useNotificationStore } from "@/stores/notification";
 import { useSaisieStore } from "@/stores/saisie";
 import EnTeteComponent from "@/components/EnTeteComponent.vue";
 import type {
@@ -19,14 +18,12 @@ import {
     formatEcart,
     formatMontant,
     formatMontantSigne,
-    versIso,
 } from "@/utils/format.ts";
 import { messageErreur } from "@/utils/erreurs.ts";
 import { idDepuisQuery } from "@/utils/routage.ts";
 
 const route = useRoute();
 const router = useRouter();
-const notification = useNotificationStore();
 const saisie = useSaisieStore();
 
 const tableau = ref<TableauDeBord | null>(null);
@@ -39,8 +36,6 @@ const {
 } = useReferentiels();
 const isLoading = ref(true);
 const errorMessage = ref<string | null>(null);
-// Aucune période encore définie : on propose de créer la première
-const sansPeriode = ref(false);
 
 // Période et compte affichés sont dans l'URL : un rechargement garde la sélection
 const periodeId = computed(() => idDepuisQuery(route.query.periode));
@@ -54,17 +49,17 @@ async function chargerTableau() {
             periodeId.value,
             compteId.value
         );
-        sansPeriode.value = false;
     } catch (e: any) {
         tableau.value = null;
-        // 422 : l'utilisateur n'a encore aucune période
-        sansPeriode.value = e.response?.status === 422;
-        if (!sansPeriode.value) {
-            errorMessage.value = messageErreur(
-                e,
-                "Impossible de charger le tableau de bord."
-            );
+        // 422 : l'utilisateur n'a encore aucune période, c'est sa première connexion
+        if (e.response?.status === 422) {
+            router.replace({ name: "bienvenue" });
+            return;
         }
+        errorMessage.value = messageErreur(
+            e,
+            "Impossible de charger le tableau de bord."
+        );
     } finally {
         isLoading.value = false;
     }
@@ -160,36 +155,6 @@ const libelleSoldeComptes = computed(() =>
         ? "Solde des comptes en fin de période"
         : "Solde du compte en fin de période"
 );
-
-// Première période : préremplie avec le mois en cours
-const debutPremierePeriode = ref("");
-const finPremierePeriode = ref("");
-const creationEnCours = ref(false);
-
-function preremplirPremierePeriode() {
-    const maintenant = new Date();
-    const annee = maintenant.getFullYear();
-    const mois = maintenant.getMonth();
-    debutPremierePeriode.value = versIso(new Date(annee, mois, 1));
-    finPremierePeriode.value = versIso(new Date(annee, mois + 1, 0));
-}
-preremplirPremierePeriode();
-
-async function creerPremierePeriode() {
-    creationEnCours.value = true;
-    try {
-        await comptesService.creerPeriode(
-            debutPremierePeriode.value,
-            finPremierePeriode.value
-        );
-        notification.success("Votre première période est créée.");
-        await chargerTableau();
-    } catch (e: any) {
-        notification.error(messageErreur(e, "Impossible de créer la période."));
-    } finally {
-        creationEnCours.value = false;
-    }
-}
 </script>
 
 <template>
@@ -201,40 +166,6 @@ async function creerPremierePeriode() {
         <p v-else-if="errorMessage" class="message erreur">
             {{ errorMessage }}
         </p>
-
-        <section v-else-if="sansPeriode" class="carte premiere-periode">
-            <h1>Bienvenue sur Mes comptes</h1>
-            <p>
-                Pour commencer, définissez votre première période : votre « mois
-                de compte », par exemple d'un jour de paie au suivant.
-            </p>
-            <form @submit.prevent="creerPremierePeriode">
-                <label>
-                    Début
-                    <input
-                        v-model="debutPremierePeriode"
-                        type="date"
-                        required
-                    />
-                </label>
-                <label>
-                    Fin
-                    <input
-                        v-model="finPremierePeriode"
-                        type="date"
-                        :min="debutPremierePeriode"
-                        required
-                    />
-                </label>
-                <button
-                    type="submit"
-                    class="bouton-principal"
-                    :disabled="creationEnCours"
-                >
-                    Créer la période
-                </button>
-            </form>
-        </section>
 
         <template v-else-if="tableau">
             <!-- Sélecteurs de période et de compte -->
@@ -775,55 +706,5 @@ ul {
 .previsions dd {
     margin: 0;
     font-weight: bold;
-}
-
-/* Première période */
-.premiere-periode {
-    max-width: 480px;
-    margin: 2rem auto;
-    text-align: center;
-}
-
-.premiere-periode p {
-    margin: 1rem 0 1.25rem;
-}
-
-.premiere-periode form {
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
-    align-items: stretch;
-    text-align: left;
-}
-
-.premiere-periode label {
-    display: flex;
-    flex-direction: column;
-    gap: 0.3rem;
-}
-
-.premiere-periode input {
-    padding: 0.55rem 0.75rem;
-    border: 1px solid #45335c;
-    border-radius: 10px;
-    background: #e3d3f1;
-    color: #000000;
-    font-size: 0.95rem;
-}
-
-.bouton-principal {
-    margin-top: 0.5rem;
-    padding: 0.6rem 1rem;
-    border: none;
-    border-radius: 10px;
-    background: #45335c;
-    color: #ffffff;
-    font-size: 1rem;
-    cursor: pointer;
-}
-
-.bouton-principal:disabled {
-    opacity: 0.6;
-    cursor: default;
 }
 </style>
