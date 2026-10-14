@@ -147,7 +147,7 @@ export const comptesService = {
         return response.data;
     },
 
-    // archive : false désarchive le compte
+    // archive : true archive, false désarchive, absent garde l'état actuel
     async modifierCompte(id: number, saisie: CompteSaisie): Promise<Compte> {
         const response = await api.put<Compte>(`/comptes/${id}`, saisie);
         return response.data;

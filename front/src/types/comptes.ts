@@ -139,12 +139,12 @@ export interface RecurrenceSaisie {
     dateFin: string | null;
 }
 
-// archive : ignoré à la création ; false désarchive un compte
+// archive : ignoré à la création ; true archive, false désarchive, absent garde l'état actuel
 export interface CompteSaisie {
     nom: string;
     soldeInitial: number;
     dateSoldeInitial: string;
-    archive: boolean;
+    archive?: boolean;
 }
 
 // Nom vide : mois de la date de fin
@@ -154,18 +154,20 @@ export interface PeriodeSaisie {
     dateFin: string;
 }
 
+// archive : comme pour CompteSaisie
 export interface CategorieSaisie {
     nom: string;
     type: TypeOperation;
     icone: string | null;
     couleur: string | null;
-    archive: boolean;
+    archive?: boolean;
 }
 
+// archive : comme pour CompteSaisie
 export interface LibelleSaisie {
     nom: string;
     categorieId: number;
-    archive: boolean;
+    archive?: boolean;
 }
 
 // Éléments fournis (communs à tous) que l'utilisateur peut masquer

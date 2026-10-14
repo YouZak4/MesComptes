@@ -105,6 +105,28 @@ async function chargerOperations() {
     }
 }
 
+// Un filtre qui ne désigne plus rien (élément supprimé depuis, vieux lien) est retiré de l'URL,
+// sinon le back répond 404 et la liste ne s'affiche pas. Rend true si l'URL a changé.
+async function retirerFiltresInconnus(): Promise<boolean> {
+    const query = { ...route.query };
+    if (
+        compteId.value !== undefined &&
+        !comptes.value.some((c) => c.id === compteId.value)
+    )
+        delete query.compte;
+    if (
+        categorieId.value !== undefined &&
+        !categories.value.has(categorieId.value)
+    )
+        delete query.categorie;
+    if (libelleId.value !== undefined && !libelles.value.has(libelleId.value))
+        delete query.libelle;
+    if (Object.keys(query).length === Object.keys(route.query).length)
+        return false;
+    await router.replace({ query });
+    return true;
+}
+
 async function toutCharger() {
     isLoading.value = true;
     try {
@@ -121,6 +143,8 @@ async function toutCharger() {
         isLoading.value = false;
         return;
     }
+    // Si l'URL change, le watch des filtres recharge la liste
+    if (await retirerFiltresInconnus()) return;
     await chargerOperations();
 }
 
