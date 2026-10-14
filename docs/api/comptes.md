@@ -40,7 +40,7 @@ Les comptes de l'utilisateur (« Compte courant », « Livret A »…). Un premi
 | `nom` | texte | Oui | 100 caractères au plus |
 | `soldeInitial` | montant | Oui | Peut être négatif (découvert) ; 2 décimales au plus |
 | `dateSoldeInitial` | date | Oui | |
-| `archive` | booléen | Non | Ignoré à la création |
+| `archive` | booléen | Non | Ignoré à la création ; voir la modification |
 
 ```json
 { "nom": "Livret A", "soldeInitial": 1200, "dateSoldeInitial": "2026-10-01" }
@@ -50,7 +50,7 @@ Les comptes de l'utilisateur (« Compte courant », « Livret A »…). Un premi
 
 ## `PUT /comptes/{id}`
 
-Mêmes champs que la création, tous renvoyés. `archive` est appliqué tel quel : `true` archive le compte, `false` le désarchive. **Absent, il vaut `false`** : renvoyer la valeur actuelle pour ne pas la changer.
+Mêmes champs que la création, tous renvoyés. `archive` est facultatif : `true` archive le compte, `false` le désarchive, et absent, l'état actuel est gardé.
 
 **200** : `DtoCompte` modifié, avec son solde recalculé.
 

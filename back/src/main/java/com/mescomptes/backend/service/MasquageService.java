@@ -33,12 +33,7 @@ public class MasquageService {
      */
     @Transactional
     public void masquer(UUID utilisateurId, TypeElement type, Long elementId) {
-        boolean fourni = switch (type) {
-            case CATEGORIE -> categorieService.trouverVisible(utilisateurId, elementId).isFournie();
-            case LIBELLE -> libelleService.trouverVisible(utilisateurId, elementId).isFourni();
-        };
-        if (!fourni) throw new BusinessRuleException("Seuls les éléments fournis se masquent ; un élément personnel s'archive.");
-
+        verifierFourni(utilisateurId, type, elementId);
         if (masquageRepository.findByUtilisateurIdAndTypeElementAndElementId(utilisateurId, type, elementId).isEmpty()) {
             Masquage masquage = new Masquage();
             masquage.setUtilisateur(utilisateurRepository.getReferenceById(utilisateurId));
@@ -49,7 +44,7 @@ public class MasquageService {
     }
 
     /**
-     * Réaffiche un élément masqué. Sans effet s'il ne l'était pas.
+     * Réaffiche un élément masqué. Sans effet s'il ne l'était pas ; 404 s'il n'existe pas, comme pour le masquage.
      *
      * @param utilisateurId id de l'utilisateur connecté
      * @param type          catégorie ou libellé
@@ -57,7 +52,17 @@ public class MasquageService {
      */
     @Transactional
     public void afficher(UUID utilisateurId, TypeElement type, Long elementId) {
+        verifierFourni(utilisateurId, type, elementId);
         masquageRepository.findByUtilisateurIdAndTypeElementAndElementId(utilisateurId, type, elementId)
                 .ifPresent(masquageRepository::delete);
+    }
+
+    // 404 si l'élément n'existe pas ou n'est pas visible pour l'utilisateur, 422 s'il est personnel
+    private void verifierFourni(UUID utilisateurId, TypeElement type, Long elementId) {
+        boolean fourni = switch (type) {
+            case CATEGORIE -> categorieService.trouverVisible(utilisateurId, elementId).isFournie();
+            case LIBELLE -> libelleService.trouverVisible(utilisateurId, elementId).isFourni();
+        };
+        if (!fourni) throw new BusinessRuleException("Seuls les éléments fournis se masquent ; un élément personnel s'archive.");
     }
 }

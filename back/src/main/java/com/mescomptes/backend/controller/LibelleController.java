@@ -47,7 +47,7 @@ public class LibelleController {
         return ResponseEntity.status(HttpStatus.CREATED).body(libelleService.creer(utilisateur.getId(), dto));
     }
 
-    @Operation(summary = "Modifie un libellé personnel", description = "archive à false désarchive.")
+    @Operation(summary = "Modifie un libellé personnel", description = "archive : true archive, false désarchive, absent garde l'état actuel.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Libellé modifié"),
             @ApiResponse(responseCode = "409", description = "Nom déjà pris"),

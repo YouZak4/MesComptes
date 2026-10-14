@@ -70,6 +70,23 @@ class CompteEtPeriodeControllerTests extends ApiTestBase {
     }
 
     @Test
+    void unPutSansArchiveGardeLEtatDArchivage() throws Exception {
+        Compte compte = compte(moi, "Livret");
+        compte.setArchive(true);
+        compteRepository.save(compte);
+        String sansArchive = """
+                {"nom": "Livret A", "soldeInitial": 0, "dateSoldeInitial": "2026-01-01"}""";
+
+        mvc.perform(en(moi, put("/comptes/" + compte.getId())).content(sansArchive))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.nom").value("Livret A"))
+                .andExpect(jsonPath("$.archive").value(true));
+        mvc.perform(en(moi, put("/comptes/" + compte.getId())).content("""
+                        {"nom": "Livret A", "soldeInitial": 0, "dateSoldeInitial": "2026-01-01", "archive": false}"""))
+                .andExpect(jsonPath("$.archive").value(false));
+    }
+
+    @Test
     void neJamaisExposerLeCompteDUnAutreUtilisateur() throws Exception {
         Compte compteAutre = compte(autre, "Secret");
 

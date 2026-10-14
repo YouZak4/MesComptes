@@ -1,5 +1,7 @@
 package com.mescomptes.backend.security;
 
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -8,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -22,6 +25,12 @@ import java.io.IOException;
 @Component
 @RequiredArgsConstructor
 public class JwtFilter extends OncePerRequestFilter {
+
+    // Attribut de requête lu par ReponsesSecurite pour expliquer le 401
+    static final String JETON_REFUSE = JwtFilter.class.getName() + ".refus";
+
+    record Refus(String code, String message) {
+    }
 
     private final JwtService jwtService;
     private final CustomUserDetailsService customUserDetailsService;
@@ -48,21 +57,32 @@ public class JwtFilter extends OncePerRequestFilter {
 
         // On extrait le token (après "Bearer ")
         final String token = authHeader.substring(7);
-        final String identifiant = jwtService.extractIdentifiant(token);
+        // Jeton refusé : la requête continue sans utilisateur. Une route publique répond normalement,
+        // une route protégée répond 401 (ReponsesSecurite), au lieu de laisser l'exception finir en 500.
+        try {
+            final String identifiant = jwtService.extractIdentifiant(token);
 
-        // Si on a un identifiant et que l'utilisateur n'est pas déjà authentifié
-        if (identifiant != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-            UserDetails userDetails = customUserDetailsService.loadUserByUsername(identifiant);
+            // Si on a un identifiant et que l'utilisateur n'est pas déjà authentifié
+            if (identifiant != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+                UserDetails userDetails = customUserDetailsService.loadUserByUsername(identifiant);
 
-            if (jwtService.isTokenValid(token, userDetails)) {
-                // On crée le token d'authentification Spring Security
-                var authToken = new UsernamePasswordAuthenticationToken(
-                        userDetails, null, userDetails.getAuthorities());
-                authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                if (jwtService.isTokenValid(token, userDetails)) {
+                    // On crée le token d'authentification Spring Security
+                    var authToken = new UsernamePasswordAuthenticationToken(
+                            userDetails, null, userDetails.getAuthorities());
+                    authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 
-                // On l'injecte dans le contexte — Spring Security considère l'user comme connecté
-                SecurityContextHolder.getContext().setAuthentication(authToken);
+                    // On l'injecte dans le contexte — Spring Security considère l'user comme connecté
+                    SecurityContextHolder.getContext().setAuthentication(authToken);
+                }
             }
+        } catch (ExpiredJwtException e) {
+            request.setAttribute(JETON_REFUSE, new Refus("TOKEN_EXPIRED", "Votre session a expiré, veuillez vous reconnecter."));
+        } catch (JwtException | IllegalArgumentException e) {
+            // Malformé, signature fausse (secret changé) ou vide
+            request.setAttribute(JETON_REFUSE, new Refus("INVALID_TOKEN", "Votre jeton de connexion n'est pas valide, veuillez vous reconnecter."));
+        } catch (UsernameNotFoundException e) {
+            request.setAttribute(JETON_REFUSE, new Refus("INVALID_TOKEN", "Ce compte n'existe plus, veuillez vous reconnecter."));
         }
 
         filterChain.doFilter(request, response);

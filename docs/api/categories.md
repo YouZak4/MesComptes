@@ -41,7 +41,7 @@ La catégorie sert aux totaux du tableau de bord ; son type (`DEPENSE` ou `REVEN
 | `type` | `DEPENSE` ou `REVENU` | Oui | |
 | `icone` | texte | Non | Un emoji ; 16 caractères au plus |
 | `couleur` | texte | Non | Format `#RRGGBB` |
-| `archive` | booléen | Non | Ignoré à la création |
+| `archive` | booléen | Non | Ignoré à la création ; voir la modification |
 
 Le nom doit être unique parmi les catégories fournies et personnelles visibles de l'utilisateur, sans tenir compte des majuscules ni des espaces en trop : « courses  » est refusé à cause de « Courses ».
 
@@ -54,7 +54,7 @@ Le nom doit être unique parmi les catégories fournies et personnelles visibles
 
 ## `PUT /categories/{id}`
 
-Mêmes champs que la création, tous renvoyés. `archive` est appliqué tel quel : `true` archive, `false` désarchive, et **absent, il vaut `false`**.
+Mêmes champs que la création, tous renvoyés. `archive` est facultatif : `true` archive, `false` désarchive, et absent, l'état actuel est gardé.
 
 - **200** : `DtoCategorie` modifiée.
 - **409** : nom déjà pris.

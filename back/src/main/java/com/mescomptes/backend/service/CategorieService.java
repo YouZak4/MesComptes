@@ -88,7 +88,7 @@ public class CategorieService {
             throw new BusinessRuleException(TYPE_NON_MODIFIABLE);
         }
         appliquer(categorie, dto);
-        categorie.setArchive(dto.isArchive());
+        if (dto.getArchive() != null) categorie.setArchive(dto.getArchive());
         return versDto(enregistrer(categorie), false);
     }
 

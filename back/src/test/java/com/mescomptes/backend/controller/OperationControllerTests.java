@@ -169,6 +169,21 @@ class OperationControllerTests extends ApiTestBase {
                 .andExpect(status().isNotFound());
     }
 
+    @Test
+    void refuserLesFiltresQuiNeDesignentRienChezLUtilisateur() throws Exception {
+        Compte compteAutre = compte(autre, "Autre");
+
+        mvc.perform(en(moi, get("/operations").param("compteId", compteAutre.getId().toString())))
+                .andExpect(status().isNotFound());
+        mvc.perform(en(moi, get("/operations").param("categorieId", "999999999")))
+                .andExpect(status().isNotFound());
+        mvc.perform(en(moi, get("/operations").param("libelleId", "999999999")))
+                .andExpect(status().isNotFound());
+        // Un élément fourni est un filtre valable
+        mvc.perform(en(moi, get("/operations").param("categorieId", categorieFournie("Courses").getId().toString())))
+                .andExpect(status().isOk());
+    }
+
     // ----- Modification et suppression -----
 
     @Test

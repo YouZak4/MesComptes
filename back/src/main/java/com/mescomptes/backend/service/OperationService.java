@@ -33,9 +33,13 @@ public class OperationService {
     private final OperationRepository operationRepository;
     private final SaisieOperationResolver resolver;
     private final PeriodeService periodeService;
+    private final CompteService compteService;
+    private final CategorieService categorieService;
+    private final LibelleService libelleService;
 
     /**
      * Retourne les opérations de l'utilisateur, les plus récentes d'abord, selon des filtres facultatifs et combinables.
+     * Chaque id de filtre doit désigner un élément de l'utilisateur (ou fourni) : 404 sinon, comme les autres routes.
      *
      * @param utilisateurId id de l'utilisateur connecté
      * @param filtre        période, compte, catégorie, libellé et texte (note ou libellé)
@@ -49,9 +53,18 @@ public class OperationService {
             Periode periode = periodeService.trouver(utilisateurId, filtre.periodeId());
             criteres.add(entre(periode.getDateDebut(), periode.getDateFin()));
         }
-        if (filtre.compteId() != null) criteres.add(surLeCompte(filtre.compteId()));
-        if (filtre.categorieId() != null) criteres.add(dansLaCategorie(filtre.categorieId()));
-        if (filtre.libelleId() != null) criteres.add(avecLeLibelle(filtre.libelleId()));
+        if (filtre.compteId() != null) {
+            compteService.trouver(utilisateurId, filtre.compteId());
+            criteres.add(surLeCompte(filtre.compteId()));
+        }
+        if (filtre.categorieId() != null) {
+            categorieService.trouverVisible(utilisateurId, filtre.categorieId());
+            criteres.add(dansLaCategorie(filtre.categorieId()));
+        }
+        if (filtre.libelleId() != null) {
+            libelleService.trouverVisible(utilisateurId, filtre.libelleId());
+            criteres.add(avecLeLibelle(filtre.libelleId()));
+        }
         if (filtre.q() != null && !filtre.q().isBlank()) criteres.add(contenant(Noms.motifRecherche(filtre.q())));
 
         return operationRepository.findAll(Specification.allOf(criteres), PLUS_RECENTES_D_ABORD).stream()

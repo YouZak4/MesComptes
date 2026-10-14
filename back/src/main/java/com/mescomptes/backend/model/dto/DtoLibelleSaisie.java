@@ -13,6 +13,6 @@ public class DtoLibelleSaisie {
     private String nom;
     @NotNull(message = "La catégorie par défaut du libellé est obligatoire.")
     private Long categorieId;
-    // Ignoré à la création ; permet de désarchiver un libellé
-    private boolean archive;
+    // Ignoré à la création. En modification : true archive, false désarchive, absent (null) garde l'état actuel
+    private Boolean archive;
 }

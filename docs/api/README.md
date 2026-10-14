@@ -30,7 +30,7 @@ Deux sources décrivent l'API :
 2. Chaque requête le passe dans l'en-tête `Authorization: Bearer <jeton>`.
 3. Le jeton est valable 24 heures. Il porte l'identifiant de connexion, pas l'id de l'utilisateur.
 
-Sans jeton, une route protégée répond **403**, sans corps : aucun point d'entrée d'authentification n'est configuré, donc Spring Security ne renvoie pas 401. Le seul 401 de l'API est celui d'une connexion ratée.
+Sans jeton valable, une route protégée répond **401** avec le corps d'erreur habituel. Le champ `error` en dit la raison : `AUTH_REQUIRED` (pas de jeton), `TOKEN_EXPIRED` (jeton expiré) ou `INVALID_TOKEN` (jeton malformé, mal signé, ou utilisateur qui n'existe plus). Sur une route publique, un jeton refusé est simplement ignoré.
 
 ### Formats
 
@@ -53,11 +53,11 @@ Une ressource qui appartient à un autre utilisateur répond **404**, comme une 
 
 Les catégories et libellés **fournis** sont communs à tous les utilisateurs : on ne peut pas les modifier, seulement les [masquer](masquage.md). Les éléments **personnels** se créent, se modifient et s'archivent.
 
-« Retirer » un compte, une catégorie ou un libellé le **supprime** s'il n'a jamais servi, et l'**archive** sinon. La réponse le dit : **204** sans corps pour une suppression, **200** avec l'élément archivé. Un élément archivé n'est plus proposé à la saisie mais son historique reste. Le `PUT` d'un élément personnel applique son champ `archive` tel quel : `false` le désarchive, et un champ absent vaut `false`. Il faut donc renvoyer la valeur actuelle pour ne pas la changer.
+« Retirer » un compte, une catégorie ou un libellé le **supprime** s'il n'a jamais servi, et l'**archive** sinon. La réponse le dit : **204** sans corps pour une suppression, **200** avec l'élément archivé. Un élément archivé n'est plus proposé à la saisie mais son historique reste. Dans le `PUT` d'un élément personnel, le champ `archive` est facultatif : `true` l'archive, `false` le désarchive, et absent, l'état actuel est gardé.
 
 ### Erreurs
 
-Toutes les erreurs, sauf le 403 sans jeton, ont le même corps (`DtoApiError`) :
+Toutes les erreurs ont le même corps (`DtoApiError`) :
 
 ```json
 {
@@ -76,8 +76,11 @@ Toutes les erreurs, sauf le 403 sans jeton, ont le même corps (`DtoApiError`) :
 | 400 | `VALIDATION_ERROR` | Champ obligatoire manquant, format ou longueur. Les messages de tous les champs en faute sont mis bout à bout. |
 | 400 | `MALFORMED_REQUEST` | Corps absent ou JSON illisible. |
 | 400 | `INVALID_VERIFICATION_CODE` | Code de vérification incorrect ou expiré, trop de tentatives, ou aucune vérification en cours. |
-| 401 | `AUTH_FAILED` | Identifiant ou mot de passe incorrect (connexion seulement). |
-| 403 | (pas de corps) | JWT absent. |
+| 401 | `AUTH_FAILED` | Identifiant ou mot de passe incorrect (connexion). |
+| 401 | `AUTH_REQUIRED` | Pas de jeton sur une route protégée. |
+| 401 | `TOKEN_EXPIRED` | Jeton expiré : il faut se reconnecter. |
+| 401 | `INVALID_TOKEN` | Jeton malformé, signé avec une autre clé, ou d'un utilisateur qui n'existe plus. |
+| 403 | `ACCESS_DENIED` | Utilisateur connecté sans le rôle requis (aucune route ne l'exige pour l'instant). |
 | 404 | `RESOURCE_NOT_FOUND` | Ressource inexistante ou d'un autre utilisateur. |
 | 409 | `RESOURCE_ALREADY_EXISTS` | Nom déjà pris, adresse ou identifiant pris entre-temps. |
 | 422 | `BUSINESS_RULE_VIOLATION` | Règle métier : élément archivé ou fourni, dates incohérentes, mot de passe actuel faux… |

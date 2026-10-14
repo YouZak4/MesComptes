@@ -19,6 +19,6 @@ public class DtoCategorieSaisie {
     private String icone;
     @Pattern(regexp = "^#[0-9A-Fa-f]{6}$", message = "La couleur doit être au format #RRGGBB.")
     private String couleur;
-    // Ignoré à la création ; permet de désarchiver une catégorie
-    private boolean archive;
+    // Ignoré à la création. En modification : true archive, false désarchive, absent (null) garde l'état actuel
+    private Boolean archive;
 }

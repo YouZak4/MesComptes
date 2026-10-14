@@ -37,7 +37,7 @@ Le libellé dit ce qu'est une opération (« Netflix », « Loyer ») et porte u
 |---|---|---|---|
 | `nom` | texte | Oui | 100 caractères au plus ; unique comme pour les catégories (majuscules et espaces ignorés) |
 | `categorieId` | id | Oui | Catégorie par défaut, non archivée |
-| `archive` | booléen | Non | Ignoré à la création |
+| `archive` | booléen | Non | Ignoré à la création ; voir la modification |
 
 ```json
 { "nom": "Croquettes", "categorieId": 25 }
@@ -49,7 +49,7 @@ Le libellé dit ce qu'est une opération (« Netflix », « Loyer ») et porte u
 
 ## `PUT /libelles/{id}`
 
-Mêmes champs que la création, tous renvoyés. `archive` est appliqué tel quel : `true` archive, `false` désarchive, et **absent, il vaut `false`**. Garder sa catégorie archivée est permis ; passer à une catégorie archivée ne l'est pas.
+Mêmes champs que la création, tous renvoyés. `archive` est facultatif : `true` archive, `false` désarchive, et absent, l'état actuel est gardé. Garder sa catégorie archivée est permis ; passer à une catégorie archivée ne l'est pas.
 
 - **200** : `DtoLibelle` modifié.
 - **409** : nom déjà pris.

@@ -43,7 +43,7 @@ public class CategorieController {
         return ResponseEntity.status(HttpStatus.CREATED).body(categorieService.creer(utilisateur.getId(), dto));
     }
 
-    @Operation(summary = "Modifie une catégorie personnelle", description = "archive à false désarchive. Le type ne change plus une fois la catégorie utilisée.")
+    @Operation(summary = "Modifie une catégorie personnelle", description = "archive : true archive, false désarchive, absent garde l'état actuel. Le type ne change plus une fois la catégorie utilisée.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Catégorie modifiée"),
             @ApiResponse(responseCode = "409", description = "Nom déjà pris"),

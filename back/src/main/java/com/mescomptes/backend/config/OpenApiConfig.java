@@ -65,14 +65,13 @@ public class OpenApiConfig {
                     reponses.putIfAbsent("400", erreur("Corps invalide : champ obligatoire manquant, format ou longueur"));
                 }
                 if (!estPublique(operation)) {
-                    // Pas de point d'entrée d'authentification configuré : Spring Security répond 403, sans corps
-                    reponses.putIfAbsent("403", new ApiResponse().description("JWT absent"));
+                    reponses.putIfAbsent("401", erreur("JWT absent, invalide ou expiré (AUTH_REQUIRED, INVALID_TOKEN, TOKEN_EXPIRED)"));
                 }
                 if (chemin.contains("{id}")) {
                     reponses.putIfAbsent("404", erreur("Introuvable, ou appartient à un autre utilisateur"));
                 }
                 reponses.forEach((code, reponse) -> {
-                    if (code.equals("204") || code.equals("403")) {
+                    if (code.equals("204")) {
                         reponse.setContent(null);
                     } else if (code.compareTo("400") >= 0) {
                         reponse.setContent(contenuErreur());

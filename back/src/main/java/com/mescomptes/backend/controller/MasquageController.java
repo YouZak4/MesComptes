@@ -37,10 +37,11 @@ public class MasquageController {
         return ResponseEntity.noContent().build();
     }
 
-    @Operation(summary = "Réaffiche un élément fourni", description = "type : categorie ou libelle. Sans effet s'il n'était pas masqué ou n'existe pas.")
+    @Operation(summary = "Réaffiche un élément fourni", description = "type : categorie ou libelle. Sans effet s'il n'était pas masqué.")
     @ApiResponses({
-            @ApiResponse(responseCode = "204", description = "Élément réaffiché, ou rien à faire"),
-            @ApiResponse(responseCode = "404", description = "Type inconnu")
+            @ApiResponse(responseCode = "204", description = "Élément réaffiché (sans effet s'il n'était pas masqué)"),
+            @ApiResponse(responseCode = "404", description = "Type ou élément inconnu"),
+            @ApiResponse(responseCode = "422", description = "Élément personnel (il s'archive)")
     })
     @DeleteMapping
     public ResponseEntity<Void> afficher(@AuthenticationPrincipal CustomUserDetails utilisateur,

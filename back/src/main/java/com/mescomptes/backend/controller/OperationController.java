@@ -33,6 +33,10 @@ public class OperationController {
 
     // Filtres facultatifs : ?periodeId=&compteId=&categorieId=&libelleId=&q=
     @Operation(summary = "Liste les opérations, filtrées", description = "Filtres facultatifs et combinables. q cherche dans la note et le libellé.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Opérations, des plus récentes aux plus anciennes"),
+            @ApiResponse(responseCode = "404", description = "Un filtre désigne une période, un compte, une catégorie ou un libellé introuvable")
+    })
     @GetMapping
     public List<DtoOperation> lister(@AuthenticationPrincipal CustomUserDetails utilisateur, @ParameterObject FiltreOperations filtre) {
         return operationService.lister(utilisateur.getId(), filtre);

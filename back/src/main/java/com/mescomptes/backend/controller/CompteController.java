@@ -41,7 +41,7 @@ public class CompteController {
         return ResponseEntity.status(HttpStatus.CREATED).body(compteService.creer(utilisateur.getId(), dto));
     }
 
-    @Operation(summary = "Modifie un compte", description = "archive à false désarchive le compte.")
+    @Operation(summary = "Modifie un compte", description = "archive : true archive, false désarchive, absent garde l'état actuel.")
     @PutMapping("/{id}")
     public DtoCompte modifier(@AuthenticationPrincipal CustomUserDetails utilisateur,
                               @PathVariable Long id, @Valid @RequestBody DtoCompteSaisie dto) {

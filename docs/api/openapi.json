@@ -294,8 +294,15 @@
             },
             "description" : "OK"
           },
-          "403" : {
-            "description" : "JWT absent"
+          "401" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DtoApiError"
+                }
+              }
+            },
+            "description" : "JWT absent, invalide ou expiré (AUTH_REQUIRED, INVALID_TOKEN, TOKEN_EXPIRED)"
           }
         },
         "summary" : "Liste les catégories fournies et personnelles",
@@ -334,8 +341,15 @@
             },
             "description" : "Corps invalide : champ obligatoire manquant, format ou longueur"
           },
-          "403" : {
-            "description" : "JWT absent"
+          "401" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DtoApiError"
+                }
+              }
+            },
+            "description" : "JWT absent, invalide ou expiré (AUTH_REQUIRED, INVALID_TOKEN, TOKEN_EXPIRED)"
           },
           "409" : {
             "content" : {
@@ -379,8 +393,15 @@
           "204" : {
             "description" : "Catégorie supprimée"
           },
-          "403" : {
-            "description" : "JWT absent"
+          "401" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DtoApiError"
+                }
+              }
+            },
+            "description" : "JWT absent, invalide ou expiré (AUTH_REQUIRED, INVALID_TOKEN, TOKEN_EXPIRED)"
           },
           "404" : {
             "content" : {
@@ -407,7 +428,7 @@
         "tags" : [ "Catégories" ]
       },
       "put" : {
-        "description" : "archive à false désarchive. Le type ne change plus une fois la catégorie utilisée.",
+        "description" : "archive : true archive, false désarchive, absent garde l'état actuel. Le type ne change plus une fois la catégorie utilisée.",
         "operationId" : "modifier_5",
         "parameters" : [ {
           "in" : "path",
@@ -449,8 +470,15 @@
             },
             "description" : "Corps invalide : champ obligatoire manquant, format ou longueur"
           },
-          "403" : {
-            "description" : "JWT absent"
+          "401" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DtoApiError"
+                }
+              }
+            },
+            "description" : "JWT absent, invalide ou expiré (AUTH_REQUIRED, INVALID_TOKEN, TOKEN_EXPIRED)"
           },
           "404" : {
             "content" : {
@@ -504,8 +532,15 @@
             },
             "description" : "OK"
           },
-          "403" : {
-            "description" : "JWT absent"
+          "401" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DtoApiError"
+                }
+              }
+            },
+            "description" : "JWT absent, invalide ou expiré (AUTH_REQUIRED, INVALID_TOKEN, TOKEN_EXPIRED)"
           }
         },
         "summary" : "Liste les comptes, archivés compris, avec leur solde",
@@ -544,8 +579,15 @@
             },
             "description" : "Corps invalide : champ obligatoire manquant, format ou longueur"
           },
-          "403" : {
-            "description" : "JWT absent"
+          "401" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DtoApiError"
+                }
+              }
+            },
+            "description" : "JWT absent, invalide ou expiré (AUTH_REQUIRED, INVALID_TOKEN, TOKEN_EXPIRED)"
           }
         },
         "summary" : "Crée un compte",
@@ -579,8 +621,15 @@
           "204" : {
             "description" : "Compte supprimé"
           },
-          "403" : {
-            "description" : "JWT absent"
+          "401" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DtoApiError"
+                }
+              }
+            },
+            "description" : "JWT absent, invalide ou expiré (AUTH_REQUIRED, INVALID_TOKEN, TOKEN_EXPIRED)"
           },
           "404" : {
             "content" : {
@@ -597,7 +646,7 @@
         "tags" : [ "Comptes" ]
       },
       "put" : {
-        "description" : "archive à false désarchive le compte.",
+        "description" : "archive : true archive, false désarchive, absent garde l'état actuel.",
         "operationId" : "modifier_4",
         "parameters" : [ {
           "in" : "path",
@@ -639,8 +688,15 @@
             },
             "description" : "Corps invalide : champ obligatoire manquant, format ou longueur"
           },
-          "403" : {
-            "description" : "JWT absent"
+          "401" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DtoApiError"
+                }
+              }
+            },
+            "description" : "JWT absent, invalide ou expiré (AUTH_REQUIRED, INVALID_TOKEN, TOKEN_EXPIRED)"
           },
           "404" : {
             "content" : {
@@ -683,8 +739,15 @@
             },
             "description" : "OK"
           },
-          "403" : {
-            "description" : "JWT absent"
+          "401" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DtoApiError"
+                }
+              }
+            },
+            "description" : "JWT absent, invalide ou expiré (AUTH_REQUIRED, INVALID_TOKEN, TOKEN_EXPIRED)"
           }
         },
         "summary" : "Liste les libellés, ou les cherche pour l'autocomplétion",
@@ -723,8 +786,15 @@
             },
             "description" : "Corps invalide : champ obligatoire manquant, format ou longueur"
           },
-          "403" : {
-            "description" : "JWT absent"
+          "401" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DtoApiError"
+                }
+              }
+            },
+            "description" : "JWT absent, invalide ou expiré (AUTH_REQUIRED, INVALID_TOKEN, TOKEN_EXPIRED)"
           },
           "409" : {
             "content" : {
@@ -778,8 +848,15 @@
           "204" : {
             "description" : "Libellé supprimé"
           },
-          "403" : {
-            "description" : "JWT absent"
+          "401" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DtoApiError"
+                }
+              }
+            },
+            "description" : "JWT absent, invalide ou expiré (AUTH_REQUIRED, INVALID_TOKEN, TOKEN_EXPIRED)"
           },
           "404" : {
             "content" : {
@@ -806,7 +883,7 @@
         "tags" : [ "Libellés" ]
       },
       "put" : {
-        "description" : "archive à false désarchive.",
+        "description" : "archive : true archive, false désarchive, absent garde l'état actuel.",
         "operationId" : "modifier_3",
         "parameters" : [ {
           "in" : "path",
@@ -848,8 +925,15 @@
             },
             "description" : "Corps invalide : champ obligatoire manquant, format ou longueur"
           },
-          "403" : {
-            "description" : "JWT absent"
+          "401" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DtoApiError"
+                }
+              }
+            },
+            "description" : "JWT absent, invalide ou expiré (AUTH_REQUIRED, INVALID_TOKEN, TOKEN_EXPIRED)"
           },
           "404" : {
             "content" : {
@@ -888,7 +972,7 @@
     },
     "/masquages/{type}/{id}" : {
       "delete" : {
-        "description" : "type : categorie ou libelle. Sans effet s'il n'était pas masqué ou n'existe pas.",
+        "description" : "type : categorie ou libelle. Sans effet s'il n'était pas masqué.",
         "operationId" : "afficher",
         "parameters" : [ {
           "in" : "path",
@@ -908,10 +992,17 @@
         } ],
         "responses" : {
           "204" : {
-            "description" : "Élément réaffiché, ou rien à faire"
+            "description" : "Élément réaffiché (sans effet s'il n'était pas masqué)"
           },
-          "403" : {
-            "description" : "JWT absent"
+          "401" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DtoApiError"
+                }
+              }
+            },
+            "description" : "JWT absent, invalide ou expiré (AUTH_REQUIRED, INVALID_TOKEN, TOKEN_EXPIRED)"
           },
           "404" : {
             "content" : {
@@ -921,7 +1012,17 @@
                 }
               }
             },
-            "description" : "Type inconnu"
+            "description" : "Type ou élément inconnu"
+          },
+          "422" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DtoApiError"
+                }
+              }
+            },
+            "description" : "Élément personnel (il s'archive)"
           }
         },
         "summary" : "Réaffiche un élément fourni",
@@ -950,8 +1051,15 @@
           "204" : {
             "description" : "Élément masqué"
           },
-          "403" : {
-            "description" : "JWT absent"
+          "401" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DtoApiError"
+                }
+              }
+            },
+            "description" : "JWT absent, invalide ou expiré (AUTH_REQUIRED, INVALID_TOKEN, TOKEN_EXPIRED)"
           },
           "404" : {
             "content" : {
@@ -1034,10 +1142,27 @@
                 }
               }
             },
-            "description" : "OK"
+            "description" : "Opérations, des plus récentes aux plus anciennes"
           },
-          "403" : {
-            "description" : "JWT absent"
+          "401" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DtoApiError"
+                }
+              }
+            },
+            "description" : "JWT absent, invalide ou expiré (AUTH_REQUIRED, INVALID_TOKEN, TOKEN_EXPIRED)"
+          },
+          "404" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DtoApiError"
+                }
+              }
+            },
+            "description" : "Un filtre désigne une période, un compte, une catégorie ou un libellé introuvable"
           }
         },
         "summary" : "Liste les opérations, filtrées",
@@ -1077,8 +1202,15 @@
             },
             "description" : "Corps invalide : champ obligatoire manquant, format ou longueur"
           },
-          "403" : {
-            "description" : "JWT absent"
+          "401" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DtoApiError"
+                }
+              }
+            },
+            "description" : "JWT absent, invalide ou expiré (AUTH_REQUIRED, INVALID_TOKEN, TOKEN_EXPIRED)"
           },
           "422" : {
             "content" : {
@@ -1112,8 +1244,15 @@
           "204" : {
             "description" : "Opération supprimée"
           },
-          "403" : {
-            "description" : "JWT absent"
+          "401" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DtoApiError"
+                }
+              }
+            },
+            "description" : "JWT absent, invalide ou expiré (AUTH_REQUIRED, INVALID_TOKEN, TOKEN_EXPIRED)"
           },
           "404" : {
             "content" : {
@@ -1172,8 +1311,15 @@
             },
             "description" : "Corps invalide : champ obligatoire manquant, format ou longueur"
           },
-          "403" : {
-            "description" : "JWT absent"
+          "401" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DtoApiError"
+                }
+              }
+            },
+            "description" : "JWT absent, invalide ou expiré (AUTH_REQUIRED, INVALID_TOKEN, TOKEN_EXPIRED)"
           },
           "404" : {
             "content" : {
@@ -1233,8 +1379,15 @@
             },
             "description" : "Récurrence créée"
           },
-          "403" : {
-            "description" : "JWT absent"
+          "401" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DtoApiError"
+                }
+              }
+            },
+            "description" : "JWT absent, invalide ou expiré (AUTH_REQUIRED, INVALID_TOKEN, TOKEN_EXPIRED)"
           },
           "404" : {
             "content" : {
@@ -1278,8 +1431,15 @@
             },
             "description" : "OK"
           },
-          "403" : {
-            "description" : "JWT absent"
+          "401" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DtoApiError"
+                }
+              }
+            },
+            "description" : "JWT absent, invalide ou expiré (AUTH_REQUIRED, INVALID_TOKEN, TOKEN_EXPIRED)"
           }
         },
         "summary" : "Liste les périodes",
@@ -1319,8 +1479,15 @@
             },
             "description" : "Corps invalide : champ obligatoire manquant, format ou longueur"
           },
-          "403" : {
-            "description" : "JWT absent"
+          "401" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DtoApiError"
+                }
+              }
+            },
+            "description" : "JWT absent, invalide ou expiré (AUTH_REQUIRED, INVALID_TOKEN, TOKEN_EXPIRED)"
           },
           "422" : {
             "content" : {
@@ -1381,8 +1548,15 @@
             },
             "description" : "Corps invalide : champ obligatoire manquant, format ou longueur"
           },
-          "403" : {
-            "description" : "JWT absent"
+          "401" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DtoApiError"
+                }
+              }
+            },
+            "description" : "JWT absent, invalide ou expiré (AUTH_REQUIRED, INVALID_TOKEN, TOKEN_EXPIRED)"
           },
           "404" : {
             "content" : {
@@ -1426,8 +1600,15 @@
             },
             "description" : "OK"
           },
-          "403" : {
-            "description" : "JWT absent"
+          "401" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DtoApiError"
+                }
+              }
+            },
+            "description" : "JWT absent, invalide ou expiré (AUTH_REQUIRED, INVALID_TOKEN, TOKEN_EXPIRED)"
           }
         },
         "summary" : "Liste les récurrences, actives et arrêtées",
@@ -1467,8 +1648,15 @@
             },
             "description" : "Corps invalide : champ obligatoire manquant, format ou longueur"
           },
-          "403" : {
-            "description" : "JWT absent"
+          "401" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DtoApiError"
+                }
+              }
+            },
+            "description" : "JWT absent, invalide ou expiré (AUTH_REQUIRED, INVALID_TOKEN, TOKEN_EXPIRED)"
           },
           "422" : {
             "content" : {
@@ -1512,8 +1700,15 @@
           "204" : {
             "description" : "Récurrence supprimée (rien n'avait été généré)"
           },
-          "403" : {
-            "description" : "JWT absent"
+          "401" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DtoApiError"
+                }
+              }
+            },
+            "description" : "JWT absent, invalide ou expiré (AUTH_REQUIRED, INVALID_TOKEN, TOKEN_EXPIRED)"
           },
           "404" : {
             "content" : {
@@ -1572,8 +1767,15 @@
             },
             "description" : "Corps invalide : champ obligatoire manquant, format ou longueur"
           },
-          "403" : {
-            "description" : "JWT absent"
+          "401" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DtoApiError"
+                }
+              }
+            },
+            "description" : "JWT absent, invalide ou expiré (AUTH_REQUIRED, INVALID_TOKEN, TOKEN_EXPIRED)"
           },
           "404" : {
             "content" : {
@@ -1622,8 +1824,15 @@
             },
             "description" : "Tableau de bord de la période"
           },
-          "403" : {
-            "description" : "JWT absent"
+          "401" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DtoApiError"
+                }
+              }
+            },
+            "description" : "JWT absent, invalide ou expiré (AUTH_REQUIRED, INVALID_TOKEN, TOKEN_EXPIRED)"
           },
           "422" : {
             "content" : {
@@ -1654,8 +1863,15 @@
             },
             "description" : "OK"
           },
-          "403" : {
-            "description" : "JWT absent"
+          "401" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DtoApiError"
+                }
+              }
+            },
+            "description" : "JWT absent, invalide ou expiré (AUTH_REQUIRED, INVALID_TOKEN, TOKEN_EXPIRED)"
           }
         },
         "summary" : "Renvoie l'utilisateur connecté",
@@ -1695,8 +1911,15 @@
             },
             "description" : "Corps invalide : champ obligatoire manquant, format ou longueur"
           },
-          "403" : {
-            "description" : "JWT absent"
+          "401" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DtoApiError"
+                }
+              }
+            },
+            "description" : "JWT absent, invalide ou expiré (AUTH_REQUIRED, INVALID_TOKEN, TOKEN_EXPIRED)"
           }
         },
         "summary" : "Modifie le nom et le prénom",
@@ -1711,8 +1934,15 @@
           "204" : {
             "description" : "Changement annulé"
           },
-          "403" : {
-            "description" : "JWT absent"
+          "401" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DtoApiError"
+                }
+              }
+            },
+            "description" : "JWT absent, invalide ou expiré (AUTH_REQUIRED, INVALID_TOKEN, TOKEN_EXPIRED)"
           }
         },
         "summary" : "Annule le changement d'adresse en cours",
@@ -1734,8 +1964,15 @@
           "204" : {
             "description" : "Aucun changement en cours"
           },
-          "403" : {
-            "description" : "JWT absent"
+          "401" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DtoApiError"
+                }
+              }
+            },
+            "description" : "JWT absent, invalide ou expiré (AUTH_REQUIRED, INVALID_TOKEN, TOKEN_EXPIRED)"
           }
         },
         "summary" : "Renvoie le changement d'adresse en cours",
@@ -1775,8 +2012,15 @@
             },
             "description" : "Corps invalide : champ obligatoire manquant, format ou longueur"
           },
-          "403" : {
-            "description" : "JWT absent"
+          "401" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DtoApiError"
+                }
+              }
+            },
+            "description" : "JWT absent, invalide ou expiré (AUTH_REQUIRED, INVALID_TOKEN, TOKEN_EXPIRED)"
           },
           "422" : {
             "content" : {
@@ -1827,8 +2071,15 @@
             },
             "description" : "Aucun changement en cours"
           },
-          "403" : {
-            "description" : "JWT absent"
+          "401" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DtoApiError"
+                }
+              }
+            },
+            "description" : "JWT absent, invalide ou expiré (AUTH_REQUIRED, INVALID_TOKEN, TOKEN_EXPIRED)"
           },
           "429" : {
             "content" : {
@@ -1880,8 +2131,15 @@
             },
             "description" : "Code incorrect ou expiré, trop de tentatives, ou aucun changement en cours"
           },
-          "403" : {
-            "description" : "JWT absent"
+          "401" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DtoApiError"
+                }
+              }
+            },
+            "description" : "JWT absent, invalide ou expiré (AUTH_REQUIRED, INVALID_TOKEN, TOKEN_EXPIRED)"
           },
           "409" : {
             "content" : {
@@ -1926,8 +2184,15 @@
             },
             "description" : "Corps invalide : champ obligatoire manquant, format ou longueur"
           },
-          "403" : {
-            "description" : "JWT absent"
+          "401" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DtoApiError"
+                }
+              }
+            },
+            "description" : "JWT absent, invalide ou expiré (AUTH_REQUIRED, INVALID_TOKEN, TOKEN_EXPIRED)"
           },
           "422" : {
             "content" : {

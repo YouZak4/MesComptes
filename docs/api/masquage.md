@@ -24,7 +24,8 @@ Sans corps. Masquer un élément déjà masqué ne fait rien.
 
 ## `DELETE /masquages/{type}/{id}`
 
-Sans corps. Réafficher un élément qui n'était pas masqué, ou qui n'existe pas, ne fait rien.
+Sans corps. Réafficher un élément qui n'était pas masqué ne fait rien.
 
-- **204** : élément réaffiché (ou rien à faire).
-- **404** : type inconnu.
+- **204** : élément réaffiché.
+- **404** : type inconnu, ou élément inexistant.
+- **422** : élément personnel.

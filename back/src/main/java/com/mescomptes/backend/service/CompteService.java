@@ -83,7 +83,7 @@ public class CompteService {
     public DtoCompte modifier(UUID utilisateurId, Long id, DtoCompteSaisie dto) {
         Compte compte = trouver(utilisateurId, id);
         appliquer(compte, dto);
-        compte.setArchive(dto.isArchive());
+        if (dto.getArchive() != null) compte.setArchive(dto.getArchive());
         return relire(utilisateurId, id);
     }
 

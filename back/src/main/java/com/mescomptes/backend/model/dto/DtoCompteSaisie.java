@@ -20,6 +20,6 @@ public class DtoCompteSaisie {
     private BigDecimal soldeInitial;
     @NotNull(message = "La date du solde initial est obligatoire.")
     private LocalDate dateSoldeInitial;
-    // Ignoré à la création ; permet de désarchiver un compte
-    private boolean archive;
+    // Ignoré à la création. En modification : true archive, false désarchive, absent (null) garde l'état actuel
+    private Boolean archive;
 }

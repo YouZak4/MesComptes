@@ -174,6 +174,28 @@ class CategorieEtLibelleControllerTests extends ApiTestBase {
         mvc.perform(en(moi, get("/libelles").param("q", "utilisé"))).andExpect(jsonPath("$.length()").value(0));
     }
 
+    @Test
+    void unPutSansArchiveGardeLEtatDArchivage() throws Exception {
+        Categorie animaux = categoriePerso(moi, "Animaux");
+        animaux.setArchive(true);
+        categorieRepository.save(animaux);
+        Libelle croquettes = libellePerso(moi, "Croquettes", categorieFournie("Courses"));
+        croquettes.setArchive(true);
+        libelleRepository.save(croquettes);
+
+        mvc.perform(en(moi, put("/categories/" + animaux.getId())).content("""
+                        {"nom": "Animaux de compagnie", "type": "DEPENSE"}"""))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.archive").value(true));
+        mvc.perform(en(moi, put("/libelles/" + croquettes.getId())).content("""
+                        {"nom": "Croquettes chat", "categorieId": %d}""".formatted(categorieFournie("Courses").getId())))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.archive").value(true));
+        mvc.perform(en(moi, put("/libelles/" + croquettes.getId())).content("""
+                        {"nom": "Croquettes chat", "categorieId": %d, "archive": false}""".formatted(categorieFournie("Courses").getId())))
+                .andExpect(jsonPath("$.archive").value(false));
+    }
+
     // ----- Masquage -----
 
     @Test
@@ -210,6 +232,17 @@ class CategorieEtLibelleControllerTests extends ApiTestBase {
         mvc.perform(en(moi, put("/masquages/categorie/" + animaux.getId()))).andExpect(status().isUnprocessableContent());
         mvc.perform(en(moi, put("/masquages/compte/1"))).andExpect(status().isNotFound());
         assertThat(categorieRepository.findById(animaux.getId())).isPresent();
+    }
+
+    @Test
+    void reafficherExigeUnElementFourniQuiExiste() throws Exception {
+        Categorie animaux = categoriePerso(moi, "Animaux");
+        Categorie chezLAutre = categoriePerso(autre, "Bricolage perso");
+
+        mvc.perform(en(moi, delete("/masquages/libelle/999999999"))).andExpect(status().isNotFound());
+        mvc.perform(en(moi, delete("/masquages/categorie/" + chezLAutre.getId()))).andExpect(status().isNotFound());
+        mvc.perform(en(moi, delete("/masquages/categorie/" + animaux.getId()))).andExpect(status().isUnprocessableContent());
+        mvc.perform(en(moi, delete("/masquages/compte/1"))).andExpect(status().isNotFound());
     }
 
     // ----- Utilitaires -----

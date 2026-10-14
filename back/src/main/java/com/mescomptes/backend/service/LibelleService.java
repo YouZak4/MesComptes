@@ -106,7 +106,7 @@ public class LibelleService {
         Libelle libelle = trouverPersonnel(utilisateurId, id);
         verifierNomLibre(utilisateurId, dto.getNom(), id);
         appliquer(utilisateurId, libelle, dto);
-        libelle.setArchive(dto.isArchive());
+        if (dto.getArchive() != null) libelle.setArchive(dto.getArchive());
         return versDto(enregistrer(libelle), false);
     }
 

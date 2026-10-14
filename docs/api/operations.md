@@ -49,7 +49,7 @@ GET /api/operations?periodeId=7&categorieId=2&q=courses
 ```
 
 - **200** : liste de `DtoOperation`, des plus récentes aux plus anciennes (date, puis ordre de saisie).
-- **404** : `periodeId` introuvable ou d'un autre utilisateur. Les autres filtres ne sont pas vérifiés : un id qui ne correspond à rien donne une liste vide.
+- **404** : un filtre désigne une période, un compte, une catégorie ou un libellé introuvable, ou d'un autre utilisateur. Une catégorie ou un libellé fourni est un filtre valable.
 
 ## `POST /operations`
 
