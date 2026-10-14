@@ -2,6 +2,7 @@ package com.mescomptes.backend.config;
 
 import com.mescomptes.backend.security.CustomUserDetailsService;
 import com.mescomptes.backend.security.JwtFilter;
+import com.mescomptes.backend.security.ReponsesSecurite;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -33,6 +34,7 @@ public class SecurityConfig {
 
     private final JwtFilter jwtFilter;
     private final CustomUserDetailsService customUserDetailsService;
+    private final ReponsesSecurite reponsesSecurite;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -43,8 +45,13 @@ public class SecurityConfig {
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))                // pas de session, on est full JWT
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/auth/**", "/error").permitAll()                  // login et register sont publics
+                        .requestMatchers("/v3/api-docs", "/v3/api-docs/**", "/v3/api-docs.yaml", "/swagger-ui/**", "/swagger-ui.html").permitAll() // documentation de l'API (springdoc)
                         .anyRequest().authenticated()                                           // tout le reste nécessite un token
                 )
+                // 401 / 403 au format DtoApiError (sans eux, Spring Security répond 403 sans corps, même sans jeton)
+                .exceptionHandling(erreurs -> erreurs
+                        .authenticationEntryPoint(reponsesSecurite)
+                        .accessDeniedHandler(reponsesSecurite))
                 .authenticationProvider(authenticationProvider())
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 

@@ -1,11 +1,13 @@
 package com.mescomptes.backend.exception;
 
 import com.mescomptes.backend.model.dto.DtoApiError;
+import lombok.extern.slf4j.Slf4j;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.FieldError;
+import org.springframework.web.ErrorResponse;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -13,6 +15,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import java.util.stream.Collectors;
 
 @RestControllerAdvice
+@Slf4j
 public class GlobalExceptionHandler {
 
     private ResponseEntity<DtoApiError> buildResponse(HttpStatus status, String errorCode, String message, HttpServletRequest request) {
@@ -28,6 +31,16 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(AlreadyExist.class)
     public ResponseEntity<DtoApiError> handleAlreadyExist(AlreadyExist ex, HttpServletRequest request) {
         return buildResponse(HttpStatus.CONFLICT, "RESOURCE_ALREADY_EXISTS", ex.getMessage(), request);
+    }
+
+    @ExceptionHandler(ResourceNotFoundException.class)
+    public ResponseEntity<DtoApiError> handleNotFound(ResourceNotFoundException ex, HttpServletRequest request) {
+        return buildResponse(HttpStatus.NOT_FOUND, "RESOURCE_NOT_FOUND", ex.getMessage(), request);
+    }
+
+    @ExceptionHandler(BusinessRuleException.class)
+    public ResponseEntity<DtoApiError> handleBusinessRule(BusinessRuleException ex, HttpServletRequest request) {
+        return buildResponse(HttpStatus.UNPROCESSABLE_CONTENT, "BUSINESS_RULE_VIOLATION", ex.getMessage(), request);
     }
 
     @ExceptionHandler(InvalidCredentialsException.class)
@@ -61,6 +74,12 @@ public class GlobalExceptionHandler {
     // Capture toutes les autres erreurs non prévues
     @ExceptionHandler(Exception.class)
     public ResponseEntity<DtoApiError> handleGlobal(Exception ex, HttpServletRequest request) {
+        // Erreurs de Spring MVC (route inconnue, méthode non supportée, paramètre manquant...) : on garde leur statut 4xx
+        if (ex instanceof ErrorResponse errorResponse && errorResponse.getStatusCode().is4xxClientError()) {
+            HttpStatus status = HttpStatus.valueOf(errorResponse.getStatusCode().value());
+            return buildResponse(status, "REQUEST_ERROR", status.getReasonPhrase(), request);
+        }
+        log.error("Erreur inattendue sur {} {}", request.getMethod(), request.getRequestURI(), ex);
         return buildResponse(HttpStatus.INTERNAL_SERVER_ERROR, "SERVER_ERROR", "Une erreur inattendue est survenue", request);
     }
 }

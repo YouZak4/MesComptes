@@ -18,18 +18,29 @@ const loginFormValid = computed(() =>
 );
 const identifiantLogin = ref("");
 const motDePasseLogin = ref("");
+// Le prénom, facultatif, n'a pas de validité à suivre (sa longueur est bornée par le champ)
 const validityRegister = ref({
-    pseudo: false,
+    nom: false,
     identifiant: false,
     motDePasse: false,
     email: false,
 });
-const registerFormValid = computed(() =>
-    Object.values(validityRegister.value).every(Boolean)
-);
-const pseudoRegister = ref("");
+const nomRegister = ref("");
+const prenomRegister = ref("");
 const identifiantRegister = ref("");
 const motDePasseRegister = ref("");
+const confirmationRegister = ref("");
+// Comparée ici et non via @valid : elle doit suivre aussi les changements du mot de passe
+const confirmationValide = computed(
+    () =>
+        confirmationRegister.value !== "" &&
+        confirmationRegister.value === motDePasseRegister.value
+);
+const registerFormValid = computed(
+    () =>
+        Object.values(validityRegister.value).every(Boolean) &&
+        confirmationValide.value
+);
 const emailRegister = ref("");
 const isLoading = ref(false);
 const isRegister = ref(true);
@@ -59,7 +70,8 @@ async function register() {
     isLoading.value = true;
     try {
         const { data } = await api.post("/auth/register", {
-            pseudo: pseudoRegister.value,
+            nom: nomRegister.value.trim(),
+            prenom: prenomRegister.value.trim() || null,
             identifiant: identifiantRegister.value,
             motDePasse: motDePasseRegister.value,
             email: emailRegister.value,
@@ -84,12 +96,13 @@ async function register() {
 
 <template>
     <div class="main-container">
-        <h1>Demon invasion</h1>
+        <h1>Bienvenue sur : Mes comptes</h1>
+        <h2>Votre outil de gestion de comptes</h2>
 
         <!-- ── Formulaire de connexion ── -->
         <div v-if="isRegister" class="login-container">
             <form @submit.prevent="login">
-                <h2>Se connecter à Demon invasion</h2>
+                <h2>Se connecter à Mes comptes</h2>
 
                 <InputComponent
                     v-model="identifiantLogin"
@@ -134,18 +147,22 @@ async function register() {
         <!-- ── Formulaire d'inscription ── -->
         <div v-if="!isRegister" class="register-container">
             <form @submit.prevent="register">
-                <h2>Créez un compte pour jouer à Demon invasion</h2>
+                <h2>Créez un compte pour utiliser Mes comptes</h2>
 
                 <InputComponent
-                    v-model="pseudoRegister"
-                    label="Pseudonyme"
-                    placeholder="Votre pseudo en jeu"
+                    v-model="nomRegister"
+                    label="Nom"
+                    placeholder="Votre nom, ou un pseudo"
                     :required="true"
-                    :min-length="1"
-                    :max-length="30"
-                    :regex="/^[a-zA-Z0-9_-]+$/"
-                    regex-message="Entre 1 et 30 caractères, lettres, chiffres, _ et - uniquement."
-                    @valid="validityRegister.pseudo = $event"
+                    :max-length="100"
+                    @valid="validityRegister.nom = $event"
+                />
+
+                <InputComponent
+                    v-model="prenomRegister"
+                    label="Prénom"
+                    placeholder="Facultatif"
+                    :max-length="100"
                 />
 
                 <InputComponent
@@ -169,6 +186,16 @@ async function register() {
                     :regex="/^(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,30}$/"
                     regex-message="8 caractères minimum, avec au moins une majuscule, un chiffre et un caractère spécial."
                     @valid="validityRegister.motDePasse = $event"
+                />
+
+                <InputComponent
+                    v-model="confirmationRegister"
+                    type="password"
+                    label="Confirmation du mot de passe"
+                    placeholder="Retapez votre mot de passe"
+                    :required="true"
+                    :correspond-a="motDePasseRegister"
+                    correspond-a-message="Les deux mots de passe ne correspondent pas."
                 />
 
                 <InputComponent

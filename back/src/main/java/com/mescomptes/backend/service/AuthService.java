@@ -4,6 +4,7 @@ import com.mescomptes.backend.exception.AlreadyExist;
 import com.mescomptes.backend.exception.InvalidCredentialsException;
 import com.mescomptes.backend.exception.InvalidVerificationCodeException;
 import com.mescomptes.backend.exception.TooManyRequestsException;
+import com.mescomptes.backend.model.CustomUserDetails;
 import com.mescomptes.backend.model.dto.DtoInscriptionEnAttente;
 import com.mescomptes.backend.model.dto.DtoLogin;
 import com.mescomptes.backend.model.dto.DtoRegister;
@@ -17,6 +18,7 @@ import com.mescomptes.backend.repository.InscriptionEnAttenteRepository;
 import com.mescomptes.backend.security.CustomUserDetailsService;
 import com.mescomptes.backend.security.JwtService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -35,16 +37,16 @@ import java.time.LocalDateTime;
 import java.util.Set;
 import java.util.UUID;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class AuthService {
 
     private static final String ROLE_UTILISATEUR = "ROLE_UTILISATEUR";
     private static final String ROLE_NOT_FOUND = "Le rôle suivant n'est pas présent en base de données : ";
-    private static final String PSEUDO_ALREADY_EXISTS = "Le pseudonyme que vous avez saisi est déjà pris.";
     private static final String EMAIL_ALREADY_EXISTS = "L'adresse mail que vous avez saisi est déjà prise.";
     private static final String IDENTIFIANT_ALREADY_EXISTS = "Cet identifiant est déjà utilisé, veuillez recommencer l'inscription avec un autre identifiant.";
-    private static final String COMPTE_CREE_ENTRE_TEMPS = "Ce pseudo, cet identifiant ou cette adresse mail vient d'être utilisé par un autre compte, veuillez recommencer l'inscription.";
+    private static final String COMPTE_CREE_ENTRE_TEMPS = "Cet identifiant ou cette adresse mail vient d'être utilisé par un autre compte, veuillez recommencer l'inscription.";
     private static final String INSCRIPTION_INTROUVABLE = "Ce lien de vérification n'est plus valide, veuillez recommencer l'inscription.";
     private static final SecureRandom RANDOM = new SecureRandom();
     private final UtilisateurService utilisateurService;
@@ -55,6 +57,8 @@ public class AuthService {
     private final JwtService jwtService;
     private final InscriptionEnAttenteRepository inscriptionEnAttenteRepository;
     private final MailService mailService;
+    private final CompteService compteService;
+    private final PlanificationRecurrences planificationRecurrences;
     @Value("${app.verification.expiration-minutes}")
     private long expirationMinutes;
     @Value("${app.verification.max-tentatives}")
@@ -74,8 +78,6 @@ public class AuthService {
     public DtoInscriptionEnAttente register(DtoRegister dto) {
         String email = dto.getEmail().trim().toLowerCase();
 
-        // Le pseudo est public (visible en jeu) : le signaler ne révèle rien
-        if (utilisateurService.existsByPseudo(dto.getPseudo())) throw new AlreadyExist(PSEUDO_ALREADY_EXISTS);
         // L'e-mail, lui, ne doit pas pouvoir être testé : même réponse qu'il soit libre ou non
         boolean compteExistant = utilisateurService.existsByEmail(email);
 
@@ -85,7 +87,8 @@ public class AuthService {
         // Nouveau jeton à chaque inscription : un ancien lien de vérification ne fonctionne plus
         attente.setJeton(UUID.randomUUID().toString());
         attente.setEmail(email);
-        attente.setPseudo(dto.getPseudo());
+        attente.setNom(dto.getNom().trim());
+        attente.setPrenom(UtilisateurService.prenomOuNull(dto.getPrenom()));
         attente.setIdentifiant(dto.getIdentifiant());
         attente.setMotDePasse(passwordEncoder.encode(dto.getMotDePasse()));
         attente.setCompteExistant(compteExistant);
@@ -189,9 +192,8 @@ public class AuthService {
             throw new InvalidVerificationCodeException("Code incorrect.");
         }
 
-        // Re-vérif : quelqu'un a pu prendre le pseudo/mail entre-temps
+        // Re-vérif : quelqu'un a pu prendre le mail entre-temps
         if (utilisateurService.existsByEmail(email)) throw new AlreadyExist(EMAIL_ALREADY_EXISTS);
-        if (utilisateurService.existsByPseudo(attente.getPseudo())) throw new AlreadyExist(PSEUDO_ALREADY_EXISTS);
         // Vérifié seulement ici, une fois le code validé : tester des identifiants exige
         // de posséder la boîte mail et de refaire une inscription complète à chaque essai
         if (utilisateurService.existsByIdentifiant(attente.getIdentifiant())) throw new AlreadyExist(IDENTIFIANT_ALREADY_EXISTS);
@@ -199,7 +201,8 @@ public class AuthService {
         Role role = roleService.findByNom(ROLE_UTILISATEUR).orElseThrow();
         Utilisateur u = new Utilisateur();
         u.setEmail(email);
-        u.setPseudo(attente.getPseudo());
+        u.setNom(attente.getNom());
+        u.setPrenom(attente.getPrenom());
         u.setIdentifiant(attente.getIdentifiant());
         u.setMotDePasse(attente.getMotDePasse()); // déjà haché, on ne re-encode pas !
         u.setRoles(Set.of(role));
@@ -209,11 +212,10 @@ public class AuthService {
             // Deux validations simultanées : les vérifs ci-dessus sont passées, mais la contrainte unique en base a bloqué la seconde
             throw new AlreadyExist(COMPTE_CREE_ENTRE_TEMPS);
         }
+        compteService.creerCompteParDefaut(u);
         inscriptionEnAttenteRepository.delete(attente);
 
-        DtoUtilisateur res = new DtoUtilisateur();
-        BeanUtils.copyProperties(u, res);
-        return res;
+        return utilisateurService.versDto(u);
     }
 
 
@@ -246,11 +248,26 @@ public class AuthService {
             );
 
             SecurityContextHolder.getContext().setAuthentication(authentication);
+            rattraperRecurrences(authentication);
 
             return jwtService.generateToken(authentication);
 
         } catch (BadCredentialsException e) {
-            throw new InvalidCredentialsException("Pseudo ou mot de passe incorrect.");
+            throw new InvalidCredentialsException("Identifiant ou mot de passe incorrect.");
+        }
+    }
+
+    /**
+     * Génère les occurrences de récurrences manquées pendant que le serveur était arrêté.
+     * Un échec ne doit jamais empêcher la connexion : la tâche de nuit rattrapera.
+     */
+    private void rattraperRecurrences(Authentication authentication) {
+        try {
+            if (authentication.getPrincipal() instanceof CustomUserDetails utilisateur) {
+                planificationRecurrences.rattraper(utilisateur.getId());
+            }
+        } catch (RuntimeException e) {
+            log.warn("Rattrapage des récurrences impossible à la connexion : {}", e.getMessage());
         }
     }
 }

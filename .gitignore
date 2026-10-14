@@ -1,0 +1,11 @@
+# Fichiers propres à l'IDE ou au système, à ne pas versionner
+.idea/
+.vscode/
+*.iml
+.DS_Store
+Thumbs.db
+
+# Paramètres locaux de Claude Code
+.claude/settings.local.json
+
+# Les règles propres au back et au front sont dans back/.gitignore et front/.gitignore

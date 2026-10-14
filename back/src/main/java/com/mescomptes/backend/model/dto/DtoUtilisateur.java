@@ -1,18 +1,19 @@
 package com.mescomptes.backend.model.dto;
 
-import com.mescomptes.backend.model.entities.Role;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.Set;
+import java.util.UUID;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 public class DtoUtilisateur {
-    private Long id;
-    private String pseudo;
+    private UUID id;
+    private String nom;
+    private String prenom; // null si non renseigné
     private String email;
-    private Set<Role> roles;
+    private Set<String> roles; // noms des rôles, ex. ROLE_UTILISATEUR
 }

@@ -1,8 +1,12 @@
 import { createRouter, createWebHistory } from "vue-router";
 import { useAuthStore } from "@/stores/auth";
-import PageAccueil from "@/views/pageAccueil.vue";
+import TableauDeBordView from "@/views/tableauDeBordView.vue";
 import LoginView from "@/views/loginView.vue";
 import VerificationView from "@/views/verificationView.vue";
+import OperationsView from "@/views/operationsView.vue";
+import RecurrencesView from "@/views/recurrencesView.vue";
+import ReglagesView from "@/views/reglagesView.vue";
+import BienvenueView from "@/views/bienvenueView.vue";
 
 const router = createRouter({
     history: createWebHistory(import.meta.env.BASE_URL),
@@ -10,7 +14,31 @@ const router = createRouter({
         {
             path: "/",
             name: "accueil",
-            component: PageAccueil,
+            component: TableauDeBordView,
+            meta: { requiresAuth: true },
+        },
+        {
+            path: "/operations",
+            name: "operations",
+            component: OperationsView,
+            meta: { requiresAuth: true },
+        },
+        {
+            path: "/recurrences",
+            name: "recurrences",
+            component: RecurrencesView,
+            meta: { requiresAuth: true },
+        },
+        {
+            path: "/reglages",
+            name: "reglages",
+            component: ReglagesView,
+            meta: { requiresAuth: true },
+        },
+        {
+            path: "/bienvenue",
+            name: "bienvenue",
+            component: BienvenueView,
             meta: { requiresAuth: true },
         },
         {

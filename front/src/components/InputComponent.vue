@@ -13,6 +13,9 @@ const props = withDefaults(
         regexMessage?: string;
         minLength?: number;
         maxLength?: number;
+        // Valeur à recopier à l'identique (confirmation d'un mot de passe)
+        correspondA?: string;
+        correspondAMessage?: string;
     }>(),
     {
         type: "text",
@@ -21,6 +24,7 @@ const props = withDefaults(
         required: false,
         disabled: false,
         regexMessage: "Format invalide.",
+        correspondAMessage: "Les deux saisies ne correspondent pas.",
     }
 );
 const emit = defineEmits<{
@@ -54,6 +58,9 @@ const errorMessage = computed((): string | null => {
     }
     if (props.regex && !props.regex.test(val)) {
         return props.regexMessage ?? "Format invalide.";
+    }
+    if (props.correspondA !== undefined && val !== props.correspondA) {
+        return props.correspondAMessage;
     }
 
     return null;

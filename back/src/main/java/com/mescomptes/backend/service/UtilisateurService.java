@@ -1,26 +1,95 @@
 package com.mescomptes.backend.service;
 
+import com.mescomptes.backend.exception.BusinessRuleException;
+import com.mescomptes.backend.exception.ResourceNotFoundException;
+import com.mescomptes.backend.model.dto.DtoMotDePasseSaisie;
+import com.mescomptes.backend.model.dto.DtoProfilSaisie;
+import com.mescomptes.backend.model.dto.DtoUtilisateur;
+import com.mescomptes.backend.model.entities.Role;
 import com.mescomptes.backend.model.entities.Utilisateur;
 import com.mescomptes.backend.repository.UtilisateurRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
+import java.util.LinkedHashSet;
 import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class UtilisateurService {
 
     private final UtilisateurRepository utilisateurRepository;
+    private final PasswordEncoder passwordEncoder;
 
     /**
-     * Retourne tous les utilisateurs contenus en base de données.
+     * Retourne l'utilisateur connecté, sans son mot de passe ni son identifiant de connexion.
      *
-     * @return une liste d'utilisateurs
+     * @param id id de l'utilisateur
+     * @return l'utilisateur
      */
-    public List<Utilisateur> getAllUtilisateurs() {
-        return utilisateurRepository.findAll();
+    @Transactional(readOnly = true)
+    public DtoUtilisateur moi(UUID id) {
+        return versDto(trouver(id));
+    }
+
+    /**
+     * Change le nom et le prénom de l'utilisateur connecté. Le token reste valable : il porte l'identifiant de connexion.
+     *
+     * @param id  id de l'utilisateur
+     * @param dto nouveau nom, et prénom facultatif
+     * @return l'utilisateur modifié
+     */
+    @Transactional
+    public DtoUtilisateur modifierProfil(UUID id, DtoProfilSaisie dto) {
+        Utilisateur u = trouver(id);
+        u.setNom(dto.getNom().trim());
+        u.setPrenom(prenomOuNull(dto.getPrenom()));
+        return versDto(u);
+    }
+
+    /**
+     * Prénom facultatif : vide ou blanc devient null, sinon débarrassé de ses espaces autour.
+     */
+    public static String prenomOuNull(String prenom) {
+        return prenom == null || prenom.isBlank() ? null : prenom.trim();
+    }
+
+    /**
+     * Change le mot de passe de l'utilisateur connecté, après vérification de l'actuel.
+     * Un mot de passe actuel faux répond 422 et non 401 : la session, elle, est valide (le front déconnecte sur 401).
+     *
+     * @param id  id de l'utilisateur
+     * @param dto mot de passe actuel et nouveau
+     */
+    @Transactional
+    public void changerMotDePasse(UUID id, DtoMotDePasseSaisie dto) {
+        Utilisateur u = trouver(id);
+        if (!passwordEncoder.matches(dto.getMotDePasseActuel(), u.getMotDePasse())) {
+            throw new BusinessRuleException("Le mot de passe actuel est incorrect.");
+        }
+        u.setMotDePasse(passwordEncoder.encode(dto.getNouveauMotDePasse()));
+    }
+
+    private Utilisateur trouver(UUID id) {
+        return utilisateurRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Utilisateur introuvable."));
+    }
+
+    /**
+     * Convertit un utilisateur en DTO, les rôles réduits à leur nom.
+     * À appeler dans une transaction : les rôles sont chargés à la demande.
+     *
+     * @param u l'utilisateur
+     * @return le DTO, sans mot de passe ni identifiant de connexion
+     */
+    public DtoUtilisateur versDto(Utilisateur u) {
+        Set<String> roles = u.getRoles().stream().map(Role::getNom).collect(Collectors.toCollection(LinkedHashSet::new));
+        return new DtoUtilisateur(u.getId(), u.getNom(), u.getPrenom(), u.getEmail(), roles);
     }
 
     /**
@@ -31,16 +100,6 @@ public class UtilisateurService {
      */
     public Optional<Utilisateur> findByIdentifiant(String identifiant) {
         return utilisateurRepository.findByIdentifiant(identifiant);
-    }
-
-    /**
-     * Vérifie si le pseudo en paramètre existe en base de donnée.
-     *
-     * @param pseudo pseudo de l'utilisateur
-     * @return un boolean
-     */
-    public boolean existsByPseudo(String pseudo) {
-        return utilisateurRepository.existsByPseudo(pseudo);
     }
 
     /**
