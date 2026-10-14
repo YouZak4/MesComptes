@@ -81,7 +81,7 @@ async function verifier() {
         await router.replace({ name: "login" });
     } catch (e: any) {
         notification.error(messageErreur(e, "Code invalide."));
-        // 409 : identifiant/pseudo pris entre-temps, il faut recommencer l'inscription
+        // 409 : identifiant ou adresse pris entre-temps, il faut recommencer l'inscription
         if (e.response?.status === 409) {
             await router.replace({ name: "login" });
         }

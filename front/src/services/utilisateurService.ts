@@ -1,5 +1,5 @@
 import api from "./api";
-import type { Utilisateur } from "@/types/utilisateur.ts";
+import type { ChangementEmail, Utilisateur } from "@/types/utilisateur.ts";
 
 export const utilisateurService = {
     async getMoi(): Promise<Utilisateur> {
@@ -7,10 +7,11 @@ export const utilisateurService = {
         return response.data;
     },
 
-    // Seul le pseudo se modifie (l'adresse mail demanderait une nouvelle vérification)
-    async modifierProfil(pseudo: string): Promise<Utilisateur> {
+    // Prénom vide : retiré
+    async modifierProfil(nom: string, prenom: string): Promise<Utilisateur> {
         const response = await api.put<Utilisateur>("/utilisateurs/moi", {
-            pseudo,
+            nom,
+            prenom,
         });
         return response.data;
     },
@@ -24,5 +25,45 @@ export const utilisateurService = {
             motDePasseActuel,
             nouveauMotDePasse,
         });
+    },
+
+    // ── Changement d'adresse mail : un code est envoyé à la nouvelle adresse ──
+
+    // null : aucun changement en cours (204)
+    async getChangementEmail(): Promise<ChangementEmail | null> {
+        const response = await api.get<ChangementEmail>(
+            "/utilisateurs/moi/email"
+        );
+        return response.status === 204 ? null : response.data;
+    },
+
+    async demanderChangementEmail(
+        nouvelEmail: string,
+        motDePasse: string
+    ): Promise<ChangementEmail> {
+        const response = await api.put<ChangementEmail>(
+            "/utilisateurs/moi/email",
+            { nouvelEmail, motDePasse }
+        );
+        return response.data;
+    },
+
+    async verifierChangementEmail(code: string): Promise<Utilisateur> {
+        const response = await api.post<Utilisateur>(
+            "/utilisateurs/moi/email/verification",
+            { code }
+        );
+        return response.data;
+    },
+
+    async renvoyerCodeChangementEmail(): Promise<ChangementEmail> {
+        const response = await api.post<ChangementEmail>(
+            "/utilisateurs/moi/email/renvoi"
+        );
+        return response.data;
+    },
+
+    async annulerChangementEmail(): Promise<void> {
+        await api.delete("/utilisateurs/moi/email");
     },
 };

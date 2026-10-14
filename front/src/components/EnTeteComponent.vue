@@ -4,20 +4,23 @@ import { useRouter } from "vue-router";
 import { useAuthStore } from "@/stores/auth";
 import { useNotificationStore } from "@/stores/notification";
 import { useProfilStore } from "@/stores/profil";
+import { nomAffiche } from "@/utils/utilisateur.ts";
 
 const router = useRouter();
 const auth = useAuthStore();
 const notification = useNotificationStore();
 const profil = useProfilStore();
 
-// Dans le store : un changement de pseudo dans les réglages s'affiche tout de suite
-const pseudo = computed(() => profil.utilisateur?.pseudo ?? null);
+// Dans le store : un changement de nom dans les réglages s'affiche tout de suite
+const nom = computed(() =>
+    profil.utilisateur ? nomAffiche(profil.utilisateur) : null
+);
 
 onMounted(async () => {
     try {
         await profil.charger();
     } catch (error) {
-        // Le pseudo n'est qu'un confort : l'en-tête reste utilisable sans
+        // Le nom n'est qu'un confort : l'en-tête reste utilisable sans
         console.error(error);
     }
 });
@@ -43,7 +46,7 @@ async function deconnexion() {
             <RouterLink :to="{ name: 'reglages' }">Réglages</RouterLink>
         </nav>
         <div class="utilisateur">
-            <span v-if="pseudo" class="pseudo">{{ pseudo }}</span>
+            <span v-if="nom" class="nom">{{ nom }}</span>
             <button type="button" class="deconnexion" @click="deconnexion">
                 Déconnexion
             </button>
