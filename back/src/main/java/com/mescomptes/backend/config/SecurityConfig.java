@@ -43,7 +43,7 @@ public class SecurityConfig {
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))                // pas de session, on est full JWT
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/auth/**", "/error").permitAll()                  // login et register sont publics
-                        .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll() // documentation de l'API (springdoc)
+                        .requestMatchers("/v3/api-docs", "/v3/api-docs/**", "/v3/api-docs.yaml", "/swagger-ui/**", "/swagger-ui.html").permitAll() // documentation de l'API (springdoc)
                         .anyRequest().authenticated()                                           // tout le reste nécessite un token
                 )
                 .authenticationProvider(authenticationProvider())
