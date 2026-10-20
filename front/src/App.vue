@@ -18,8 +18,14 @@ const auth = useAuthStore();
 </template>
 
 <style>
-body {
-    margin: 0;
-    font-family: Arial, Helvetica, sans-serif;
+/* Le bouton « Nouvelle opération », collant, reste en bas de l'écran même quand la page est courte */
+#app {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+#app > .page {
+    flex: 1 0 auto;
 }
 </style>

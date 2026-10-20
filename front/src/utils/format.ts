@@ -16,8 +16,19 @@ const dateLongue = new Intl.DateTimeFormat("fr-FR", {
     year: "numeric",
 });
 
+const pourcentage = new Intl.NumberFormat("fr-FR", {
+    style: "percent",
+    maximumFractionDigits: 0,
+});
+
+// 0.48 → « 48 % »
+export function formatPourcentage(part: number): string {
+    return pourcentage.format(part);
+}
+
+// Négatif : le vrai signe moins (U+2212), et non le tiret que donne Intl
 export function formatMontant(montant: number): string {
-    return euros.format(montant);
+    return euros.format(montant).replace("-", "−");
 }
 
 // Montant d'une opération : toujours positif côté back, le type donne le signe

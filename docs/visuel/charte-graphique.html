@@ -1,0 +1,540 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Charte graphique MesComptes · Sapin</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+/* ===== Jetons de la charte (à copier dans front/src/styles/theme.css) ===== */
+:root {
+  --vert-900: #123F2E;
+  --vert-800: #154A35;
+  --vert-700: #1B5C42;
+  --vert-300: #C9E0D3;
+  --vert-200: #D8EBDF;
+  --vert-100: #DCEFE4;
+  --vert-50:  #F3F6F4;
+
+  --jaune-500: #E9B949;
+  --jaune-600: #D9A731;
+  --encre-jaune: #17140C;
+
+  --encre: #17241E;
+  --encre-douce: #55665D;
+  --trait: #E1E8E4;
+  --trait-champ: #C9D6CE;
+  --blanc: #FFFFFF;
+
+  --positif: #1B5C42;
+  --negatif: #A8352A;
+  --negatif-fond: #F8E3DF;
+  --negatif-sur-sombre: #FFB8AD;
+  --alerte: #9A6410;
+  --alerte-fond: #F8EBD3;
+
+  --police: 'Manrope', system-ui, -apple-system, 'Segoe UI', sans-serif;
+
+  --rayon-s: 10px;
+  --rayon-m: 12px;
+  --rayon-l: 14px;
+  --rayon-xl: 18px;
+
+  --ombre-carte: 0 1px 2px #123F2E14;
+  --ombre-flottante: 0 6px 18px #123F2E33;
+  --ombre-fenetre: 0 24px 48px #123F2E33;
+
+  --largeur-contenu: 1180px;
+}
+
+/* ===== Base ===== */
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--vert-50);
+  color: var(--encre);
+  font-family: var(--police);
+  font-size: 14px;
+  line-height: 1.45;
+  font-weight: 500;
+}
+a { color: var(--vert-700); font-weight: 700; text-decoration: none; }
+a:hover { color: var(--vert-900); text-decoration: underline; }
+:focus-visible { outline: 2px solid var(--vert-700); outline-offset: 2px; }
+.num { font-variant-numeric: tabular-nums; }
+svg.ic { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; flex: none; }
+
+/* ===== Composants ===== */
+.barre { background: var(--vert-700); color: #E3F0E9; position: sticky; top: 0; z-index: 5; }
+.barre-in { max-width: var(--largeur-contenu); margin: 0 auto; padding: 10px 24px; display: flex; flex-wrap: wrap; align-items: center; gap: 24px; }
+.marque { display: flex; align-items: center; gap: 10px; font-weight: 800; font-size: 17px; letter-spacing: -0.01em; color: #fff; }
+.logo { width: 32px; height: 32px; border-radius: var(--rayon-s); background: var(--vert-200); color: var(--vert-700); display: flex; align-items: center; justify-content: center; }
+.onglets { display: flex; flex-wrap: wrap; gap: 4px; flex: 1 1 auto; }
+.onglet { display: flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 14px; border-radius: var(--rayon-m); color: var(--vert-300); font-weight: 600; }
+.onglet:hover { background: var(--vert-800); color: #fff; text-decoration: none; }
+.onglet.actif { background: var(--vert-50); color: var(--vert-700); font-weight: 700; }
+
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; padding: 0 20px; border-radius: var(--rayon-m); border: 0; font: inherit; font-weight: 700; cursor: pointer; }
+.btn svg.ic { stroke-width: 2.4; }
+.btn-principal { background: var(--jaune-500); color: var(--encre-jaune); font-weight: 800; min-height: 46px; padding: 0 24px; }
+.btn-principal:hover { background: var(--jaune-600); }
+.btn-secondaire { background: var(--blanc); color: var(--encre); border: 1px solid var(--trait); }
+.btn-secondaire:hover { background: var(--vert-50); }
+.btn-discret { background: transparent; color: var(--vert-700); }
+.btn-discret:hover { background: var(--vert-50); }
+.btn-danger { background: var(--negatif); color: #fff; }
+.btn:disabled { opacity: .45; cursor: not-allowed; }
+.btn-icone { width: 40px; height: 40px; min-height: 40px; padding: 0; border-radius: var(--rayon-s); background: transparent; color: var(--vert-900); }
+.btn-icone:hover { background: var(--vert-50); }
+.flottant { box-shadow: var(--ombre-flottante); }
+
+.carte { background: var(--blanc); border-radius: var(--rayon-xl); padding: 22px; box-shadow: var(--ombre-carte); }
+.carte h3 { margin: 0 0 14px; font-size: 16px; font-weight: 800; }
+.carte-heros { background: var(--vert-900); color: #fff; box-shadow: none; }
+.carte-heros .lib { color: #B9D6C6; font-weight: 600; }
+.carte-heros .val { font-size: 32px; font-weight: 800; letter-spacing: -0.02em; color: var(--negatif-sur-sombre); margin-top: 6px; }
+
+.indic { display: flex; align-items: center; gap: 14px; }
+.indic .lib { color: var(--encre-douce); font-weight: 600; }
+.indic .val { font-size: 24px; font-weight: 800; }
+.pastille-indic { width: 44px; height: 44px; border-radius: var(--rayon-l); display: flex; align-items: center; justify-content: center; }
+.pastille-indic svg.ic { width: 20px; height: 20px; stroke-width: 2; }
+
+.pastille-cat { width: 38px; height: 38px; border-radius: var(--rayon-m); display: flex; align-items: center; justify-content: center; flex: none; }
+.pastille-cat svg.ic { width: 19px; height: 19px; }
+
+.ligne-op { display: flex; align-items: center; gap: 12px; padding: 11px 8px; margin: 0 -8px; border-radius: var(--rayon-m); }
+.ligne-op:hover { background: var(--vert-50); }
+.ligne-op .txt { flex: 1 1 auto; min-width: 0; }
+.ligne-op .lib { font-weight: 700; }
+.meta { font-size: 12px; color: var(--encre-douce); }
+.ligne-op .mt { font-weight: 800; }
+
+.encart { background: var(--vert-50); border-radius: var(--rayon-l); padding: 12px 14px; }
+
+.badge { display: inline-flex; align-items: center; height: 24px; padding: 0 10px; border-radius: 999px; font-size: 12px; font-weight: 700; }
+.badge-neutre { background: var(--vert-50); color: var(--vert-700); }
+.badge-alerte { background: var(--alerte-fond); color: var(--alerte); }
+.badge-danger { background: var(--negatif-fond); color: var(--negatif); }
+
+.champ { display: flex; flex-direction: column; gap: 6px; }
+.champ label { font-size: 13px; font-weight: 700; }
+.champ input, .champ select { height: 46px; padding: 0 14px; border: 1px solid var(--trait-champ); border-radius: var(--rayon-m); background: var(--blanc); color: var(--encre); font: inherit; font-size: 15px; }
+.champ input:focus, .champ select:focus { outline: none; border-color: var(--vert-700); box-shadow: 0 0 0 3px #1B5C4226; }
+.champ.erreur input { border-color: var(--negatif); }
+.champ .msg-erreur { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--negatif); font-weight: 600; }
+.champ .msg-erreur svg.ic { width: 14px; height: 14px; stroke-width: 2.2; }
+.montant { position: relative; }
+.montant input { height: 58px; width: 100%; font-size: 28px; font-weight: 800; font-variant-numeric: tabular-nums; padding-right: 44px; }
+.montant span { position: absolute; right: 16px; top: 50%; transform: translateY(-50%); font-size: 22px; font-weight: 700; color: var(--encre-douce); }
+
+.anneau { width: 140px; height: 140px; border-radius: 50%; flex: none; display: flex; align-items: center; justify-content: center; }
+.anneau-in { width: 100px; height: 100px; border-radius: 50%; background: #fff; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+
+/* ===== Mise en page du document ===== */
+.doc { max-width: var(--largeur-contenu); margin: 0 auto; padding: 40px 24px 120px; display: flex; flex-direction: column; gap: 56px; }
+.doc > header h1 { margin: 0; font-size: 40px; font-weight: 800; letter-spacing: -0.03em; color: var(--vert-900); }
+.doc > header p { margin: 8px 0 0; color: var(--encre-douce); max-width: 70ch; font-size: 15px; }
+section > h2 { margin: 0 0 6px; font-size: 26px; font-weight: 800; letter-spacing: -0.02em; color: var(--vert-900); }
+section > .intro { margin: 0 0 20px; color: var(--encre-douce); max-width: 75ch; }
+h4 { margin: 24px 0 10px; font-size: 13px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em; color: var(--encre-douce); }
+.grille { display: grid; gap: 16px; grid-template-columns: repeat(auto-fill, minmax(min(100%, 200px), 1fr)); }
+.grille-l { display: grid; gap: 16px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 340px), 1fr)); }
+.rangee { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+
+.nuance { border-radius: var(--rayon-l); overflow: hidden; background: #fff; box-shadow: var(--ombre-carte); }
+.nuance .ech { height: 84px; display: flex; align-items: flex-end; padding: 10px 12px; font-weight: 800; font-size: 13px; }
+.nuance .inf { padding: 10px 12px; font-size: 12px; }
+.nuance .inf b { display: block; font-size: 13px; }
+.nuance code { color: var(--encre-douce); }
+
+table { width: 100%; border-collapse: collapse; background: #fff; border-radius: var(--rayon-xl); overflow: hidden; box-shadow: var(--ombre-carte); }
+th, td { text-align: left; padding: 12px 16px; border-bottom: 1px solid var(--trait); vertical-align: middle; }
+th { font-size: 12px; text-transform: uppercase; letter-spacing: .06em; color: var(--encre-douce); background: #FAFCFB; }
+tr:last-child td { border-bottom: 0; }
+.tableau { overflow-x: auto; border-radius: var(--rayon-xl); }
+
+.regles { display: grid; gap: 16px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr)); }
+.regle { background: #fff; border-radius: var(--rayon-xl); padding: 18px 20px; box-shadow: var(--ombre-carte); }
+.regle h5 { margin: 0 0 6px; font-size: 14px; font-weight: 800; display: flex; align-items: center; gap: 8px; }
+.oui h5 { color: var(--vert-700); }
+.non h5 { color: var(--negatif); }
+.regle ul { margin: 0; padding-left: 18px; color: var(--encre-douce); }
+
+pre { margin: 0; background: var(--vert-900); color: #DCEFE4; padding: 20px; border-radius: var(--rayon-xl); overflow-x: auto; font-size: 13px; line-height: 1.6; }
+code { font-family: ui-monospace, 'Cascadia Code', Consolas, monospace; font-size: .92em; }
+
+.voile { background: #123F2E66; border-radius: var(--rayon-xl); padding: 40px 16px; display: flex; justify-content: center; }
+.fenetre { width: 100%; max-width: 520px; background: #fff; border-radius: var(--rayon-xl); padding: 28px; box-shadow: var(--ombre-fenetre); display: flex; flex-direction: column; gap: 16px; }
+.fenetre h3 { margin: 0; font-size: 20px; font-weight: 800; }
+.deux { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.pied { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; margin-top: 4px; }
+
+.cta-bas { position: sticky; bottom: 24px; display: flex; justify-content: center; pointer-events: none; }
+.cta-bas .btn { pointer-events: auto; }
+
+@media (max-width: 640px) {
+  .barre-in { padding: 10px 16px; gap: 12px; }
+  .doc { padding: 28px 16px 120px; }
+  .doc > header h1 { font-size: 30px; }
+  .cta-bas { padding: 0 16px; }
+  .cta-bas .btn { width: 100%; }
+  .deux { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="i-logo" viewBox="0 0 24 24"><path d="M3 17l6-6 4 4 8-8 M15 7h6v6"/></symbol>
+    <symbol id="i-dash" viewBox="0 0 24 24"><path d="M3 3h7v9H3z M14 3h7v5h-7z M14 12h7v9h-7z M3 16h7v5H3z"/></symbol>
+    <symbol id="i-list" viewBox="0 0 24 24"><path d="M8 6h13 M8 12h13 M8 18h13 M3.5 6h.01 M3.5 12h.01 M3.5 18h.01"/></symbol>
+    <symbol id="i-repeat" viewBox="0 0 24 24"><path d="M17 2l4 4-4 4 M3 11v-1a4 4 0 0 1 4-4h14 M7 22l-4-4 4-4 M21 13v1a4 4 0 0 1-4 4H3"/></symbol>
+    <symbol id="i-sliders" viewBox="0 0 24 24"><path d="M4 21v-7 M4 10V3 M12 21v-9 M12 8V3 M20 21v-5 M20 12V3 M1 14h6 M9 8h6 M17 16h6"/></symbol>
+    <symbol id="i-logout" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4 M16 17l5-5-5-5 M21 12H9"/></symbol>
+    <symbol id="i-left" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></symbol>
+    <symbol id="i-right" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></symbol>
+    <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14 M5 12h14"/></symbol>
+    <symbol id="i-up" viewBox="0 0 24 24"><path d="M12 19V5 M5 12l7-7 7 7"/></symbol>
+    <symbol id="i-down" viewBox="0 0 24 24"><path d="M12 5v14 M19 12l-7 7-7-7"/></symbol>
+    <symbol id="i-alert" viewBox="0 0 24 24"><path d="M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20z M12 8v4 M12 16h.01"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></symbol>
+    <symbol id="i-x" viewBox="0 0 24 24"><path d="M18 6L6 18 M6 6l12 12"/></symbol>
+    <symbol id="i-eye" viewBox="0 0 24 24"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/></symbol>
+    <symbol id="c-tv" viewBox="0 0 24 24"><path d="M3 7h18v13H3z M8 3l4 4 4-4"/></symbol>
+    <symbol id="c-shield" viewBox="0 0 24 24"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z M9 12l2 2 4-4"/></symbol>
+    <symbol id="c-package" viewBox="0 0 24 24"><path d="M3 7.5L12 3l9 4.5v9L12 21l-9-4.5z M3 7.5l9 4.5 9-4.5 M12 12v9"/></symbol>
+    <symbol id="c-landmark" viewBox="0 0 24 24"><path d="M3 21h18 M5 10h14 M12 3l8 5H4z M6 10v8 M10 10v8 M14 10v8 M18 10v8"/></symbol>
+    <symbol id="c-gift" viewBox="0 0 24 24"><path d="M3 8h18v4H3z M5 12v9h14v-9 M12 8v13 M12 8C10 4 6 4 6 6.5S9 8 12 8 M12 8c2-4 6-4 6-1.5S15 8 12 8"/></symbol>
+    <symbol id="c-fuel" viewBox="0 0 24 24"><path d="M4 21V5a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v16 M3 21h12 M4 10h10 M14 8h2a2 2 0 0 1 2 2v6a1.5 1.5 0 0 0 3 0V8l-3-3"/></symbol>
+    <symbol id="c-cart" viewBox="0 0 24 24"><path d="M3 4h2l2.4 11.2a1 1 0 0 0 1 .8h9.2a1 1 0 0 0 1-.8L21 8H6.2 M10 20a1 1 0 1 1-2 0 1 1 0 0 1 2 0 M19 20a1 1 0 1 1-2 0 1 1 0 0 1 2 0"/></symbol>
+    <symbol id="c-house" viewBox="0 0 24 24"><path d="M3 11l9-7 9 7 M5 9.5V20h14V9.5 M10 20v-6h4v6"/></symbol>
+    <symbol id="c-roller" viewBox="0 0 24 24"><path d="M4 4h13v5H4z M17 6.5h3V12h-8v3 M10.5 15h3v6h-3z"/></symbol>
+    <symbol id="c-percent" viewBox="0 0 24 24"><path d="M9 7a2 2 0 1 1-4 0 2 2 0 0 1 4 0 M19 17a2 2 0 1 1-4 0 2 2 0 0 1 4 0 M19 5L5 19"/></symbol>
+    <symbol id="c-heart" viewBox="0 0 24 24"><path d="M20.8 8.6a5 5 0 0 0-8.8-3.2 5 5 0 0 0-8.8 3.2C3.2 14 12 20 12 20s8.8-6 8.8-11.4 M3.5 12H8l1.5-3 3 6 1.5-3h6"/></symbol>
+    <symbol id="c-sparkles" viewBox="0 0 24 24"><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z M19 15l.8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8z"/></symbol>
+    <symbol id="c-utensils" viewBox="0 0 24 24"><path d="M6 3v7a2 2 0 0 0 2 2v9 M10 3v7a2 2 0 0 1-2 2 M8 3v6 M17 21V3c-2 1-3 3.5-3 7v3h3"/></symbol>
+    <symbol id="c-dumbbell" viewBox="0 0 24 24"><path d="M6 7v10 M3 9.5v5 M18 7v10 M21 9.5v5 M6 12h12"/></symbol>
+    <symbol id="c-phone" viewBox="0 0 24 24"><path d="M7 3h10v18H7z M11 18h2"/></symbol>
+    <symbol id="c-plane" viewBox="0 0 24 24"><path d="M17.8 19.2L16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z"/></symbol>
+    <symbol id="c-car" viewBox="0 0 24 24"><path d="M5 17h14v-5l-2-5H7l-2 5z M5 12h14 M7 17v2 M17 17v2 M8 14.5h.01 M16 14.5h.01"/></symbol>
+  </defs>
+</svg>
+
+<header class="barre">
+  <div class="barre-in">
+    <div class="marque"><span class="logo"><svg class="ic" style="stroke-width:2.2"><use href="#i-logo"/></svg></span>Mes comptes</div>
+    <nav class="onglets" aria-label="Sections de la charte">
+      <a class="onglet actif" href="#intention">Intention</a>
+      <a class="onglet" href="#couleurs">Couleurs</a>
+      <a class="onglet" href="#typo">Typographie</a>
+      <a class="onglet" href="#icones">Icônes</a>
+      <a class="onglet" href="#composants">Composants</a>
+      <a class="onglet" href="#css">Variables CSS</a>
+    </nav>
+  </div>
+</header>
+
+<main class="doc">
+  <header>
+    <h1>Charte graphique · Sapin</h1>
+    <p>Version 1.0, 14 octobre 2026. Référence visuelle : maquette « 7 · Sapin, menu en haut et bouton centré ». Cette page est aussi un exemple vivant : tous ses composants utilisent les jetons de la section « Variables CSS ».</p>
+  </header>
+
+  <!-- 1. Intention -->
+  <section id="intention">
+    <h2>1. Intention</h2>
+    <p class="intro">MesComptes doit inspirer confiance et calme comme un outil financier sérieux, et rester assez chaleureux pour qu'on ait envie d'y revenir chaque semaine.</p>
+    <div class="regles">
+      <div class="regle"><h5>Le chiffre d'abord</h5><ul><li>Les montants sont l'information principale : gros, gras, alignés.</li></ul></div>
+      <div class="regle"><h5>Une couleur, une signification</h5><ul><li>Vert : la marque. Jaune : l'action. Brique : l'argent qui sort. Teintes : reconnaître une catégorie.</li></ul></div>
+      <div class="regle"><h5>Le calme par l'espace</h5><ul><li>On sépare les blocs par des cartes blanches sur fond vert pâle, pas par des traits.</li></ul></div>
+      <div class="regle oui"><h5><svg class="ic"><use href="#i-check"/></svg>On veut</h5><ul><li>Vert profond, surfaces claires et aérées</li><li>Angles arrondis, pastilles douces</li><li>Une seule action forte par écran</li></ul></div>
+      <div class="regle non"><h5><svg class="ic"><use href="#i-x"/></svg>On évite</h5><ul><li>Emoji, Comic Sans, couleurs saturées partout</li><li>Dégradés décoratifs, ombres lourdes</li><li>Bordure colorée sur un côté de carte</li></ul></div>
+    </div>
+  </section>
+
+  <!-- 2. Couleurs -->
+  <section id="couleurs">
+    <h2>2. Couleurs</h2>
+    <p class="intro">Toutes les paires texte et fond présentées ici respectent un contraste d'au moins 4,5:1.</p>
+
+    <h4>Marque</h4>
+    <div class="grille">
+      <div class="nuance"><div class="ech" style="background:#1B5C42;color:#fff">Sapin</div><div class="inf"><b>--vert-700</b><code>#1B5C42</code><br>Barre, liens, revenus</div></div>
+      <div class="nuance"><div class="ech" style="background:#154A35;color:#fff">Sapin foncé</div><div class="inf"><b>--vert-800</b><code>#154A35</code><br>Survol sur fond vert</div></div>
+      <div class="nuance"><div class="ech" style="background:#123F2E;color:#fff">Forêt</div><div class="inf"><b>--vert-900</b><code>#123F2E</code><br>Carte solde, titres</div></div>
+      <div class="nuance"><div class="ech" style="background:#C9E0D3;color:#123F2E">Sauge</div><div class="inf"><b>--vert-300</b><code>#C9E0D3</code><br>Texte secondaire sur vert</div></div>
+      <div class="nuance"><div class="ech" style="background:#D8EBDF;color:#123F2E">Menthe</div><div class="inf"><b>--vert-200</b><code>#D8EBDF</code><br>Logo, avatar</div></div>
+      <div class="nuance"><div class="ech" style="background:#DCEFE4;color:#123F2E">Brume</div><div class="inf"><b>--vert-100</b><code>#DCEFE4</code><br>Pastille revenus</div></div>
+      <div class="nuance"><div class="ech" style="background:#F3F6F4;color:#123F2E;border-bottom:1px solid var(--trait)">Fond</div><div class="inf"><b>--vert-50</b><code>#F3F6F4</code><br>Fond de page, onglet actif</div></div>
+    </div>
+
+    <h4>Action</h4>
+    <div class="grille">
+      <div class="nuance"><div class="ech" style="background:#E9B949;color:#17140C">Doré</div><div class="inf"><b>--jaune-500</b><code>#E9B949</code><br>Bouton principal, et lui seul</div></div>
+      <div class="nuance"><div class="ech" style="background:#D9A731;color:#17140C">Doré survol</div><div class="inf"><b>--jaune-600</b><code>#D9A731</code></div></div>
+      <div class="nuance"><div class="ech" style="background:#17140C;color:#E9B949">Encre sur doré</div><div class="inf"><b>--encre-jaune</b><code>#17140C</code></div></div>
+    </div>
+
+    <h4>Neutres</h4>
+    <div class="grille">
+      <div class="nuance"><div class="ech" style="background:#17241E;color:#fff">Encre</div><div class="inf"><b>--encre</b><code>#17241E</code><br>Texte principal</div></div>
+      <div class="nuance"><div class="ech" style="background:#55665D;color:#fff">Encre douce</div><div class="inf"><b>--encre-douce</b><code>#55665D</code><br>Texte secondaire, méta</div></div>
+      <div class="nuance"><div class="ech" style="background:#E1E8E4;color:#17241E">Trait</div><div class="inf"><b>--trait</b><code>#E1E8E4</code><br>Séparateurs</div></div>
+      <div class="nuance"><div class="ech" style="background:#C9D6CE;color:#17241E">Trait champ</div><div class="inf"><b>--trait-champ</b><code>#C9D6CE</code><br>Bordure des champs</div></div>
+      <div class="nuance"><div class="ech" style="background:#fff;color:#17241E;border-bottom:1px solid var(--trait)">Blanc</div><div class="inf"><b>--blanc</b><code>#FFFFFF</code><br>Cartes, champs</div></div>
+    </div>
+
+    <h4>Sémantique</h4>
+    <div class="grille">
+      <div class="nuance"><div class="ech" style="background:#A8352A;color:#fff">Négatif</div><div class="inf"><b>--negatif</b><code>#A8352A</code><br>Soldes et totaux négatifs</div></div>
+      <div class="nuance"><div class="ech" style="background:#F8E3DF;color:#A8352A">Négatif fond</div><div class="inf"><b>--negatif-fond</b><code>#F8E3DF</code></div></div>
+      <div class="nuance"><div class="ech" style="background:#123F2E;color:#FFB8AD">Négatif sur sombre</div><div class="inf"><b>--negatif-sur-sombre</b><code>#FFB8AD</code></div></div>
+      <div class="nuance"><div class="ech" style="background:#9A6410;color:#fff">Alerte</div><div class="inf"><b>--alerte</b><code>#9A6410</code></div></div>
+      <div class="nuance"><div class="ech" style="background:#F8EBD3;color:#9A6410">Alerte fond</div><div class="inf"><b>--alerte-fond</b><code>#F8EBD3</code></div></div>
+    </div>
+    <p class="intro" style="margin-top:14px">Dans les listes d'opérations, le montant reste en encre, précédé du signe −. Le rouge brique est réservé aux soldes et totaux.</p>
+
+    <h4>Catégories (couleur sur teinte)</h4>
+    <div class="tableau">
+      <table>
+        <thead><tr><th>Catégorie</th><th>Icône Lucide</th><th>Couleur</th><th>Teinte</th></tr></thead>
+        <tbody>
+          <tr><td><div class="rangee"><span class="pastille-cat" style="background:#E4E8F6;color:#3F51A3"><svg class="ic"><use href="#c-tv"/></svg></span>Abonnements & loisirs</div></td><td><code>tv</code></td><td><code>#3F51A3</code></td><td><code>#E4E8F6</code></td></tr>
+          <tr><td><div class="rangee"><span class="pastille-cat" style="background:#E3E9EE;color:#4A6378"><svg class="ic"><use href="#c-shield"/></svg></span>Assurances</div></td><td><code>shield-check</code></td><td><code>#4A6378</code></td><td><code>#E3E9EE</code></td></tr>
+          <tr><td><div class="rangee"><span class="pastille-cat" style="background:#ECEDEF;color:#6B7079"><svg class="ic"><use href="#c-package"/></svg></span>Autres dépenses</div></td><td><code>package</code></td><td><code>#6B7079</code></td><td><code>#ECEDEF</code></td></tr>
+          <tr><td><div class="rangee"><span class="pastille-cat" style="background:#E7EAED;color:#4F5A66"><svg class="ic"><use href="#c-landmark"/></svg></span>Banque</div></td><td><code>landmark</code></td><td><code>#4F5A66</code></td><td><code>#E7EAED</code></td></tr>
+          <tr><td><div class="rangee"><span class="pastille-cat" style="background:#F6E3EA;color:#A8335F"><svg class="ic"><use href="#c-gift"/></svg></span>Cadeaux</div></td><td><code>gift</code></td><td><code>#A8335F</code></td><td><code>#F6E3EA</code></td></tr>
+          <tr><td><div class="rangee"><span class="pastille-cat" style="background:#F8E4D8;color:#B8501A"><svg class="ic"><use href="#c-fuel"/></svg></span>Carburant</div></td><td><code>fuel</code></td><td><code>#B8501A</code></td><td><code>#F8E4D8</code></td></tr>
+          <tr><td><div class="rangee"><span class="pastille-cat" style="background:#F8EBD3;color:#9A6410"><svg class="ic"><use href="#c-cart"/></svg></span>Courses</div></td><td><code>shopping-cart</code></td><td><code>#9A6410</code></td><td><code>#F8EBD3</code></td></tr>
+          <tr><td><div class="rangee"><span class="pastille-cat" style="background:#F1E6E0;color:#8A5A44"><svg class="ic"><use href="#c-house"/></svg></span>Logement</div></td><td><code>house</code></td><td><code>#8A5A44</code></td><td><code>#F1E6E0</code></td></tr>
+          <tr><td><div class="rangee"><span class="pastille-cat" style="background:#EEF0D9;color:#6B7A1E"><svg class="ic"><use href="#c-roller"/></svg></span>Maison & entretien</div></td><td><code>paint-roller</code></td><td><code>#6B7A1E</code></td><td><code>#EEF0D9</code></td></tr>
+          <tr><td><div class="rangee"><span class="pastille-cat" style="background:#EEE7E1;color:#6B5240"><svg class="ic"><use href="#c-percent"/></svg></span>Prêts</div></td><td><code>percent</code></td><td><code>#6B5240</code></td><td><code>#EEE7E1</code></td></tr>
+          <tr><td><div class="rangee"><span class="pastille-cat" style="background:#F8E1DF;color:#B83227"><svg class="ic"><use href="#c-heart"/></svg></span>Santé</div></td><td><code>heart-pulse</code></td><td><code>#B83227</code></td><td><code>#F8E1DF</code></td></tr>
+          <tr><td><div class="rangee"><span class="pastille-cat" style="background:#F7E2EC;color:#B23A72"><svg class="ic"><use href="#c-sparkles"/></svg></span>Soins & beauté</div></td><td><code>sparkles</code></td><td><code>#B23A72</code></td><td><code>#F7E2EC</code></td></tr>
+          <tr><td><div class="rangee"><span class="pastille-cat" style="background:#FBEBD0;color:#A86400"><svg class="ic"><use href="#c-utensils"/></svg></span>Sorties & restaurants</div></td><td><code>utensils</code></td><td><code>#A86400</code></td><td><code>#FBEBD0</code></td></tr>
+          <tr><td><div class="rangee"><span class="pastille-cat" style="background:#DAF0ED;color:#0F7A70"><svg class="ic"><use href="#c-dumbbell"/></svg></span>Sport</div></td><td><code>dumbbell</code></td><td><code>#0F7A70</code></td><td><code>#DAF0ED</code></td></tr>
+          <tr><td><div class="rangee"><span class="pastille-cat" style="background:#E0EBF8;color:#1F64B5"><svg class="ic"><use href="#c-phone"/></svg></span>Téléphone & internet</div></td><td><code>smartphone</code></td><td><code>#1F64B5</code></td><td><code>#E0EBF8</code></td></tr>
+          <tr><td><div class="rangee"><span class="pastille-cat" style="background:#DCEFF6;color:#0A779F"><svg class="ic"><use href="#c-plane"/></svg></span>Vacances & voyages</div></td><td><code>plane</code></td><td><code>#0A779F</code></td><td><code>#DCEFF6</code></td></tr>
+          <tr><td><div class="rangee"><span class="pastille-cat" style="background:#E3E6F5;color:#34449A"><svg class="ic"><use href="#c-car"/></svg></span>Véhicule</div></td><td><code>car</code></td><td><code>#34449A</code></td><td><code>#E3E6F5</code></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="intro" style="margin-top:14px">Les catégories de revenus utilisent toutes le couple marque <code>#1B5C42</code> sur <code>#DCEFE4</code>. Pour une catégorie créée par l'utilisateur, on propose ces 17 couples dans le sélecteur, sans saisie libre.</p>
+  </section>
+
+  <!-- 3. Typographie -->
+  <section id="typo">
+    <h2>3. Typographie</h2>
+    <p class="intro">Une seule police : <a href="https://fonts.google.com/specimen/Manrope">Manrope</a> (graisses 400 à 800). Repli : <code>system-ui, -apple-system, "Segoe UI", sans-serif</code>.</p>
+    <div class="carte" style="display:flex;flex-direction:column;gap:18px">
+      <div><div class="meta">Titre de page · 30 / 800 / −0,025em · Forêt</div><div style="font-size:30px;font-weight:800;letter-spacing:-0.025em;color:var(--vert-900)">Octobre 2026</div></div>
+      <div><div class="meta">Montant héros · 32 / 800 / −0,02em</div><div class="num" style="font-size:32px;font-weight:800;letter-spacing:-0.02em">−114,50 €</div></div>
+      <div><div class="meta">Montant indicateur · 24 / 800</div><div class="num" style="font-size:24px;font-weight:800">1 234,50 €</div></div>
+      <div><div class="meta">Titre de carte · 16 / 800</div><div style="font-size:16px;font-weight:800">Dépenses par catégorie</div></div>
+      <div><div class="meta">Corps fort · 14 / 700</div><div style="font-weight:700">Supermarché</div></div>
+      <div><div class="meta">Corps · 14 / 500</div><div>Aucune opération récurrente à venir.</div></div>
+      <div><div class="meta">Méta · 12 / 500, encre douce</div><div class="meta" style="color:var(--encre-douce)">13 oct. · Courses · Achat d'une table à repasser</div></div>
+    </div>
+    <div class="regles" style="margin-top:16px">
+      <div class="regle"><h5>Chiffres</h5><ul><li><code>font-variant-numeric: tabular-nums</code> sur tous les montants.</li></ul></div>
+      <div class="regle"><h5>Format français</h5><ul><li><code>1 234,50 €</code> : espace fine insécable (U+202F) pour les milliers, espace insécable avant €.</li><li>Signe moins vrai <code>−</code> (U+2212).</li></ul></div>
+      <div class="regle"><h5>Sobriété</h5><ul><li>Pas d'italique, pas de majuscules continues, sauf de rares surtitres en 12 px.</li></ul></div>
+    </div>
+  </section>
+
+  <!-- 4. Espacements -->
+  <section id="espaces">
+    <h2>4. Espacements, rayons, ombres</h2>
+    <p class="intro">Base de 4 px : 4 · 8 · 12 · 14 · 16 · 22 · 24 · 32 · 40. Contenu centré sur 1180 px, marges latérales de 24 px (16 px sur mobile).</p>
+    <div class="grille">
+      <div class="carte" style="border-radius:var(--rayon-s)"><b>--rayon-s</b><div class="meta">10 px · boutons icône</div></div>
+      <div class="carte" style="border-radius:var(--rayon-m)"><b>--rayon-m</b><div class="meta">12 px · boutons, champs, pastilles</div></div>
+      <div class="carte" style="border-radius:var(--rayon-l)"><b>--rayon-l</b><div class="meta">14 px · encarts, sélecteur</div></div>
+      <div class="carte"><b>--rayon-xl</b><div class="meta">18 px · cartes, fenêtres</div></div>
+    </div>
+    <div class="grille" style="margin-top:16px">
+      <div class="carte"><b>--ombre-carte</b><div class="meta"><code>0 1px 2px #123F2E14</code></div></div>
+      <div class="carte" style="box-shadow:var(--ombre-flottante)"><b>--ombre-flottante</b><div class="meta"><code>0 6px 18px #123F2E33</code></div></div>
+      <div class="carte" style="box-shadow:var(--ombre-fenetre)"><b>--ombre-fenetre</b><div class="meta"><code>0 24px 48px #123F2E33</code></div></div>
+    </div>
+    <p class="intro" style="margin-top:14px">Une carte a soit une ombre, soit une bordure, jamais les deux.</p>
+  </section>
+
+  <!-- 5. Icônes -->
+  <section id="icones">
+    <h2>5. Iconographie</h2>
+    <p class="intro">Jeu <a href="https://lucide.dev">Lucide</a> (<code>lucide-vue-next</code>), en remplacement de tous les emoji, y compris l'œil du mot de passe. Grille 24 px, trait 1,9 px (2,2 à 2,6 dans les petits boutons), extrémités arrondies, sans remplissage.</p>
+    <div class="grille">
+      <div class="carte rangee"><svg class="ic"><use href="#i-dash"/></svg><span>Tableau de bord<br><code class="meta">layout-dashboard</code></span></div>
+      <div class="carte rangee"><svg class="ic"><use href="#i-list"/></svg><span>Opérations<br><code class="meta">list</code></span></div>
+      <div class="carte rangee"><svg class="ic"><use href="#i-repeat"/></svg><span>Récurrences<br><code class="meta">repeat</code></span></div>
+      <div class="carte rangee"><svg class="ic"><use href="#i-sliders"/></svg><span>Réglages<br><code class="meta">sliders-vertical</code></span></div>
+      <div class="carte rangee"><svg class="ic"><use href="#i-logout"/></svg><span>Déconnexion<br><code class="meta">log-out</code></span></div>
+      <div class="carte rangee"><svg class="ic"><use href="#i-left"/></svg><svg class="ic"><use href="#i-right"/></svg><span>Période<br><code class="meta">chevron-left/right</code></span></div>
+      <div class="carte rangee"><svg class="ic"><use href="#i-plus"/></svg><span>Nouvelle opération<br><code class="meta">plus</code></span></div>
+      <div class="carte rangee"><svg class="ic"><use href="#i-eye"/></svg><span>Mot de passe<br><code class="meta">eye / eye-off</code></span></div>
+    </div>
+    <h4>Pastilles</h4>
+    <div class="rangee">
+      <span class="pastille-cat" style="background:#F8EBD3;color:#9A6410" title="Catégorie 38 px"><svg class="ic"><use href="#c-cart"/></svg></span>
+      <span class="meta">Catégorie : 38 px, rayon 12, icône 19 px</span>
+      <span class="pastille-indic" style="background:var(--vert-100);color:var(--vert-700);margin-left:16px"><svg class="ic"><use href="#i-up"/></svg></span>
+      <span class="pastille-indic" style="background:var(--negatif-fond);color:var(--negatif)"><svg class="ic"><use href="#i-down"/></svg></span>
+      <span class="meta">Indicateur : 44 px, rayon 14, icône 20 px</span>
+    </div>
+  </section>
+
+  <!-- 6/7. Composants -->
+  <section id="composants">
+    <h2>6. Composants</h2>
+    <p class="intro">Mise en page : barre Sapin en haut sur toute la largeur, contenu centré, trois indicateurs, deux colonnes souples (<code>flex: 1 1 400px</code>), bouton doré centré et collant en bas de page.</p>
+
+    <h4>Boutons</h4>
+    <div class="rangee">
+      <button class="btn btn-principal" type="button"><svg class="ic"><use href="#i-plus"/></svg>Nouvelle opération</button>
+      <button class="btn btn-secondaire" type="button">Enregistrer et en ajouter une autre</button>
+      <button class="btn btn-discret" type="button">Annuler</button>
+      <button class="btn btn-danger" type="button">Supprimer</button>
+      <button class="btn btn-principal" type="button" disabled>Désactivé</button>
+      <button class="btn btn-icone" type="button" aria-label="Période précédente"><svg class="ic" style="stroke-width:2.2"><use href="#i-left"/></svg></button>
+    </div>
+    <p class="intro" style="margin-top:10px">Un seul bouton doré par écran. Hauteur minimale de 44 px. Au focus, contour Sapin de 2 px.</p>
+
+    <h4>Indicateurs</h4>
+    <div class="grille-l" style="grid-template-columns:repeat(auto-fit,minmax(min(100%,210px),1fr))">
+      <div class="carte carte-heros"><div class="lib">Solde de la période</div><div class="val num">−114,50 €</div></div>
+      <div class="carte indic"><span class="pastille-indic" style="background:var(--vert-100);color:var(--vert-700)"><svg class="ic"><use href="#i-up"/></svg></span><div><div class="lib">Revenus</div><div class="val num" style="color:var(--positif)">0,00 €</div></div></div>
+      <div class="carte indic"><span class="pastille-indic" style="background:var(--negatif-fond);color:var(--negatif)"><svg class="ic"><use href="#i-down"/></svg></span><div><div class="lib">Dépenses</div><div class="val num">114,50 €</div></div></div>
+    </div>
+
+    <h4>Cartes de contenu</h4>
+    <div class="grille-l">
+      <div class="carte">
+        <h3>Dépenses par catégorie</h3>
+        <div class="rangee" style="gap:24px">
+          <div class="anneau" role="img" aria-label="Répartition : Cadeaux 48 %, Courses 41 %, Abonnements 10 %" style="background:conic-gradient(#A8335F 0 48%, #9A6410 48% 89.5%, #3F51A3 89.5% 100%)">
+            <div class="anneau-in"><span class="meta" style="font-weight:600">Total</span><span class="num" style="font-size:17px;font-weight:800">114,50 €</span></div>
+          </div>
+          <div style="flex:1 1 180px;display:flex;flex-direction:column;gap:14px">
+            <div class="rangee" style="flex-wrap:nowrap"><span class="pastille-cat" style="background:#F6E3EA;color:#A8335F"><svg class="ic"><use href="#c-gift"/></svg></span><div style="flex:1"><div style="display:flex;justify-content:space-between;font-weight:700"><span>Cadeaux</span><span class="num">55,00 €</span></div><div class="meta">48 % des dépenses</div></div></div>
+            <div class="rangee" style="flex-wrap:nowrap"><span class="pastille-cat" style="background:#F8EBD3;color:#9A6410"><svg class="ic"><use href="#c-cart"/></svg></span><div style="flex:1"><div style="display:flex;justify-content:space-between;font-weight:700"><span>Courses</span><span class="num">47,50 €</span></div><div class="meta">41 % des dépenses</div></div></div>
+            <div class="rangee" style="flex-wrap:nowrap"><span class="pastille-cat" style="background:#E4E8F6;color:#3F51A3"><svg class="ic"><use href="#c-tv"/></svg></span><div style="flex:1"><div style="display:flex;justify-content:space-between;font-weight:700"><span>Abonnements & loisirs</span><span class="num">12,00 €</span></div><div class="meta">10 % des dépenses</div></div></div>
+          </div>
+        </div>
+      </div>
+      <div class="carte">
+        <div style="display:flex;justify-content:space-between;align-items:baseline"><h3>Dernières opérations</h3><a href="#composants" style="font-size:13px">Tout voir</a></div>
+        <div class="ligne-op"><span class="pastille-cat" style="background:#F8EBD3;color:#9A6410"><svg class="ic"><use href="#c-cart"/></svg></span><div class="txt"><div class="lib">Supermarché</div><div class="meta">13 oct. · Courses · Achat d'une table à repasser</div></div><span class="mt num">−47,50 €</span></div>
+        <div class="ligne-op"><span class="pastille-cat" style="background:#E4E8F6;color:#3F51A3"><svg class="ic"><use href="#c-tv"/></svg></span><div class="txt"><div class="lib">Abonnements & loisirs</div><div class="meta">13 oct.</div></div><span class="mt num">−12,00 €</span></div>
+        <div class="ligne-op"><span class="pastille-cat" style="background:#F6E3EA;color:#A8335F"><svg class="ic"><use href="#c-gift"/></svg></span><div class="txt"><div class="lib">Cadeau anniversaire</div><div class="meta">13 oct. · Cadeaux</div></div><span class="mt num">−55,00 €</span></div>
+      </div>
+      <div class="carte">
+        <h3 style="margin-bottom:4px">À venir sur la période</h3>
+        <p style="margin:0 0 14px;color:var(--encre-douce)">Aucune opération récurrente à venir. <a href="#composants">Ajouter une récurrence</a></p>
+        <div class="deux">
+          <div class="encart"><div class="meta" style="font-weight:600">Solde prévu</div><div class="num" style="font-weight:800;color:var(--negatif)">−114,50 €</div></div>
+          <div class="encart"><div class="meta" style="font-weight:600">Comptes en fin de période</div><div class="num" style="font-weight:800;color:var(--negatif)">−114,50 €</div></div>
+        </div>
+      </div>
+      <div class="carte">
+        <h3>Badges</h3>
+        <div class="rangee"><span class="badge badge-neutre">Récurrente</span><span class="badge badge-alerte">Budget à 90 %</span><span class="badge badge-danger">Solde négatif</span></div>
+      </div>
+    </div>
+
+    <h4>Formulaire en fenêtre · Nouvelle opération</h4>
+    <div class="voile">
+      <form class="fenetre" onsubmit="return false">
+        <h3>Nouvelle opération</h3>
+        <div class="champ"><label for="f-mt">Montant</label><div class="montant"><input id="f-mt" inputmode="decimal" placeholder="0,00"><span>€</span></div></div>
+        <div class="champ"><label for="f-lib">Libellé</label><input id="f-lib" placeholder="Netflix, Supermarché…"></div>
+        <div class="champ"><label for="f-cat">Catégorie</label><select id="f-cat"><option>Choisir une catégorie</option><option>Courses</option><option>Cadeaux</option></select></div>
+        <div class="deux">
+          <div class="champ"><label for="f-date">Date</label><input id="f-date" type="date" value="2026-10-14"></div>
+          <div class="champ"><label for="f-cpt">Compte</label><select id="f-cpt"><option>Compte courant</option></select></div>
+        </div>
+        <div class="champ erreur"><label for="f-note">Note</label><input id="f-note" value="x"><span class="msg-erreur"><svg class="ic"><use href="#i-alert"/></svg>Exemple de message d'erreur.</span></div>
+        <div class="pied">
+          <button class="btn btn-discret" type="button">Annuler</button>
+          <button class="btn btn-secondaire" type="button">Enregistrer et en ajouter une autre</button>
+          <button class="btn btn-principal" type="submit">Enregistrer</button>
+        </div>
+      </form>
+    </div>
+  </section>
+
+  <!-- 8. Accessibilité et ton -->
+  <section id="regles">
+    <h2>7. Ton et accessibilité</h2>
+    <div class="regles">
+      <div class="regle"><h5>Ton</h5><ul><li>Neutre, comme l'interface actuelle (« Se connecter »).</li><li>Actions à l'infinitif : Enregistrer, Masquer, Tout voir.</li><li>Jamais d'emoji.</li></ul></div>
+      <div class="regle"><h5>Dates</h5><ul><li>Abrégées en liste : <code>13 oct.</code></li><li>Complètes en en-tête : <code>du 25 septembre au 25 octobre 2026</code></li></ul></div>
+      <div class="regle"><h5>Accessibilité</h5><ul><li>Contraste ≥ 4,5:1 (3:1 au-delà de 24 px et pour les icônes).</li><li>La couleur n'est jamais le seul indice.</li><li>Focus visible, vrais <code>&lt;button&gt;</code>, <code>&lt;label&gt;</code>.</li></ul></div>
+    </div>
+  </section>
+
+  <!-- 9. Variables CSS -->
+  <section id="css">
+    <h2>8. Variables CSS</h2>
+    <p class="intro">À placer dans <code>front/src/styles/theme.css</code> et à importer dans <code>main.ts</code>. Ce sont exactement les jetons utilisés par cette page.</p>
+<pre><code>:root {
+  /* Marque */
+  --vert-900: #123F2E;
+  --vert-800: #154A35;
+  --vert-700: #1B5C42;
+  --vert-300: #C9E0D3;
+  --vert-200: #D8EBDF;
+  --vert-100: #DCEFE4;
+  --vert-50:  #F3F6F4;
+
+  /* Action */
+  --jaune-500: #E9B949;
+  --jaune-600: #D9A731;
+  --encre-jaune: #17140C;
+
+  /* Neutres */
+  --encre: #17241E;
+  --encre-douce: #55665D;
+  --trait: #E1E8E4;
+  --trait-champ: #C9D6CE;
+  --blanc: #FFFFFF;
+
+  /* Sémantique */
+  --positif: #1B5C42;
+  --negatif: #A8352A;
+  --negatif-fond: #F8E3DF;
+  --negatif-sur-sombre: #FFB8AD;
+  --alerte: #9A6410;
+  --alerte-fond: #F8EBD3;
+
+  /* Typo */
+  --police: 'Manrope', system-ui, -apple-system, 'Segoe UI', sans-serif;
+
+  /* Rayons */
+  --rayon-s: 10px;
+  --rayon-m: 12px;
+  --rayon-l: 14px;
+  --rayon-xl: 18px;
+
+  /* Ombres */
+  --ombre-carte: 0 1px 2px #123F2E14;
+  --ombre-flottante: 0 6px 18px #123F2E33;
+  --ombre-fenetre: 0 24px 48px #123F2E33;
+
+  /* Mise en page */
+  --largeur-contenu: 1180px;
+}</code></pre>
+  </section>
+</main>
+
+<div class="cta-bas">
+  <button class="btn btn-principal flottant" type="button"><svg class="ic"><use href="#i-plus"/></svg>Nouvelle opération</button>
+</div>
+
+</body>
+</html>

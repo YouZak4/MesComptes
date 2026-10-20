@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from "vue";
+import { Check, CircleAlert } from "@lucide/vue";
+import PastilleCategorieComponent from "@/components/PastilleCategorieComponent.vue";
 import { vFocus } from "@/directives/focus.ts";
 import { comptesService } from "@/services/comptesService.ts";
 import type { Categorie, Compte, Libelle, Periode } from "@/types/comptes.ts";
@@ -219,7 +221,9 @@ async function creer() {
                 ]"
                 :key="groupe.titre"
             >
-                <h3 v-if="groupe.liste.length > 0">{{ groupe.titre }}</h3>
+                <h3 class="titre-groupe" v-if="groupe.liste.length > 0">
+                    {{ groupe.titre }}
+                </h3>
                 <ul class="liste">
                     <li
                         v-for="ligne in groupe.liste"
@@ -232,9 +236,9 @@ async function creer() {
                                 type="checkbox"
                                 :disabled="ligne.creee"
                             />
-                            <span class="icone" aria-hidden="true">{{
-                                ligne.categorie.icone
-                            }}</span>
+                            <PastilleCategorieComponent
+                                :categorie="ligne.categorie"
+                            />
                             <span class="texte">
                                 <span class="titre">{{
                                     ligne.libelle.nom
@@ -245,7 +249,10 @@ async function creer() {
                             </span>
                         </label>
 
-                        <span v-if="ligne.creee" class="badge">Créée ✓</span>
+                        <span v-if="ligne.creee" class="badge">
+                            <Check aria-hidden="true" />
+                            Créée
+                        </span>
                         <div v-else-if="ligne.cochee" class="saisie">
                             <label class="champ">
                                 Montant (€)
@@ -273,6 +280,7 @@ async function creer() {
                             </label>
                         </div>
                         <p v-if="ligne.erreur" class="erreur" role="alert">
+                            <CircleAlert aria-hidden="true" />
                             {{ ligne.erreur }}
                         </p>
                     </li>
@@ -284,13 +292,14 @@ async function creer() {
             </p>
 
             <p v-if="erreurFormulaire" class="erreur" role="alert">
+                <CircleAlert aria-hidden="true" />
                 {{ erreurFormulaire }}
             </p>
 
             <div class="actions fin">
                 <button
                     type="button"
-                    class="bouton-secondaire"
+                    class="btn btn-secondaire"
                     :disabled="creationEnCours"
                     @click="
                         emit('terminee', lignes.filter((l) => l.creee).length)
@@ -301,7 +310,7 @@ async function creer() {
                 <button
                     v-if="aCreer.length > 0"
                     type="submit"
-                    class="bouton-principal"
+                    class="btn btn-secondaire"
                     :disabled="creationEnCours"
                 >
                     Créer
@@ -321,59 +330,45 @@ async function creer() {
 .recurrences {
     display: flex;
     flex-direction: column;
-    gap: 0.5rem;
-    margin-top: 0.75rem;
+    gap: 8px;
+    margin-top: 12px;
 }
 
 .compte {
     max-width: 320px;
 }
 
-h3 {
-    margin: 0.75rem 0 0;
-    font-size: 1rem;
+.titre-groupe {
+    margin: 12px 0 0;
+    font-size: 14px;
+    font-weight: 800;
 }
 
 .case {
     flex: 1 1 220px;
     display: flex;
     align-items: center;
-    gap: 0.6rem;
+    gap: 12px;
+    min-height: 44px;
     cursor: pointer;
-}
-
-.case input {
-    width: 1.1rem;
-    height: 1.1rem;
-    accent-color: #45335c;
-}
-
-.icone {
-    width: 1.8rem;
-    text-align: center;
-    font-size: 1.3rem;
 }
 
 .saisie {
     display: flex;
-    gap: 0.5rem;
+    gap: 8px;
 }
 
 .montant {
-    width: 7rem;
+    width: 7.5rem;
+    font-variant-numeric: tabular-nums;
 }
 
 .jour {
-    width: 4.5rem;
-}
-
-.recurrences .liste > li {
-    padding-inline: 0.5rem;
-    border-radius: 8px;
+    width: 5rem;
 }
 
 .recurrences .liste > li.cochee {
-    background: #faf6fd;
+    background: var(--vert-50);
 }
 
 .liste .erreur {
@@ -382,7 +377,7 @@ h3 {
 
 .fin {
     justify-content: flex-end;
-    gap: 0.5rem !important;
-    margin-top: 0.5rem;
+    gap: 8px !important;
+    margin-top: 8px;
 }
 </style>

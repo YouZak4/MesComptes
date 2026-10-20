@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted, ref } from "vue";
+import { CircleAlert } from "@lucide/vue";
 import { vFocus } from "@/directives/focus.ts";
 import { utilisateurService } from "@/services/utilisateurService.ts";
 import { useNotificationStore } from "@/stores/notification";
@@ -245,12 +246,13 @@ async function changerMotDePasse() {
                 </label>
                 <button
                     type="submit"
-                    class="bouton-principal"
+                    class="btn btn-secondaire"
                     :disabled="nomEnCours || nomInchange"
                 >
                     Enregistrer
                 </button>
                 <p v-if="erreurNom" class="erreur" role="alert">
+                    <CircleAlert aria-hidden="true" />
                     {{ erreurNom }}
                 </p>
             </form>
@@ -293,14 +295,14 @@ async function changerMotDePasse() {
                     <div class="actions">
                         <button
                             type="submit"
-                            class="bouton-principal"
+                            class="btn btn-secondaire"
                             :disabled="emailEnCours"
                         >
                             Confirmer
                         </button>
                         <button
                             type="button"
-                            class="bouton-secondaire"
+                            class="btn btn-secondaire"
                             :disabled="emailEnCours || secondesAvantRenvoi > 0"
                             @click="renvoyerCode"
                         >
@@ -312,7 +314,7 @@ async function changerMotDePasse() {
                         </button>
                         <button
                             type="button"
-                            class="bouton-action"
+                            class="btn btn-discret"
                             :disabled="emailEnCours"
                             @click="annulerChangement"
                         >
@@ -349,14 +351,14 @@ async function changerMotDePasse() {
                 <div class="actions">
                     <button
                         type="submit"
-                        class="bouton-principal"
+                        class="btn btn-secondaire"
                         :disabled="emailEnCours"
                     >
                         Envoyer le code
                     </button>
                     <button
                         type="button"
-                        class="bouton-secondaire"
+                        class="btn btn-discret"
                         @click="formulaireEmail = false"
                     >
                         Annuler
@@ -367,13 +369,14 @@ async function changerMotDePasse() {
             <button
                 v-else
                 type="button"
-                class="bouton-secondaire"
+                class="btn btn-secondaire"
                 @click="ouvrirFormulaireEmail"
             >
                 Changer d'adresse mail
             </button>
 
             <p v-if="erreurEmail" class="erreur message-email" role="alert">
+                <CircleAlert aria-hidden="true" />
                 {{ erreurEmail }}
             </p>
         </section>
@@ -410,12 +413,13 @@ async function changerMotDePasse() {
                 </label>
                 <button
                     type="submit"
-                    class="bouton-principal"
+                    class="btn btn-secondaire"
                     :disabled="motDePasseEnCours"
                 >
                     Changer le mot de passe
                 </button>
                 <p v-if="erreurMotDePasse" class="erreur" role="alert">
+                    <CircleAlert aria-hidden="true" />
                     {{ erreurMotDePasse }}
                 </p>
             </form>
@@ -429,12 +433,12 @@ async function changerMotDePasse() {
 }
 
 .email {
-    margin: 0 0 0.75rem;
+    margin: 0 0 12px;
 }
 
 .formulaire + .aide,
 .aide + .formulaire {
-    margin-top: 0.75rem;
+    margin-top: 12px;
 }
 
 .code {
@@ -443,6 +447,6 @@ async function changerMotDePasse() {
 }
 
 .message-email {
-    margin-top: 0.75rem;
+    margin-top: 12px;
 }
 </style>

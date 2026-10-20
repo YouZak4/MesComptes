@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, nextTick, onMounted, onUnmounted, ref, watch } from "vue";
+import { CircleAlert, Plus } from "@lucide/vue";
 import { comptesService } from "@/services/comptesService.ts";
 import ChampLibelleComponent from "@/components/ChampLibelleComponent.vue";
 import { useNotificationStore } from "@/stores/notification";
@@ -28,7 +29,7 @@ const note = ref("");
 
 const champMontant = ref<HTMLInputElement | null>(null);
 
-// ── Ouverture : touche N ou bouton « + » ──
+// ── Ouverture : touche N ou bouton « Nouvelle opération » ──
 
 function estUnChampDeSaisie(cible: EventTarget | null): boolean {
     if (!(cible instanceof HTMLElement)) return false;
@@ -244,25 +245,28 @@ async function enregistrer(enAjouterUneAutre: boolean) {
 </script>
 
 <template>
-    <button
-        type="button"
-        class="bouton-ajout"
-        title="Nouvelle opération (N)"
-        aria-label="Nouvelle opération"
-        @click="saisie.ouvrir()"
-    >
-        +
-    </button>
+    <!-- Seul bouton doré de l'écran : centré, collant en bas de page -->
+    <div class="cta-bas">
+        <button
+            type="button"
+            class="btn btn-principal"
+            title="Nouvelle opération (N)"
+            @click="saisie.ouvrir()"
+        >
+            <Plus aria-hidden="true" />
+            Nouvelle opération
+        </button>
+    </div>
 
     <Teleport to="body">
-        <div v-if="saisie.ouverte" class="fond" @mousedown.self="fermer">
+        <div v-if="saisie.ouverte" class="voile" @mousedown.self="fermer">
             <div
                 class="fenetre"
                 role="dialog"
                 aria-modal="true"
                 aria-labelledby="titre-saisie"
             >
-                <h2 id="titre-saisie">
+                <h2 id="titre-saisie" class="titre-fenetre">
                     {{
                         enModification
                             ? "Modifier l'opération"
@@ -273,7 +277,7 @@ async function enregistrer(enAjouterUneAutre: boolean) {
                 <form @submit.prevent="enregistrer(false)">
                     <label class="champ">
                         Montant
-                        <span class="montant">
+                        <span class="champ-montant">
                             <input
                                 ref="champMontant"
                                 v-model="montantTexte"
@@ -283,7 +287,7 @@ async function enregistrer(enAjouterUneAutre: boolean) {
                                 placeholder="0,00"
                                 required
                             />
-                            <span class="devise">€</span>
+                            <span class="devise" aria-hidden="true">€</span>
                         </span>
                     </label>
 
@@ -309,7 +313,7 @@ async function enregistrer(enAjouterUneAutre: boolean) {
                                     :key="c.id"
                                     :value="c.id"
                                 >
-                                    {{ c.icone }} {{ c.nom }}
+                                    {{ c.nom }}
                                 </option>
                             </optgroup>
                             <optgroup label="Revenus">
@@ -318,13 +322,13 @@ async function enregistrer(enAjouterUneAutre: boolean) {
                                     :key="c.id"
                                     :value="c.id"
                                 >
-                                    {{ c.icone }} {{ c.nom }}
+                                    {{ c.nom }}
                                 </option>
                             </optgroup>
                         </select>
                     </label>
 
-                    <div class="ligne">
+                    <div class="deux-colonnes">
                         <label class="champ">
                             Date
                             <input v-model="date" type="date" required />
@@ -366,20 +370,21 @@ async function enregistrer(enAjouterUneAutre: boolean) {
                     </label>
 
                     <p v-if="erreur" class="erreur" role="alert">
+                        <CircleAlert aria-hidden="true" />
                         {{ erreur }}
                     </p>
 
-                    <div class="actions">
+                    <div class="pied-fenetre">
                         <button
                             type="button"
-                            class="bouton-secondaire"
+                            class="btn btn-discret"
                             @click="fermer"
                         >
                             Annuler
                         </button>
                         <button
                             type="button"
-                            class="bouton-secondaire"
+                            class="btn btn-secondaire"
                             v-if="!enModification"
                             :disabled="enregistrementEnCours"
                             @click="enregistrer(true)"
@@ -388,7 +393,7 @@ async function enregistrer(enAjouterUneAutre: boolean) {
                         </button>
                         <button
                             type="submit"
-                            class="bouton-principal"
+                            class="btn btn-principal"
                             :disabled="enregistrementEnCours"
                         >
                             Enregistrer
@@ -401,143 +406,31 @@ async function enregistrer(enAjouterUneAutre: boolean) {
 </template>
 
 <style scoped>
-.bouton-ajout {
-    position: fixed;
-    right: 1.5rem;
-    bottom: 1.5rem;
-    z-index: 900;
-    width: 3.5rem;
-    height: 3.5rem;
-    border: none;
-    border-radius: 50%;
-    background: #45335c;
-    color: #ffffff;
-    font-size: 2rem;
-    line-height: 1;
-    box-shadow: 0 4px 12px rgba(69, 51, 92, 0.35);
-    cursor: pointer;
-}
-
-.bouton-ajout:hover {
-    background: #5a4377;
-}
-
-.fond {
-    position: fixed;
-    inset: 0;
-    z-index: 950;
+.cta-bas {
+    position: sticky;
+    bottom: 24px;
+    z-index: 800;
     display: flex;
-    align-items: flex-start;
     justify-content: center;
-    padding: 8vh 1rem 1rem;
-    background: rgba(30, 20, 45, 0.45);
-    overflow-y: auto;
+    margin-bottom: 24px;
+    padding: 0 16px;
+    pointer-events: none;
 }
 
-.fenetre {
-    width: min(100%, 480px);
-    padding: 1.5rem;
-    border-radius: 12px;
-    background: #ffffff;
-    color: #45335c;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+.cta-bas .btn {
+    pointer-events: auto;
+    box-shadow: var(--ombre-flottante);
 }
 
-h2 {
-    margin: 0 0 1rem;
-    font-size: 1.25rem;
-}
+/* Mobile : toute la largeur, moins 16 px de chaque côté */
+@media (max-width: 640px) {
+    .cta-bas {
+        bottom: 16px;
+        margin-bottom: 16px;
+    }
 
-form {
-    display: flex;
-    flex-direction: column;
-    gap: 0.85rem;
-}
-
-.champ {
-    display: flex;
-    flex-direction: column;
-    gap: 0.3rem;
-    min-width: 0;
-}
-
-.ligne {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 0.75rem;
-}
-
-input,
-select {
-    padding: 0.55rem 0.75rem;
-    border: 1px solid #45335c;
-    border-radius: 10px;
-    background: #e3d3f1;
-    color: #000000;
-    font-size: 0.95rem;
-    font-family: inherit;
-    min-width: 0;
-}
-
-input:focus,
-select:focus {
-    outline: 2px solid #45335c;
-    outline-offset: 1px;
-}
-
-.montant {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-}
-
-.montant input {
-    flex: 1;
-    font-size: 1.5rem;
-    font-weight: bold;
-}
-
-.devise {
-    font-size: 1.5rem;
-    font-weight: bold;
-}
-
-.erreur {
-    margin: 0;
-    color: #c62727;
-}
-
-.actions {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: flex-end;
-    gap: 0.5rem;
-    margin-top: 0.25rem;
-}
-
-.bouton-principal,
-.bouton-secondaire {
-    padding: 0.6rem 1rem;
-    border-radius: 10px;
-    font-size: 0.95rem;
-    cursor: pointer;
-}
-
-.bouton-principal {
-    border: none;
-    background: #45335c;
-    color: #ffffff;
-}
-
-.bouton-secondaire {
-    border: 1px solid #45335c;
-    background: transparent;
-    color: #45335c;
-}
-
-.bouton-principal:disabled,
-.bouton-secondaire:disabled {
-    opacity: 0.6;
-    cursor: default;
+    .cta-bas .btn {
+        width: 100%;
+    }
 }
 </style>

@@ -1,5 +1,15 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from "vue";
+import {
+    Archive,
+    ChevronDown,
+    ChevronRight,
+    CircleAlert,
+    Pencil,
+    Plus,
+} from "@lucide/vue";
+import ChoixApparenceComponent from "@/components/reglages/ChoixApparenceComponent.vue";
+import PastilleCategorieComponent from "@/components/PastilleCategorieComponent.vue";
 import { vFocus } from "@/directives/focus.ts";
 import { comptesService } from "@/services/comptesService.ts";
 import { useNotificationStore } from "@/stores/notification";
@@ -9,6 +19,7 @@ import type {
     TypeMasquable,
     TypeOperation,
 } from "@/types/comptes.ts";
+import { COULEURS_DEPENSES, ICONES } from "@/utils/categories.ts";
 import { messageErreur } from "@/utils/erreurs.ts";
 
 const notification = useNotificationStore();
@@ -148,15 +159,16 @@ const enregistrementEnCours = ref(false);
 
 const nomCat = ref("");
 const typeCat = ref<TypeOperation>("DEPENSE");
-const iconeCat = ref("");
-const couleurCat = ref("#81758e");
+// Nouvelle catégorie : première icône et premier couple de la charte
+const iconeCat = ref("package");
+const couleurCat = ref(COULEURS_DEPENSES[0].couleur);
 
 function ouvrirNouvelleCategorie() {
     edition.value = "nouvelle-categorie";
     nomCat.value = "";
     typeCat.value = "DEPENSE";
-    iconeCat.value = "";
-    couleurCat.value = "#81758e";
+    iconeCat.value = "package";
+    couleurCat.value = COULEURS_DEPENSES[0].couleur;
     erreurFormulaire.value = null;
 }
 
@@ -164,8 +176,8 @@ function ouvrirCategorie(c: Categorie) {
     edition.value = `categorie-${c.id}`;
     nomCat.value = c.nom;
     typeCat.value = c.type;
-    iconeCat.value = c.icone ?? "";
-    couleurCat.value = c.couleur ?? "#81758e";
+    iconeCat.value = c.icone && ICONES[c.icone] ? c.icone : "package";
+    couleurCat.value = c.couleur ?? COULEURS_DEPENSES[0].couleur;
     erreurFormulaire.value = null;
 }
 
@@ -177,7 +189,7 @@ async function enregistrerCategorie(existante: Categorie | null) {
         const valeurs = {
             nom: nomCat.value.trim(),
             type: typeCat.value,
-            icone: iconeCat.value.trim() || null,
+            icone: iconeCat.value,
             couleur: couleurCat.value,
             archive: existante?.archive ?? false,
         };
@@ -358,10 +370,11 @@ async function desarchiverLibelle(l: Libelle) {
                 <button
                     v-if="edition !== 'nouvelle-categorie'"
                     type="button"
-                    class="bouton-principal"
+                    class="btn btn-secondaire"
                     @click="ouvrirNouvelleCategorie"
                 >
-                    + Nouvelle catégorie
+                    <Plus aria-hidden="true" />
+                    Nouvelle catégorie
                 </button>
             </div>
             <p class="aide">
@@ -392,36 +405,30 @@ async function desarchiverLibelle(l: Libelle) {
                         <option value="REVENU">Revenu</option>
                     </select>
                 </label>
-                <label class="champ icone-champ">
-                    Icône
-                    <input
-                        v-model="iconeCat"
-                        type="text"
-                        maxlength="16"
-                        placeholder="🐾"
-                    />
-                </label>
-                <label class="champ">
-                    Couleur
-                    <input v-model="couleurCat" type="color" />
-                </label>
+                <ChoixApparenceComponent
+                    v-model:icone="iconeCat"
+                    v-model:couleur="couleurCat"
+                    :type="typeCat"
+                    nom-categorie="nouvelle"
+                />
                 <div class="actions">
                     <button
                         type="submit"
-                        class="bouton-principal"
+                        class="btn btn-secondaire"
                         :disabled="enregistrementEnCours"
                     >
                         Créer
                     </button>
                     <button
                         type="button"
-                        class="bouton-secondaire"
+                        class="btn btn-discret"
                         @click="edition = null"
                     >
                         Annuler
                     </button>
                 </div>
                 <p v-if="erreurFormulaire" class="erreur" role="alert">
+                    <CircleAlert aria-hidden="true" />
                     {{ erreurFormulaire }}
                 </p>
             </form>
@@ -462,35 +469,30 @@ async function desarchiverLibelle(l: Libelle) {
                                 <option value="REVENU">Revenu</option>
                             </select>
                         </label>
-                        <label class="champ icone-champ">
-                            Icône
-                            <input
-                                v-model="iconeCat"
-                                type="text"
-                                maxlength="16"
-                            />
-                        </label>
-                        <label class="champ">
-                            Couleur
-                            <input v-model="couleurCat" type="color" />
-                        </label>
+                        <ChoixApparenceComponent
+                            v-model:icone="iconeCat"
+                            v-model:couleur="couleurCat"
+                            :type="typeCat"
+                            :nom-categorie="String(c.id)"
+                        />
                         <div class="actions">
                             <button
                                 type="submit"
-                                class="bouton-principal"
+                                class="btn btn-secondaire"
                                 :disabled="enregistrementEnCours"
                             >
                                 Enregistrer
                             </button>
                             <button
                                 type="button"
-                                class="bouton-secondaire"
+                                class="btn btn-discret"
                                 @click="edition = null"
                             >
                                 Annuler
                             </button>
                         </div>
                         <p v-if="erreurFormulaire" class="erreur" role="alert">
+                            <CircleAlert aria-hidden="true" />
                             {{ erreurFormulaire }}
                         </p>
                     </form>
@@ -502,23 +504,34 @@ async function desarchiverLibelle(l: Libelle) {
                             :aria-expanded="estOuverte(c.id)"
                             @click="basculer(c.id)"
                         >
-                            <span class="fleche">{{
-                                estOuverte(c.id) ? "▾" : "▸"
-                            }}</span>
-                            <span
-                                class="pastille"
-                                :style="{ background: c.couleur ?? '#81758e' }"
-                            ></span>
-                            <span class="icone">{{ c.icone ?? "•" }}</span>
-                            <span class="titre">{{ c.nom }}</span>
-                            <span v-if="!c.fournie" class="badge"
-                                >Personnelle</span
-                            >
-                            <span v-if="c.masquee" class="badge">Masquée</span>
-                            <span v-if="c.archive" class="badge">Archivée</span>
-                            <span class="nombre"
-                                >{{ libellesDe(c.id).length }} libellé(s)</span
-                            >
+                            <span class="fleche" aria-hidden="true">
+                                <ChevronDown
+                                    v-if="estOuverte(c.id)"
+                                    :size="18"
+                                />
+                                <ChevronRight v-else :size="18" />
+                            </span>
+                            <PastilleCategorieComponent :categorie="c" />
+                            <span class="texte-categorie">
+                                <span class="titre">
+                                    {{ c.nom }}
+                                    <span v-if="!c.fournie" class="badge"
+                                        >Personnelle</span
+                                    >
+                                    <span v-if="c.masquee" class="badge"
+                                        >Masquée</span
+                                    >
+                                    <span v-if="c.archive" class="badge"
+                                        >Archivée</span
+                                    >
+                                </span>
+                                <span class="nombre"
+                                    >{{
+                                        libellesDe(c.id).length
+                                    }}
+                                    libellé(s)</span
+                                >
+                            </span>
                         </button>
 
                         <div
@@ -528,24 +541,24 @@ async function desarchiverLibelle(l: Libelle) {
                             <span>Retirer cette catégorie ?</span>
                             <button
                                 type="button"
-                                class="bouton-danger"
+                                class="btn btn-danger"
                                 :disabled="enCours === `categorie-${c.id}`"
                                 @click="retirerCategorie(c)"
                             >
-                                Oui
+                                Retirer
                             </button>
                             <button
                                 type="button"
-                                class="bouton-action"
+                                class="btn btn-discret"
                                 @click="aRetirer = null"
                             >
-                                Non
+                                Annuler
                             </button>
                         </div>
                         <div v-else-if="c.fournie" class="actions">
                             <button
                                 type="button"
-                                class="bouton-action"
+                                class="btn btn-discret"
                                 :disabled="enCours === `categorie-${c.id}`"
                                 @click="
                                     basculerMasquage(
@@ -562,17 +575,17 @@ async function desarchiverLibelle(l: Libelle) {
                         <div v-else class="actions">
                             <button
                                 type="button"
-                                class="bouton-action"
+                                class="btn btn-icone"
                                 title="Modifier"
                                 aria-label="Modifier"
                                 @click="ouvrirCategorie(c)"
                             >
-                                ✏️
+                                <Pencil aria-hidden="true" />
                             </button>
                             <button
                                 v-if="c.archive"
                                 type="button"
-                                class="bouton-action"
+                                class="btn btn-discret"
                                 :disabled="enCours === `categorie-${c.id}`"
                                 @click="desarchiverCategorie(c)"
                             >
@@ -581,12 +594,12 @@ async function desarchiverLibelle(l: Libelle) {
                             <button
                                 v-else
                                 type="button"
-                                class="bouton-action"
+                                class="btn btn-icone"
                                 title="Archiver (ou supprimer si elle n'a jamais servi)"
                                 aria-label="Retirer"
                                 @click="aRetirer = `categorie-${c.id}`"
                             >
-                                🗄️
+                                <Archive aria-hidden="true" />
                             </button>
                         </div>
                     </div>
@@ -621,7 +634,6 @@ async function desarchiverLibelle(l: Libelle) {
                                             :key="option.id"
                                             :value="option.id"
                                         >
-                                            {{ option.icone }}
                                             {{ option.nom }}
                                         </option>
                                     </select>
@@ -629,14 +641,14 @@ async function desarchiverLibelle(l: Libelle) {
                                 <div class="actions">
                                     <button
                                         type="submit"
-                                        class="bouton-principal"
+                                        class="btn btn-secondaire"
                                         :disabled="enregistrementEnCours"
                                     >
                                         Enregistrer
                                     </button>
                                     <button
                                         type="button"
-                                        class="bouton-secondaire"
+                                        class="btn btn-discret"
                                         @click="edition = null"
                                     >
                                         Annuler
@@ -672,26 +684,26 @@ async function desarchiverLibelle(l: Libelle) {
                                     <span>Retirer ce libellé ?</span>
                                     <button
                                         type="button"
-                                        class="bouton-danger"
+                                        class="btn btn-danger"
                                         :disabled="
                                             enCours === `libelle-${l.id}`
                                         "
                                         @click="retirerLibelle(l)"
                                     >
-                                        Oui
+                                        Retirer
                                     </button>
                                     <button
                                         type="button"
-                                        class="bouton-action"
+                                        class="btn btn-discret"
                                         @click="aRetirer = null"
                                     >
-                                        Non
+                                        Annuler
                                     </button>
                                 </div>
                                 <div v-else-if="l.fourni" class="actions">
                                     <button
                                         type="button"
-                                        class="bouton-action"
+                                        class="btn btn-discret"
                                         :disabled="
                                             enCours === `libelle-${l.id}`
                                         "
@@ -710,17 +722,17 @@ async function desarchiverLibelle(l: Libelle) {
                                 <div v-else class="actions">
                                     <button
                                         type="button"
-                                        class="bouton-action"
+                                        class="btn btn-icone"
                                         title="Modifier"
                                         aria-label="Modifier"
                                         @click="ouvrirLibelle(l)"
                                     >
-                                        ✏️
+                                        <Pencil aria-hidden="true" />
                                     </button>
                                     <button
                                         v-if="l.archive"
                                         type="button"
-                                        class="bouton-action"
+                                        class="btn btn-discret"
                                         :disabled="
                                             enCours === `libelle-${l.id}`
                                         "
@@ -731,12 +743,12 @@ async function desarchiverLibelle(l: Libelle) {
                                     <button
                                         v-else
                                         type="button"
-                                        class="bouton-action"
+                                        class="btn btn-icone"
                                         title="Archiver (ou supprimer s'il n'a jamais servi)"
                                         aria-label="Retirer"
                                         @click="aRetirer = `libelle-${l.id}`"
                                     >
-                                        🗄️
+                                        <Archive aria-hidden="true" />
                                     </button>
                                 </div>
                             </template>
@@ -764,14 +776,14 @@ async function desarchiverLibelle(l: Libelle) {
                                 />
                                 <button
                                     type="submit"
-                                    class="bouton-principal"
+                                    class="btn btn-secondaire"
                                     :disabled="enregistrementEnCours"
                                 >
                                     Ajouter
                                 </button>
                                 <button
                                     type="button"
-                                    class="bouton-secondaire"
+                                    class="btn btn-discret"
                                     @click="edition = null"
                                 >
                                     Annuler
@@ -787,10 +799,11 @@ async function desarchiverLibelle(l: Libelle) {
                             <button
                                 v-else
                                 type="button"
-                                class="bouton-lien"
+                                class="btn btn-discret"
                                 @click="ouvrirNouveauLibelle(c.id)"
                             >
-                                + Ajouter un libellé
+                                <Plus aria-hidden="true" />
+                                Ajouter un libellé
                             </button>
                         </li>
                     </ul>
@@ -804,8 +817,8 @@ async function desarchiverLibelle(l: Libelle) {
 .barre {
     display: flex;
     flex-wrap: wrap;
-    gap: 0.75rem;
-    margin-bottom: 0.5rem;
+    gap: 12px;
+    margin-bottom: 8px;
 }
 
 .recherche {
@@ -813,13 +826,7 @@ async function desarchiverLibelle(l: Libelle) {
 }
 
 .nouvelle {
-    margin-top: 0.75rem;
-    padding-top: 0.75rem;
-    border-top: 1px solid #f1e9f8;
-}
-
-.icone-champ input {
-    width: 4.5rem;
+    margin-top: 16px;
 }
 
 .erreur {
@@ -835,7 +842,12 @@ async function desarchiverLibelle(l: Libelle) {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
-    gap: 0.5rem;
+    gap: 8px;
+}
+
+/* Actions à droite, y compris quand elles passent à la ligne */
+.ligne > .actions {
+    margin-left: auto;
 }
 
 .edition {
@@ -843,12 +855,13 @@ async function desarchiverLibelle(l: Libelle) {
 }
 
 .deplier {
-    flex: 1;
+    flex: 1 1 180px;
     display: flex;
-    flex-wrap: wrap;
     align-items: center;
-    gap: 0.45rem;
-    padding: 0.2rem 0;
+    gap: 10px;
+    min-width: 0;
+    min-height: 44px;
+    padding: 0;
     border: none;
     background: none;
     color: inherit;
@@ -857,45 +870,57 @@ async function desarchiverLibelle(l: Libelle) {
     cursor: pointer;
 }
 
+.deplier:focus-visible {
+    border-radius: var(--rayon-m);
+}
+
 .fleche {
-    width: 1rem;
-    color: #81758e;
+    display: flex;
+    flex: none;
+    color: var(--encre-douce);
 }
 
-.pastille {
-    width: 0.7rem;
-    height: 0.7rem;
-    border-radius: 50%;
-}
-
-.icone {
-    width: 1.5rem;
-    text-align: center;
+.texte-categorie {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
 }
 
 .nombre {
-    font-size: 0.8rem;
-    color: #81758e;
+    font-size: 12px;
+    color: var(--encre-douce);
 }
 
+/* Libellés : décalés sous leur catégorie, sans trait de séparation */
 .libelles {
     list-style: none;
-    margin: 0.25rem 0 0.25rem 2.5rem;
-    padding: 0 0 0 0.75rem;
-    border-left: 2px solid #e3d3f1;
+    margin: 4px 0 4px 66px;
+    padding: 0;
 }
 
 .libelles > li {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
-    gap: 0.5rem;
-    padding: 0.3rem 0;
-    min-height: 2rem;
+    gap: 8px;
+    min-height: 44px;
+    padding: 2px 0;
+}
+
+.libelles > li.vide {
+    align-items: flex-start;
+    min-height: 0;
+    padding: 4px 0;
+    text-align: left;
 }
 
 .titre-libelle {
     flex: 1;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 2px 8px;
 }
 
 .inactif .titre-libelle {
@@ -906,13 +931,9 @@ async function desarchiverLibelle(l: Libelle) {
     align-items: center;
 }
 
-.bouton-lien {
-    padding: 0;
-    border: none;
-    background: none;
-    color: #45335c;
-    text-decoration: underline;
-    cursor: pointer;
-    font-size: 0.9rem;
+@media (max-width: 640px) {
+    .libelles {
+        margin-left: 24px;
+    }
 }
 </style>

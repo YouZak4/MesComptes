@@ -34,27 +34,27 @@ public class DonneesFourniesInitializer implements ApplicationRunner {
     }
 
     private static final List<CategorieFournie> CATEGORIES = List.of(
-            new CategorieFournie("Logement", DEPENSE, "🏠", "#8D6E63", List.of("Loyer", "Électricité", "Gaz", "Eau", "Taxe d'habitation")),
-            new CategorieFournie("Courses", DEPENSE, "🛒", "#43A047", List.of("Supermarché", "Boulangerie", "Marché", "Boucherie")),
-            new CategorieFournie("Sorties & restaurants", DEPENSE, "🍽️", "#FB8C00", List.of("Restaurant", "Fast-food", "Café", "Bar")),
-            new CategorieFournie("Abonnements & loisirs", DEPENSE, "🎬", "#8E24AA", List.of("Netflix", "Deezer", "Spotify", "Cinéma", "Jeux vidéo")),
-            new CategorieFournie("Téléphone & internet", DEPENSE, "📱", "#1E88E5", List.of("Forfait mobile", "Box internet")),
-            new CategorieFournie("Assurances", DEPENSE, "🛡️", "#546E7A", List.of("Assurance auto", "Assurance moto", "Assurance habitation", "Prévoyance", "Assurance vie")),
-            new CategorieFournie("Santé", DEPENSE, "🩺", "#E53935", List.of("Médecin", "Pharmacie", "Opticien", "Dentiste", "Mutuelle")),
-            new CategorieFournie("Soins & beauté", DEPENSE, "💇", "#EC407A", List.of("Coiffeur", "Cosmétiques")),
-            new CategorieFournie("Carburant", DEPENSE, "⛽", "#F4511E", List.of("Essence voiture", "Essence moto")),
-            new CategorieFournie("Véhicule", DEPENSE, "🚗", "#3949AB", List.of("Entretien", "Révision", "Péage", "Parking", "Équipement moto", "Permis")),
-            new CategorieFournie("Prêts", DEPENSE, "🏦", "#6D4C41", List.of("Prêt auto", "Prêt moto", "Crédit immobilier")),
-            new CategorieFournie("Banque", DEPENSE, "💳", "#757575", List.of("Cotisation carte", "Frais bancaires")),
-            new CategorieFournie("Sport", DEPENSE, "🏋️", "#00897B", List.of("Salle de sport", "Compléments alimentaires", "Inscription course")),
-            new CategorieFournie("Vacances & voyages", DEPENSE, "✈️", "#039BE5", List.of("Train", "Avion", "Hôtel", "Location")),
-            new CategorieFournie("Maison & entretien", DEPENSE, "🧹", "#7CB342", List.of("Laverie", "Bricolage", "Ménage")),
-            new CategorieFournie("Cadeaux", DEPENSE, "🎁", "#D81B60", List.of("Cadeau anniversaire", "Cadeau Noël")),
-            new CategorieFournie("Autres dépenses", DEPENSE, "📦", "#9E9E9E", List.of()),
-            new CategorieFournie("Salaire", REVENU, "💼", "#2E7D32", List.of("Salaire", "Prime")),
-            new CategorieFournie("Aides", REVENU, "🤝", "#00ACC1", List.of("CAF", "Aide au logement")),
-            new CategorieFournie("Remboursements", REVENU, "↩️", "#5E35B1", List.of("Remboursement mutuelle", "Remboursement d'un proche", "Covoiturage")),
-            new CategorieFournie("Autres revenus", REVENU, "💰", "#9E9D24", List.of())
+            new CategorieFournie("Logement", DEPENSE, "house", "#8A5A44", List.of("Loyer", "Électricité", "Gaz", "Eau", "Taxe d'habitation")),
+            new CategorieFournie("Courses", DEPENSE, "shopping-cart", "#9A6410", List.of("Supermarché", "Boulangerie", "Marché", "Boucherie")),
+            new CategorieFournie("Sorties & restaurants", DEPENSE, "utensils", "#A86400", List.of("Restaurant", "Fast-food", "Café", "Bar")),
+            new CategorieFournie("Abonnements & loisirs", DEPENSE, "tv", "#3F51A3", List.of("Netflix", "Deezer", "Spotify", "Cinéma", "Jeux vidéo")),
+            new CategorieFournie("Téléphone & internet", DEPENSE, "smartphone", "#1F64B5", List.of("Forfait mobile", "Box internet")),
+            new CategorieFournie("Assurances", DEPENSE, "shield-check", "#4A6378", List.of("Assurance auto", "Assurance moto", "Assurance habitation", "Prévoyance", "Assurance vie")),
+            new CategorieFournie("Santé", DEPENSE, "heart-pulse", "#B83227", List.of("Médecin", "Pharmacie", "Opticien", "Dentiste", "Mutuelle")),
+            new CategorieFournie("Soins & beauté", DEPENSE, "sparkles", "#B23A72", List.of("Coiffeur", "Cosmétiques")),
+            new CategorieFournie("Carburant", DEPENSE, "fuel", "#B8501A", List.of("Essence voiture", "Essence moto")),
+            new CategorieFournie("Véhicule", DEPENSE, "car", "#34449A", List.of("Entretien", "Révision", "Péage", "Parking", "Équipement moto", "Permis")),
+            new CategorieFournie("Prêts", DEPENSE, "percent", "#6B5240", List.of("Prêt auto", "Prêt moto", "Crédit immobilier")),
+            new CategorieFournie("Banque", DEPENSE, "landmark", "#4F5A66", List.of("Cotisation carte", "Frais bancaires")),
+            new CategorieFournie("Sport", DEPENSE, "dumbbell", "#0F7A70", List.of("Salle de sport", "Compléments alimentaires", "Inscription course")),
+            new CategorieFournie("Vacances & voyages", DEPENSE, "plane", "#0A779F", List.of("Train", "Avion", "Hôtel", "Location")),
+            new CategorieFournie("Maison & entretien", DEPENSE, "paint-roller", "#6B7A1E", List.of("Laverie", "Bricolage", "Ménage")),
+            new CategorieFournie("Cadeaux", DEPENSE, "gift", "#A8335F", List.of("Cadeau anniversaire", "Cadeau Noël")),
+            new CategorieFournie("Autres dépenses", DEPENSE, "package", "#6B7079", List.of()),
+            new CategorieFournie("Salaire", REVENU, "briefcase", "#1B5C42", List.of("Salaire", "Prime")),
+            new CategorieFournie("Aides", REVENU, "handshake", "#1B5C42", List.of("CAF", "Aide au logement")),
+            new CategorieFournie("Remboursements", REVENU, "undo-2", "#1B5C42", List.of("Remboursement mutuelle", "Remboursement d'un proche", "Covoiturage")),
+            new CategorieFournie("Autres revenus", REVENU, "piggy-bank", "#1B5C42", List.of())
     );
 
     private final CategorieRepository categorieRepository;

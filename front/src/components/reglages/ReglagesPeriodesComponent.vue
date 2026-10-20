@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from "vue";
+import { CircleAlert, Pencil, Plus } from "@lucide/vue";
 import { vFocus } from "@/directives/focus.ts";
 import { comptesService } from "@/services/comptesService.ts";
 import { useNotificationStore } from "@/stores/notification";
@@ -156,11 +157,12 @@ async function creerPremiere() {
             <button
                 v-if="periodes.length > 0"
                 type="button"
-                class="bouton-secondaire"
+                class="btn btn-secondaire"
                 :disabled="ajoutEnCours"
                 @click="ajouterSuivante"
             >
-                + Ajouter la période suivante
+                <Plus aria-hidden="true" />
+                Ajouter la période suivante
             </button>
         </div>
         <p class="aide">
@@ -190,12 +192,13 @@ async function creerPremiere() {
             </label>
             <button
                 type="submit"
-                class="bouton-principal"
+                class="btn btn-secondaire"
                 :disabled="ajoutEnCours"
             >
                 Créer la première période
             </button>
             <p v-if="erreurFormulaire" class="erreur" role="alert">
+                <CircleAlert aria-hidden="true" />
                 {{ erreurFormulaire }}
             </p>
         </form>
@@ -233,20 +236,21 @@ async function creerPremiere() {
                     <div class="actions">
                         <button
                             type="submit"
-                            class="bouton-principal"
+                            class="btn btn-secondaire"
                             :disabled="enregistrementEnCours"
                         >
                             Enregistrer
                         </button>
                         <button
                             type="button"
-                            class="bouton-secondaire"
+                            class="btn btn-discret"
                             @click="enEdition = null"
                         >
                             Annuler
                         </button>
                     </div>
                     <p v-if="erreurFormulaire" class="erreur" role="alert">
+                        <CircleAlert aria-hidden="true" />
                         {{ erreurFormulaire }}
                     </p>
                 </form>
@@ -267,12 +271,12 @@ async function creerPremiere() {
                     <div class="actions">
                         <button
                             type="button"
-                            class="bouton-action"
+                            class="btn btn-icone"
                             title="Modifier"
                             aria-label="Modifier"
                             @click="ouvrirModification(p)"
                         >
-                            ✏️
+                            <Pencil aria-hidden="true" />
                         </button>
                     </div>
                 </template>
@@ -288,7 +292,7 @@ async function creerPremiere() {
     align-items: center;
     justify-content: space-between;
     gap: 0.75rem;
-    margin-bottom: 0.5rem;
+    margin-bottom: 6px;
 }
 
 .en-tete-carte h2 {
@@ -297,7 +301,7 @@ async function creerPremiere() {
 
 .liste,
 .premiere {
-    margin-top: 0.75rem !important;
+    margin-top: 12px !important;
 }
 
 .edition {

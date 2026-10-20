@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { CircleAlert, CircleCheck, X } from "@lucide/vue";
 import { useNotificationStore } from "@/stores/notification";
 
 const notificationStore = useNotificationStore();
@@ -15,19 +16,23 @@ const notificationStore = useNotificationStore();
                     :class="notification.type"
                     :role="notification.type === 'error' ? 'alert' : 'status'"
                 >
-                    <span class="notification-icon">
-                        {{ notification.type === "success" ? "✔" : "✖" }}
+                    <span class="notification-icon" aria-hidden="true">
+                        <CircleCheck
+                            v-if="notification.type === 'success'"
+                            :size="20"
+                        />
+                        <CircleAlert v-else :size="20" />
                     </span>
                     <p class="notification-message">
                         {{ notification.message }}
                     </p>
                     <button
                         type="button"
-                        class="notification-close"
+                        class="btn btn-icone"
                         aria-label="Fermer"
                         @click="notificationStore.remove(notification.id)"
                     >
-                        ×
+                        <X aria-hidden="true" />
                     </button>
                 </div>
             </TransitionGroup>
@@ -38,66 +43,46 @@ const notificationStore = useNotificationStore();
 <style scoped>
 .notification-container {
     position: fixed;
-    top: 1.5rem;
+    top: 76px;
     left: 50%;
     transform: translateX(-50%);
     z-index: 1000;
     display: flex;
     flex-direction: column;
-    gap: 0.75rem;
-    width: min(90vw, 420px);
+    gap: 12px;
+    width: min(calc(100vw - 32px), 440px);
     pointer-events: none;
 }
 
 .notification {
-    font-family: Arial, Helvetica, sans-serif;
-    font-size: 1rem;
     display: flex;
     align-items: center;
-    gap: 0.75rem;
-    padding: 0.75rem 1rem;
-    border: 1px solid;
-    border-left-width: 6px;
-    border-radius: 10px;
-    background: #e3d3f1;
-    color: #45335c;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    gap: 12px;
+    padding: 8px 8px 8px 16px;
+    border-radius: var(--rayon-l);
+    background: var(--blanc);
+    color: var(--encre);
+    font-weight: 600;
+    box-shadow: var(--ombre-flottante);
     pointer-events: auto;
 }
 
-.notification.success {
-    border-color: #14a81a;
-}
-
-.notification.error {
-    border-color: #c62727;
-}
-
 .notification-icon {
-    font-weight: bold;
+    display: flex;
+    flex: none;
 }
 
 .notification.success .notification-icon {
-    color: #14a81a;
+    color: var(--positif);
 }
 
 .notification.error .notification-icon {
-    color: #c62727;
+    color: var(--negatif);
 }
 
 .notification-message {
     flex: 1;
     margin: 0;
-    text-align: left;
-}
-
-.notification-close {
-    background: none;
-    border: none;
-    cursor: pointer;
-    font-size: 1.25rem;
-    line-height: 1;
-    color: #45335c;
 }
 
 /* Animations d'apparition / disparition */

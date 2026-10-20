@@ -1,11 +1,22 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
+import {
+    ArrowDown,
+    ArrowUp,
+    CalendarClock,
+    ChartPie,
+    Receipt,
+} from "@lucide/vue";
 import { comptesService } from "@/services/comptesService.ts";
 import { useReferentiels } from "@/composables/useReferentiels.ts";
 import { useSaisieStore } from "@/stores/saisie";
 import EnTeteComponent from "@/components/EnTeteComponent.vue";
+import LigneOperationComponent from "@/components/LigneOperationComponent.vue";
+import PastilleCategorieComponent from "@/components/PastilleCategorieComponent.vue";
+import SelecteurPeriodeComponent from "@/components/SelecteurPeriodeComponent.vue";
 import type {
+    Categorie,
     Occurrence,
     Operation,
     TableauDeBord,
@@ -17,8 +28,10 @@ import {
     formatDateLongue,
     formatEcart,
     formatMontant,
-    formatMontantSigne,
+    formatPourcentage,
+    versIso,
 } from "@/utils/format.ts";
+import { teinteDe } from "@/utils/categories.ts";
 import { messageErreur } from "@/utils/erreurs.ts";
 import { idConnu, idDepuisQuery } from "@/utils/routage.ts";
 
@@ -32,7 +45,7 @@ const {
     nomsComptes,
     chargerReferentiels,
     titre,
-    icone,
+    categorie,
     details: detailsOperation,
 } = useReferentiels();
 const isLoading = ref(true);
@@ -104,6 +117,20 @@ function allerALaPeriode(id: number | null) {
     router.push({ query: { ...route.query, periode: String(id) } });
 }
 
+// Sans période dans l'URL, le back renvoie celle d'aujourd'hui
+function allerALaPeriodeCourante() {
+    const query = { ...route.query };
+    delete query.periode;
+    router.push({ query });
+}
+
+const periodeEnCours = computed(() => {
+    if (!tableau.value) return true;
+    const aujourdhui = versIso(new Date());
+    const { dateDebut, dateFin } = tableau.value.periode;
+    return dateDebut <= aujourdhui && aujourdhui <= dateFin;
+});
+
 function choisirCompte(event: Event) {
     const valeur = (event.target as HTMLSelectElement).value;
     const query = { ...route.query };
@@ -117,265 +144,404 @@ const comptesProposes = computed(() =>
     comptes.value.filter((c) => !c.archive || c.id === compteId.value)
 );
 
+// Lien « Tout voir » : l'écran Opérations sur la même période et le même compte
+const lienOperations = computed(() => ({
+    name: "operations",
+    query: {
+        ...(tableau.value ? { periode: String(tableau.value.periode.id) } : {}),
+        ...(compteId.value !== undefined
+            ? { compte: String(compteId.value) }
+            : {}),
+    },
+}));
+
 const depensesParCategorie = computed(() => totauxDuType("DEPENSE"));
 const revenusParCategorie = computed(() => totauxDuType("REVENU"));
 
 // Le back renvoie aussi les catégories à zéro sur la période mais présentes sur la précédente (pour l'écart)
 function totauxDuType(type: TypeOperation): TotalCategorie[] {
-    return (tableau.value?.parCategorie ?? []).filter((t) => t.type === type);
+    return (tableau.value?.parCategorie ?? [])
+        .filter((t) => t.type === type)
+        .sort((a, b) => b.total - a.total);
 }
 
-function largeurBarre(total: number, liste: TotalCategorie[]): string {
-    const max = Math.max(...liste.map((t) => t.total));
-    return max > 0 ? `${(total / max) * 100}%` : "0";
+// ── Répartition des dépenses : anneau et légende ──
+
+// Au-delà de 6 catégories, les plus petites sont regroupées en « Autres »
+const MAX_SEGMENTS = 6;
+
+interface Segment {
+    cle: string;
+    nom: string;
+    total: number;
+    part: number;
+    pastille: Pick<Categorie, "icone" | "couleur" | "type">;
+    // Absent pour « Autres »
+    detail?: TotalCategorie;
 }
 
-// Plus de dépenses ou moins de revenus que la période précédente : en rouge
+const repartition = computed<Segment[]>(() => {
+    const liste = depensesParCategorie.value;
+    const somme = liste.reduce((s, t) => s + t.total, 0);
+    const part = (total: number) => (somme > 0 ? total / somme : 0);
+    const segment = (t: TotalCategorie): Segment => ({
+        cle: String(t.categorieId),
+        nom: t.nom,
+        total: t.total,
+        part: part(t.total),
+        pastille: t,
+        detail: t,
+    });
+    if (liste.length <= MAX_SEGMENTS) return liste.map(segment);
+    const gardees = liste.slice(0, MAX_SEGMENTS - 1);
+    const reste = liste
+        .slice(MAX_SEGMENTS - 1)
+        .reduce((s, t) => s + t.total, 0);
+    return [
+        ...gardees.map(segment),
+        {
+            cle: "autres",
+            nom: "Autres",
+            total: Math.round(reste * 100) / 100,
+            part: part(reste),
+            pastille: { icone: "package", couleur: "#6B7079", type: "DEPENSE" },
+        },
+    ];
+});
+
+const totalDepensesCategories = computed(() =>
+    depensesParCategorie.value.reduce((s, t) => s + t.total, 0)
+);
+
+const fondAnneau = computed(() => {
+    let debut = 0;
+    const morceaux = repartition.value
+        .filter((s) => s.part > 0)
+        .map((s) => {
+            const fin = debut + s.part * 100;
+            const couleur = teinteDe(s.pastille.couleur, "DEPENSE").couleur;
+            const morceau = `${couleur} ${debut}% ${fin}%`;
+            debut = fin;
+            return morceau;
+        });
+    return morceaux.length > 0
+        ? `conic-gradient(${morceaux.join(", ")})`
+        : "var(--trait)";
+});
+
+const descriptionAnneau = computed(
+    () =>
+        "Répartition des dépenses : " +
+        repartition.value
+            .filter((s) => s.part > 0)
+            .map((s) => `${s.nom} ${formatPourcentage(s.part)}`)
+            .join(", ")
+);
+
+// Plus de dépenses ou moins de revenus que la période précédente : défavorable
 function classeEcart(t: TotalCategorie): string {
-    if (t.ecart === 0) return "neutre";
+    if (t.ecart === 0) return "";
     const hausse = t.ecart > 0;
-    return hausse === (t.type === "REVENU") ? "favorable" : "defavorable";
+    return hausse === (t.type === "REVENU") ? "positif" : "negatif";
 }
+
+// ── Listes ──
 
 // Avec tous les comptes affichés, on précise celui de chaque opération
-function details(op: Operation | Occurrence): string {
-    return detailsOperation(
+function meta(op: Operation | Occurrence): string {
+    const morceaux = [formatDateCourte(op.date)];
+    const details = detailsOperation(
         op,
         compteId.value === undefined && comptes.value.length > 1
     );
+    if (details) morceaux.push(details);
+    return morceaux.join(" · ");
 }
 
-function classeMontant(type: TypeOperation): string {
-    return type === "DEPENSE" ? "depense" : "revenu";
-}
-
-// Rouge si négatif, vert si positif, neutre à zéro
+// Brique si négatif ; un solde positif reste à l'encre
 function classeSolde(montant: number): string {
-    if (montant === 0) return "";
-    return montant < 0 ? "depense" : "revenu";
+    return montant < 0 ? "negatif" : "";
 }
 
 const libelleSoldeComptes = computed(() =>
     compteId.value === undefined
-        ? "Solde des comptes en fin de période"
-        : "Solde du compte en fin de période"
+        ? "Comptes en fin de période"
+        : "Compte en fin de période"
 );
 </script>
 
 <template>
     <EnTeteComponent />
 
-    <main class="tableau-de-bord">
+    <main class="page tableau-de-bord">
         <p v-if="isLoading && !tableau" class="message">Chargement...</p>
 
-        <p v-else-if="errorMessage" class="message erreur">
+        <p v-else-if="errorMessage" class="message erreur" role="alert">
             {{ errorMessage }}
         </p>
 
         <template v-else-if="tableau">
-            <!-- Sélecteurs de période et de compte -->
-            <div class="barre-selection">
-                <div class="selecteur-periode">
-                    <button
-                        type="button"
-                        class="fleche"
-                        aria-label="Période précédente"
-                        :disabled="tableau.periodePrecedenteId === null"
-                        @click="allerALaPeriode(tableau.periodePrecedenteId)"
-                    >
-                        ‹
-                    </button>
-                    <div class="periode">
-                        <h1>{{ tableau.periode.nom }}</h1>
-                        <p>
-                            du
-                            {{ formatDateLongue(tableau.periode.dateDebut) }} au
-                            {{ formatDateLongue(tableau.periode.dateFin) }}
-                        </p>
-                    </div>
-                    <button
-                        type="button"
-                        class="fleche"
-                        aria-label="Période suivante"
-                        :disabled="tableau.periodeSuivanteId === null"
-                        @click="allerALaPeriode(tableau.periodeSuivanteId)"
-                    >
-                        ›
-                    </button>
+            <!-- Période (titre et dates à gauche), sélecteurs à droite -->
+            <div class="en-tete-page">
+                <div>
+                    <h1 class="titre-page">{{ tableau.periode.nom }}</h1>
+                    <p class="sous-titre">
+                        du
+                        {{ formatDateLongue(tableau.periode.dateDebut) }} au
+                        {{ formatDateLongue(tableau.periode.dateFin) }}
+                    </p>
                 </div>
-
-                <select
-                    v-if="comptesProposes.length > 1"
-                    class="selecteur-compte"
-                    aria-label="Compte"
-                    :value="compteId ?? ''"
-                    @change="choisirCompte"
-                >
-                    <option value="">Tous les comptes</option>
-                    <option
-                        v-for="compte in comptesProposes"
-                        :key="compte.id"
-                        :value="compte.id"
+                <div class="selecteurs">
+                    <select
+                        v-if="comptesProposes.length > 1"
+                        class="selecteur-compte"
+                        aria-label="Compte"
+                        :value="compteId ?? ''"
+                        @change="choisirCompte"
                     >
-                        {{ compte.nom }}{{ compte.archive ? " (archivé)" : "" }}
-                    </option>
-                </select>
+                        <option value="">Tous les comptes</option>
+                        <option
+                            v-for="compte in comptesProposes"
+                            :key="compte.id"
+                            :value="compte.id"
+                        >
+                            {{ compte.nom
+                            }}{{ compte.archive ? " (archivé)" : "" }}
+                        </option>
+                    </select>
+                    <SelecteurPeriodeComponent
+                        :precedente="tableau.periodePrecedenteId !== null"
+                        :suivante="tableau.periodeSuivanteId !== null"
+                        :en-cours="periodeEnCours"
+                        @precedente="
+                            allerALaPeriode(tableau.periodePrecedenteId)
+                        "
+                        @suivante="allerALaPeriode(tableau.periodeSuivanteId)"
+                        @courante="allerALaPeriodeCourante"
+                    />
+                </div>
             </div>
 
-            <!-- Les trois chiffres de la période -->
-            <div class="chiffres" :class="{ rechargement: isLoading }">
-                <div class="carte chiffre">
-                    <span class="intitule">Revenus</span>
-                    <span class="valeur revenu">
-                        {{ formatMontant(tableau.revenus) }}
-                    </span>
-                </div>
-                <div class="carte chiffre">
-                    <span class="intitule">Dépenses</span>
-                    <span class="valeur depense">
-                        {{ formatMontant(tableau.depenses) }}
-                    </span>
-                </div>
-                <div class="carte chiffre">
+            <!-- Les trois indicateurs : le solde d'abord, sur fond Forêt -->
+            <div class="indicateurs" :class="{ rechargement: isLoading }">
+                <div class="carte heros">
                     <span class="intitule">Solde de la période</span>
-                    <span class="valeur" :class="classeSolde(tableau.solde)">
+                    <span
+                        class="valeur num"
+                        :class="{ 'negatif-sombre': tableau.solde < 0 }"
+                    >
                         {{ formatMontant(tableau.solde) }}
                     </span>
+                </div>
+                <div class="carte indicateur">
+                    <span
+                        class="pastille-indicateur revenus"
+                        aria-hidden="true"
+                    >
+                        <ArrowUp :size="20" :stroke-width="2" />
+                    </span>
+                    <div>
+                        <span class="intitule">Revenus</span>
+                        <span class="valeur num positif">
+                            {{ formatMontant(tableau.revenus) }}
+                        </span>
+                    </div>
+                </div>
+                <div class="carte indicateur">
+                    <span
+                        class="pastille-indicateur depenses"
+                        aria-hidden="true"
+                    >
+                        <ArrowDown :size="20" :stroke-width="2" />
+                    </span>
+                    <div>
+                        <span class="intitule">Dépenses</span>
+                        <span class="valeur num">
+                            {{ formatMontant(tableau.depenses) }}
+                        </span>
+                    </div>
                 </div>
             </div>
 
             <div class="colonnes" :class="{ rechargement: isLoading }">
-                <!-- Totaux par catégorie -->
-                <section class="carte">
-                    <h2>Dépenses par catégorie</h2>
+                <!-- Répartition par catégorie -->
+                <section class="carte colonne">
+                    <h2 class="titre-carte">Dépenses par catégorie</h2>
                     <p v-if="depensesParCategorie.length === 0" class="vide">
+                        <ChartPie aria-hidden="true" />
                         Aucune dépense sur la période.
                     </p>
-                    <ul v-else class="liste-categories">
-                        <li
-                            v-for="t in depensesParCategorie"
-                            :key="t.categorieId"
+                    <div v-else class="repartition">
+                        <div
+                            class="anneau"
+                            role="img"
+                            :aria-label="descriptionAnneau"
+                            :style="{ background: fondAnneau }"
                         >
-                            <div class="ligne-categorie">
-                                <span class="icone">{{ t.icone ?? "•" }}</span>
-                                <span class="nom">{{ t.nom }}</span>
-                                <span class="montant">
-                                    {{ formatMontant(t.total) }}
+                            <div class="anneau-centre">
+                                <span class="meta">Total</span>
+                                <span class="total num">
+                                    {{ formatMontant(totalDepensesCategories) }}
                                 </span>
                             </div>
-                            <div class="barre">
-                                <div
-                                    class="remplissage"
-                                    :style="{
-                                        width: largeurBarre(
-                                            t.total,
-                                            depensesParCategorie
-                                        ),
-                                        background: t.couleur ?? '#45335c',
-                                    }"
-                                ></div>
-                            </div>
-                            <span
-                                v-if="tableau.periodePrecedenteId !== null"
-                                class="ecart"
-                                :class="classeEcart(t)"
-                                :title="`Période précédente : ${formatMontant(t.totalPrecedent)}`"
-                            >
-                                {{ formatEcart(t.ecart) }} par rapport à la
-                                période précédente
-                            </span>
-                        </li>
-                    </ul>
+                        </div>
+                        <ul class="nue legende">
+                            <li v-for="s in repartition" :key="s.cle">
+                                <PastilleCategorieComponent
+                                    :categorie="s.pastille"
+                                />
+                                <div class="texte">
+                                    <div class="nom-montant">
+                                        <span>{{ s.nom }}</span>
+                                        <span class="num">
+                                            {{ formatMontant(s.total) }}
+                                        </span>
+                                    </div>
+                                    <span class="meta">
+                                        {{ formatPourcentage(s.part) }} des
+                                        dépenses
+                                        <template
+                                            v-if="
+                                                s.detail &&
+                                                tableau.periodePrecedenteId !==
+                                                    null
+                                            "
+                                        >
+                                            ·
+                                            <span
+                                                class="ecart num"
+                                                :class="classeEcart(s.detail)"
+                                                :title="`Période précédente : ${formatMontant(s.detail.totalPrecedent)}`"
+                                            >
+                                                {{
+                                                    formatEcart(s.detail.ecart)
+                                                }}
+                                                vs période précédente
+                                            </span>
+                                        </template>
+                                    </span>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
 
                     <template v-if="revenusParCategorie.length > 0">
-                        <h2>Revenus par catégorie</h2>
-                        <ul class="liste-categories">
+                        <h2 class="titre-carte sous-section">
+                            Revenus par catégorie
+                        </h2>
+                        <ul class="nue legende">
                             <li
                                 v-for="t in revenusParCategorie"
                                 :key="t.categorieId"
                             >
-                                <div class="ligne-categorie">
-                                    <span class="icone">{{
-                                        t.icone ?? "•"
-                                    }}</span>
-                                    <span class="nom">{{ t.nom }}</span>
-                                    <span class="montant">
-                                        {{ formatMontant(t.total) }}
+                                <PastilleCategorieComponent :categorie="t" />
+                                <div class="texte">
+                                    <div class="nom-montant">
+                                        <span>{{ t.nom }}</span>
+                                        <span class="num positif">
+                                            {{ formatMontant(t.total) }}
+                                        </span>
+                                    </div>
+                                    <span
+                                        v-if="
+                                            tableau.periodePrecedenteId !== null
+                                        "
+                                        class="meta"
+                                    >
+                                        <span
+                                            class="ecart num"
+                                            :class="classeEcart(t)"
+                                            :title="`Période précédente : ${formatMontant(t.totalPrecedent)}`"
+                                        >
+                                            {{ formatEcart(t.ecart) }} vs
+                                            période précédente
+                                        </span>
                                     </span>
                                 </div>
-                                <div class="barre">
-                                    <div
-                                        class="remplissage"
-                                        :style="{
-                                            width: largeurBarre(
-                                                t.total,
-                                                revenusParCategorie
-                                            ),
-                                            background: t.couleur ?? '#14a81a',
-                                        }"
-                                    ></div>
-                                </div>
-                                <span
-                                    v-if="tableau.periodePrecedenteId !== null"
-                                    class="ecart"
-                                    :class="classeEcart(t)"
-                                    :title="`Période précédente : ${formatMontant(t.totalPrecedent)}`"
-                                >
-                                    {{ formatEcart(t.ecart) }} par rapport à la
-                                    période précédente
-                                </span>
                             </li>
                         </ul>
                     </template>
                 </section>
 
-                <div class="colonne-droite">
+                <div class="colonne pile">
+                    <!-- Dernières opérations -->
+                    <section class="carte">
+                        <div class="en-tete-carte">
+                            <h2 class="titre-carte">Dernières opérations</h2>
+                            <RouterLink :to="lienOperations" class="tout-voir">
+                                Tout voir
+                            </RouterLink>
+                        </div>
+                        <p
+                            v-if="tableau.dernieresOperations.length === 0"
+                            class="vide"
+                        >
+                            <Receipt aria-hidden="true" />
+                            Aucune opération sur la période.
+                        </p>
+                        <ul v-else class="nue">
+                            <LigneOperationComponent
+                                v-for="op in tableau.dernieresOperations"
+                                :key="op.id"
+                                :categorie="categorie(op.categorieId)"
+                                :titre="titre(op)"
+                                :meta="meta(op)"
+                                :montant="op.montant"
+                                :type="op.type"
+                            >
+                                <template
+                                    v-if="op.recurrenceId !== null"
+                                    #badges
+                                >
+                                    <span
+                                        class="badge"
+                                        title="Générée par une récurrence"
+                                        >Récurrente</span
+                                    >
+                                </template>
+                            </LigneOperationComponent>
+                        </ul>
+                    </section>
+
                     <!-- Récurrences à venir et prévision -->
                     <section class="carte">
-                        <h2>À venir sur la période</h2>
+                        <h2 class="titre-carte a-venir">
+                            À venir sur la période
+                        </h2>
                         <p v-if="tableau.aVenir.length === 0" class="vide">
-                            Aucune opération récurrente à venir.
+                            <CalendarClock aria-hidden="true" />
+                            <span>
+                                Aucune opération récurrente à venir.
+                                <RouterLink :to="{ name: 'recurrences' }">
+                                    Ajouter une récurrence
+                                </RouterLink>
+                            </span>
                         </p>
-                        <ul v-else class="liste-operations">
-                            <li
+                        <ul v-else class="nue">
+                            <LigneOperationComponent
                                 v-for="occ in tableau.aVenir"
                                 :key="`${occ.recurrenceId}-${occ.date}`"
-                            >
-                                <span class="icone">{{
-                                    icone(occ.categorieId)
-                                }}</span>
-                                <div class="texte">
-                                    <span class="titre">{{ titre(occ) }}</span>
-                                    <span class="details">
-                                        {{ formatDateCourte(occ.date) }}
-                                        <template v-if="details(occ)">
-                                            · {{ details(occ) }}
-                                        </template>
-                                    </span>
-                                </div>
-                                <span
-                                    class="montant"
-                                    :class="classeMontant(occ.type)"
-                                >
-                                    {{
-                                        formatMontantSigne(
-                                            occ.montant,
-                                            occ.type
-                                        )
-                                    }}
-                                </span>
-                            </li>
+                                :categorie="categorie(occ.categorieId)"
+                                :titre="titre(occ)"
+                                :meta="meta(occ)"
+                                :montant="occ.montant"
+                                :type="occ.type"
+                            />
                         </ul>
                         <dl class="previsions">
-                            <div>
-                                <dt>Solde de la période prévu</dt>
-                                <dd :class="classeSolde(tableau.soldePrevu)">
+                            <div class="encart">
+                                <dt class="meta">Solde prévu</dt>
+                                <dd
+                                    class="num"
+                                    :class="classeSolde(tableau.soldePrevu)"
+                                >
                                     {{ formatMontant(tableau.soldePrevu) }}
                                 </dd>
                             </div>
-                            <div>
-                                <dt>{{ libelleSoldeComptes }}</dt>
+                            <div class="encart">
+                                <dt class="meta">{{ libelleSoldeComptes }}</dt>
                                 <dd
+                                    class="num"
                                     :class="
                                         classeSolde(
                                             tableau.soldeComptesFinPeriode
@@ -391,52 +557,6 @@ const libelleSoldeComptes = computed(() =>
                             </div>
                         </dl>
                     </section>
-
-                    <!-- Dernières opérations -->
-                    <section class="carte">
-                        <h2>Dernières opérations</h2>
-                        <p
-                            v-if="tableau.dernieresOperations.length === 0"
-                            class="vide"
-                        >
-                            Aucune opération sur la période.
-                        </p>
-                        <ul v-else class="liste-operations">
-                            <li
-                                v-for="op in tableau.dernieresOperations"
-                                :key="op.id"
-                            >
-                                <span class="icone">{{
-                                    icone(op.categorieId)
-                                }}</span>
-                                <div class="texte">
-                                    <span class="titre">
-                                        {{ titre(op) }}
-                                        <span
-                                            v-if="op.recurrenceId !== null"
-                                            class="badge"
-                                            title="Générée par une récurrence"
-                                            >🔁</span
-                                        >
-                                    </span>
-                                    <span class="details">
-                                        {{ formatDateCourte(op.date) }}
-                                        <template v-if="details(op)">
-                                            · {{ details(op) }}
-                                        </template>
-                                    </span>
-                                </div>
-                                <span
-                                    class="montant"
-                                    :class="classeMontant(op.type)"
-                                >
-                                    {{
-                                        formatMontantSigne(op.montant, op.type)
-                                    }}
-                                </span>
-                            </li>
-                        </ul>
-                    </section>
                 </div>
             </div>
         </template>
@@ -444,272 +564,217 @@ const libelleSoldeComptes = computed(() =>
 </template>
 
 <style scoped>
-.tableau-de-bord {
-    color: #45335c;
-    max-width: 1100px;
-    margin: 0 auto;
-    padding: 1.5rem;
+.selecteurs {
     display: flex;
-    flex-direction: column;
-    gap: 1.25rem;
-}
-
-h1,
-h2 {
-    margin: 0;
-}
-
-h2 {
-    font-size: 1.1rem;
-    margin-bottom: 0.75rem;
-}
-
-h2:not(:first-child) {
-    margin-top: 1.5rem;
-}
-
-.message {
-    text-align: center;
-}
-
-.erreur {
-    color: #c62727;
-}
-
-.carte {
-    background: #ffffff;
-    border: 1px solid #e3d3f1;
-    border-radius: 10px;
-    padding: 1.25rem;
-    box-shadow: 0 2px 6px rgba(69, 51, 92, 0.08);
-}
-
-.vide {
-    color: #81758e;
-    margin: 0;
-}
-
-.depense {
-    color: #c62727;
-}
-
-.revenu {
-    color: #14a81a;
-}
-
-/* Rechargement d'une autre période : on garde l'ancien contenu, estompé */
-.rechargement {
-    opacity: 0.5;
-    transition: opacity 0.2s;
-}
-
-/* Sélecteurs */
-.barre-selection {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
     flex-wrap: wrap;
-    gap: 1rem;
-}
-
-.selecteur-periode {
-    display: flex;
     align-items: center;
-    gap: 0.75rem;
-}
-
-.periode p {
-    margin: 0.25rem 0 0;
-    color: #81758e;
-}
-
-.fleche {
-    width: 2.25rem;
-    height: 2.25rem;
-    border: 1px solid #45335c;
-    border-radius: 50%;
-    background: #e3d3f1;
-    color: #45335c;
-    font-size: 1.4rem;
-    line-height: 1;
-    cursor: pointer;
-}
-
-.fleche:disabled {
-    opacity: 0.3;
-    cursor: default;
+    gap: 12px;
 }
 
 .selecteur-compte {
-    padding: 0.5rem 0.75rem;
-    border: 1px solid #45335c;
-    border-radius: 10px;
-    background: #e3d3f1;
-    color: #45335c;
-    font-size: 0.95rem;
+    border-color: transparent;
+    box-shadow: var(--ombre-carte);
+    border-radius: var(--rayon-l);
 }
 
-/* Les trois chiffres */
-.chiffres {
+/* Indicateurs */
+.indicateurs {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 1rem;
-}
-
-.chiffre {
-    display: flex;
-    flex-direction: column;
-    gap: 0.4rem;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 210px), 1fr));
+    gap: 16px;
 }
 
 .intitule {
-    color: #81758e;
+    display: block;
+    color: var(--encre-douce);
+    font-weight: 600;
 }
 
 .valeur {
-    font-size: 1.6rem;
-    font-weight: bold;
+    display: block;
+    font-size: 24px;
+    line-height: 1.2;
+    font-weight: 800;
 }
 
-/* Deux colonnes, une seule sur petit écran */
+.heros {
+    background: var(--vert-900);
+    color: #ffffff;
+    box-shadow: none;
+}
+
+.heros .intitule {
+    color: #b9d6c6;
+}
+
+.heros .valeur {
+    margin-top: 6px;
+    font-size: 32px;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+}
+
+.heros .negatif-sombre {
+    color: var(--negatif-sur-sombre);
+}
+
+.indicateur {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.pastille-indicateur {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: none;
+    width: 44px;
+    height: 44px;
+    border-radius: var(--rayon-l);
+}
+
+.pastille-indicateur.revenus {
+    background: var(--vert-100);
+    color: var(--vert-700);
+}
+
+.pastille-indicateur.depenses {
+    background: var(--negatif-fond);
+    color: var(--negatif);
+}
+
+/* Deux colonnes souples, l'une sous l'autre sous ≈ 860 px */
 .colonnes {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-    gap: 1rem;
-    align-items: start;
-}
-
-.colonne-droite {
     display: flex;
-    flex-direction: column;
-    gap: 1rem;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: 16px;
 }
 
-ul {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-}
-
-/* Totaux par catégorie */
-.liste-categories {
-    display: flex;
-    flex-direction: column;
-    gap: 0.9rem;
-}
-
-.ligne-categorie {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-}
-
-.ligne-categorie .nom {
-    flex: 1;
-}
-
-.ligne-categorie .montant {
-    font-weight: bold;
-}
-
-.barre {
-    height: 6px;
-    margin: 0.35rem 0 0.25rem;
-    border-radius: 3px;
-    background: #f1e9f8;
-    overflow: hidden;
-}
-
-.remplissage {
-    height: 100%;
-    border-radius: 3px;
-}
-
-.ecart {
-    font-size: 0.8rem;
-}
-
-.ecart.neutre {
-    color: #81758e;
-}
-
-.ecart.favorable {
-    color: #14a81a;
-}
-
-.ecart.defavorable {
-    color: #c62727;
-}
-
-/* Listes d'opérations */
-.liste-operations li {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    padding: 0.6rem 0;
-    border-bottom: 1px solid #f1e9f8;
-}
-
-.liste-operations li:last-child {
-    border-bottom: none;
-}
-
-.icone {
-    width: 1.5rem;
-    text-align: center;
-}
-
-.texte {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
+.colonne {
+    flex: 1 1 400px;
     min-width: 0;
 }
 
-.titre {
-    font-weight: bold;
+.pile {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
 }
 
-.badge {
-    font-size: 0.8rem;
-    margin-left: 0.25rem;
+.titre-carte {
+    margin-bottom: 14px;
 }
 
-.details {
-    font-size: 0.85rem;
-    color: #81758e;
-    overflow: hidden;
-    text-overflow: ellipsis;
+.en-tete-carte .titre-carte {
+    margin-bottom: 0;
+}
+
+.tout-voir {
+    font-size: 13px;
+}
+
+.sous-section {
+    margin-top: 24px;
+}
+
+.a-venir {
+    margin-bottom: 4px;
+}
+
+/* Répartition */
+.repartition {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 24px;
+}
+
+.anneau {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: none;
+    width: 140px;
+    height: 140px;
+    border-radius: 50%;
+}
+
+.anneau-centre {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    background: var(--blanc);
+}
+
+.anneau-centre .meta {
+    font-weight: 600;
+}
+
+.anneau-centre .total {
+    font-size: 17px;
+    font-weight: 800;
+}
+
+.legende {
+    flex: 1 1 200px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    min-width: 0;
+}
+
+.legende li {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.legende .texte {
+    flex: 1;
+    min-width: 0;
+}
+
+.nom-montant {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    font-weight: 700;
+}
+
+.nom-montant .num {
     white-space: nowrap;
 }
 
-.liste-operations .montant {
-    font-weight: bold;
-    white-space: nowrap;
+.ecart {
+    font-weight: 600;
 }
 
 /* Prévisions */
 .previsions {
-    margin: 1rem 0 0;
-    padding-top: 0.75rem;
-    border-top: 2px solid #e3d3f1;
-    display: flex;
-    flex-direction: column;
-    gap: 0.4rem;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+    margin: 14px 0 0;
 }
 
-.previsions div {
-    display: flex;
-    justify-content: space-between;
-    gap: 1rem;
-}
-
-.previsions dt {
-    color: #81758e;
+.previsions .meta {
+    font-weight: 600;
 }
 
 .previsions dd {
     margin: 0;
-    font-weight: bold;
+    font-weight: 800;
+}
+
+@media (max-width: 640px) {
+    .previsions {
+        grid-template-columns: 1fr;
+    }
 }
 </style>
