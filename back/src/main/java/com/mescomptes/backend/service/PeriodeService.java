@@ -139,14 +139,15 @@ public class PeriodeService {
     }
 
     /**
-     * Crée les périodes manquantes pour qu'une date soit couverte, avec la durée par défaut.
-     * Appelé à l'enregistrement d'une opération datée après la dernière période.
+     * Crée les périodes manquantes pour qu'une date soit couverte, avec la durée par défaut :
+     * après la dernière période si la date est plus tard, avant la première si elle est plus tôt.
+     * Appelé à l'enregistrement d'une opération.
      *
      * @param utilisateurId id de l'utilisateur
      * @param date          date à couvrir
      */
     @Transactional
-    public void couvrirJusqua(UUID utilisateurId, LocalDate date) {
+    public void couvrir(UUID utilisateurId, LocalDate date) {
         Optional<Periode> derniere = periodeRepository.findFirstByUtilisateurIdOrderByDateFinDesc(utilisateurId);
         // Aucune période (assistant de première connexion non terminé) : on part du mois de la date
         LocalDate fin = derniere.map(Periode::getDateFin).orElse(date.withDayOfMonth(1).minusDays(1));
@@ -155,6 +156,13 @@ public class PeriodeService {
             LocalDate debut = fin.plusDays(1);
             fin = finParDefaut(debut);
             enregistrer(utilisateurId, nomParDefaut(fin), debut, fin);
+        }
+
+        LocalDate debut = periodeRepository.findFirstByUtilisateurIdOrderByDateDebut(utilisateurId).orElseThrow().getDateDebut();
+        while (debut.isAfter(date)) {
+            LocalDate finPrecedente = debut.minusDays(1);
+            debut = debutParDefaut(finPrecedente);
+            enregistrer(utilisateurId, nomParDefaut(finPrecedente), debut, finPrecedente);
         }
     }
 
@@ -179,6 +187,11 @@ public class PeriodeService {
     // Durée par défaut : un mois (réglage utilisateur prévu, fixe en V1)
     private static LocalDate finParDefaut(LocalDate debut) {
         return debut.plusMonths(1).minusDays(1);
+    }
+
+    // Symétrique de finParDefaut, pour une période ajoutée avant la première : fin 28/02 → début 01/02
+    private static LocalDate debutParDefaut(LocalDate fin) {
+        return fin.plusDays(1).minusMonths(1);
     }
 
     private static String nomOuDefaut(String nom, LocalDate fin) {

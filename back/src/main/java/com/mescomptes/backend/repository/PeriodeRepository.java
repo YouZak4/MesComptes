@@ -22,6 +22,8 @@ public interface PeriodeRepository extends JpaRepository<Periode, Long> {
 
     Optional<Periode> findFirstByUtilisateurIdOrderByDateFinDesc(UUID utilisateurId);
 
+    Optional<Periode> findFirstByUtilisateurIdOrderByDateDebut(UUID utilisateurId);
+
     // Voisines, pour maintenir la contiguïté quand une limite bouge
     Optional<Periode> findFirstByUtilisateurIdAndDateDebutGreaterThanOrderByDateDebut(UUID utilisateurId, LocalDate date);
 

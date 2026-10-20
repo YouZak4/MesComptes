@@ -66,7 +66,7 @@ GET /api/operations?periodeId=7&categorieId=2&q=courses
 { "compteId": 3, "montant": 15.99, "libelleId": 12 }
 ```
 
-Ici, la catégorie est celle de « Netflix » et la date est aujourd'hui. Si la date tombe après la dernière période, les périodes manquantes sont créées, d'un mois chacune.
+Ici, la catégorie est celle de « Netflix » et la date est aujourd'hui. Si la date tombe après la dernière période ou avant la première, les périodes manquantes sont créées, d'un mois chacune.
 
 - **201** : `DtoOperation` créée.
 - **422** : compte, catégorie ou libellé archivé ; ni catégorie ni libellé ; montant arrondi à 0.

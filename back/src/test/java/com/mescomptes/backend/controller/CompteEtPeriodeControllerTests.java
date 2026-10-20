@@ -155,11 +155,33 @@ class CompteEtPeriodeControllerTests extends ApiTestBase {
     void creerLesPeriodesManquantesJusquAUneDate() {
         periode("2026-01-23", "2026-02-25");
 
-        periodeService.couvrirJusqua(moi.getId(), LocalDate.parse("2026-04-10"));
+        periodeService.couvrir(moi.getId(), LocalDate.parse("2026-04-10"));
 
         assertThat(periodeRepository.findByUtilisateurIdOrderByDateDebut(moi.getId()))
                 .extracting(p -> p.getDateDebut() + "→" + p.getDateFin())
                 .containsExactly("2026-01-23→2026-02-25", "2026-02-26→2026-03-25", "2026-03-26→2026-04-25");
+    }
+
+    @Test
+    void creerLesPeriodesManquantesAvantLaPremiere() {
+        periode("2026-09-26", "2026-10-25");
+
+        periodeService.couvrir(moi.getId(), LocalDate.parse("2026-08-10"));
+
+        assertThat(periodeRepository.findByUtilisateurIdOrderByDateDebut(moi.getId()))
+                .extracting(p -> p.getNom() + " " + p.getDateDebut() + "→" + p.getDateFin())
+                .containsExactly("Août 2026 2026-07-26→2026-08-25", "Septembre 2026 2026-08-26→2026-09-25", "Test 2026-09-26→2026-10-25");
+    }
+
+    @Test
+    void creerLesPeriodesManquantesAvantLaPremiereEnMoisCalendaires() {
+        periode("2026-03-01", "2026-03-31");
+
+        periodeService.couvrir(moi.getId(), LocalDate.parse("2026-01-15"));
+
+        assertThat(periodeRepository.findByUtilisateurIdOrderByDateDebut(moi.getId()))
+                .extracting(p -> p.getDateDebut() + "→" + p.getDateFin())
+                .containsExactly("2026-01-01→2026-01-31", "2026-02-01→2026-02-28", "2026-03-01→2026-03-31");
     }
 
     private Long periode(String debut, String fin) {

@@ -42,7 +42,7 @@ public class OperationController {
         return operationService.lister(utilisateur.getId(), filtre);
     }
 
-    @Operation(summary = "Crée une opération", description = "Date vide : aujourd'hui. Catégorie vide : celle du libellé. Crée les périodes manquantes jusqu'à sa date.")
+    @Operation(summary = "Crée une opération", description = "Date vide : aujourd'hui. Catégorie vide : celle du libellé. Crée les périodes manquantes pour couvrir sa date.")
     @ApiResponses({
             @ApiResponse(responseCode = "201", description = "Opération créée"),
             @ApiResponse(responseCode = "422", description = "Compte, catégorie ou libellé archivé, ou catégorie manquante")

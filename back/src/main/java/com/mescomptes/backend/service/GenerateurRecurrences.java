@@ -49,8 +49,8 @@ public class GenerateurRecurrences {
         if (!dates.isEmpty()) {
             UUID utilisateurId = recurrence.getUtilisateur().getId();
             // D'abord la première date : sans période existante, la première créée doit la contenir
-            periodeService.couvrirJusqua(utilisateurId, dates.getFirst());
-            periodeService.couvrirJusqua(utilisateurId, dates.getLast());
+            periodeService.couvrir(utilisateurId, dates.getFirst());
+            periodeService.couvrir(utilisateurId, dates.getLast());
         }
         return creees;
     }
