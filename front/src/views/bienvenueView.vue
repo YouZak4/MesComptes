@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from "vue";
+import { ArrowLeft, Check, CircleAlert } from "@lucide/vue";
 import { useRoute, useRouter } from "vue-router";
 import EnTeteComponent from "@/components/EnTeteComponent.vue";
 import ReglagesComptesComponent from "@/components/reglages/ReglagesComptesComponent.vue";
@@ -113,8 +114,8 @@ function terminer(nbRecurrences: number) {
 <template>
     <EnTeteComponent />
 
-    <main class="reglages assistant">
-        <h1>Bienvenue sur Mes comptes</h1>
+    <main class="page page-etroite reglages assistant">
+        <h1 class="titre-page">Bienvenue sur Mes comptes</h1>
 
         <ol class="etapes">
             <li
@@ -123,9 +124,15 @@ function terminer(nbRecurrences: number) {
                 :class="{ active: etape === e.numero, faite: etape > e.numero }"
                 :aria-current="etape === e.numero ? 'step' : undefined"
             >
-                <span class="numero">{{
-                    etape > e.numero ? "✓" : e.numero
-                }}</span>
+                <span class="numero">
+                    <Check
+                        v-if="etape > e.numero"
+                        :size="16"
+                        :stroke-width="2.6"
+                        aria-label="Faite"
+                    />
+                    <template v-else>{{ e.numero }}</template>
+                </span>
                 {{ e.titre }}
             </li>
         </ol>
@@ -155,12 +162,13 @@ function terminer(nbRecurrences: number) {
                 </label>
                 <button
                     type="submit"
-                    class="bouton-principal"
+                    class="btn btn-secondaire"
                     :disabled="creationEnCours"
                 >
                     Continuer
                 </button>
                 <p v-if="erreurPeriode" class="erreur" role="alert">
+                    <CircleAlert aria-hidden="true" />
                     {{ erreurPeriode }}
                 </p>
             </form>
@@ -174,8 +182,8 @@ function terminer(nbRecurrences: number) {
             </p>
             <p v-else class="aide">
                 Un premier compte a été créé à votre inscription : renommez-le
-                et donnez son solde actuel avec ✏️, puis ajoutez vos autres
-                comptes (livret, compte joint…).
+                et donnez son solde actuel avec le bouton « Modifier », puis
+                ajoutez vos autres comptes (livret, compte joint…).
             </p>
             <ReglagesComptesComponent @charges="comptesCharges" />
             <div class="actions navigation">
@@ -184,7 +192,7 @@ function terminer(nbRecurrences: number) {
                 </span>
                 <button
                     type="button"
-                    class="bouton-principal"
+                    class="btn btn-secondaire"
                     :disabled="!nbComptesActifs"
                     :title="
                         nbComptesActifs === 0
@@ -207,10 +215,11 @@ function terminer(nbRecurrences: number) {
             <div class="actions navigation">
                 <button
                     type="button"
-                    class="bouton-secondaire"
+                    class="btn btn-secondaire"
                     @click="allerA(2)"
                 >
-                    ← Comptes
+                    <ArrowLeft aria-hidden="true" />
+                    Comptes
                 </button>
             </div>
         </template>
@@ -229,48 +238,51 @@ function terminer(nbRecurrences: number) {
 .etapes {
     display: flex;
     flex-wrap: wrap;
-    gap: 0.5rem 1.5rem;
+    gap: 8px 24px;
     margin: 0;
     padding: 0;
     list-style: none;
-    color: #81758e;
+    color: var(--encre-douce);
+    font-weight: 600;
 }
 
 .etapes li {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
+    gap: 8px;
 }
 
 .etapes .numero {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 1.8rem;
-    height: 1.8rem;
-    border: 2px solid #e3d3f1;
+    width: 30px;
+    height: 30px;
     border-radius: 50%;
-    font-weight: bold;
+    background: var(--blanc);
+    box-shadow: var(--ombre-carte);
+    font-weight: 800;
 }
 
 .etapes .active {
-    color: #45335c;
-    font-weight: bold;
+    color: var(--vert-900);
+    font-weight: 700;
 }
 
 .etapes .active .numero {
-    border-color: #45335c;
-    background: #45335c;
+    background: var(--vert-700);
     color: #ffffff;
+    box-shadow: none;
 }
 
 .etapes .faite .numero {
-    border-color: #14a81a;
-    color: #14a81a;
+    background: var(--vert-100);
+    color: var(--vert-700);
+    box-shadow: none;
 }
 
 .periode {
-    margin-top: 0.75rem;
+    margin-top: 12px;
 }
 
 .periode .erreur {
@@ -279,11 +291,10 @@ function terminer(nbRecurrences: number) {
 
 .navigation {
     justify-content: flex-end;
-    gap: 0.5rem !important;
+    gap: 8px !important;
 }
 
-.plus-tard a {
-    color: #45335c;
-    font-weight: bold;
+.plus-tard {
+    text-align: center;
 }
 </style>

@@ -39,8 +39,9 @@ export function useReferentiels() {
         return categories.value.get(op.categorieId)?.nom ?? "Opération";
     }
 
-    function icone(categorieId: number): string {
-        return categories.value.get(categorieId)?.icone ?? "•";
+    // Pour la pastille (icône et couleurs) d'une opération
+    function categorie(categorieId: number): Categorie | undefined {
+        return categories.value.get(categorieId);
     }
 
     // Catégorie (seulement si le titre est un libellé), compte (si demandé) et note
@@ -65,7 +66,7 @@ export function useReferentiels() {
         nomsComptes,
         chargerReferentiels,
         titre,
-        icone,
+        categorie,
         details,
     };
 }

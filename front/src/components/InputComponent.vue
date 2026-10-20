@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { ref, computed } from "vue";
+import { computed, ref, useId } from "vue";
+import { CircleAlert, Eye, EyeOff } from "@lucide/vue";
 
 const props = withDefaults(
     defineProps<{
@@ -29,9 +30,11 @@ const props = withDefaults(
 );
 const emit = defineEmits<{
     (e: "update:modelValue", value: string): void;
-    (e: "valid", value: boolean): void; // 👈
+    (e: "valid", value: boolean): void;
 }>();
 
+// Relie le libellé et le message d'erreur au champ
+const id = useId();
 const touched = ref(false);
 const showPassword = ref(false);
 
@@ -87,111 +90,80 @@ function onBlur() {
 </script>
 
 <template>
-    <div class="main-input-container">
-        <label v-if="label" class="base-input-label">
+    <div class="champ" :class="{ 'champ-invalide': isValid === false }">
+        <label v-if="label" :for="id">
             {{ label }}
-            <span v-if="required" class="required-star">*</span>
+            <span v-if="required" class="obligatoire" aria-hidden="true"
+                >*</span
+            >
         </label>
 
-        <div
-            class="base-input-field"
-            :class="{ valid: isValid === true, invalid: isValid === false }"
-        >
+        <div class="zone">
             <input
+                :id="id"
                 :type="inputType"
-                :model-value="modelValue"
+                :value="modelValue"
                 :placeholder="placeholder"
                 :required="required"
                 :disabled="disabled"
                 :maxlength="maxLength"
-                class="base-input"
+                :aria-invalid="isValid === false"
+                :aria-describedby="errorMessage ? `${id}-erreur` : undefined"
                 @input="onInput"
                 @blur="onBlur"
             />
 
-            <!-- Bouton toggle uniquement pour les champs password -->
+            <!-- Bouton d'affichage uniquement pour les champs mot de passe -->
             <button
                 v-if="type === 'password'"
                 type="button"
-                class="toggle-password"
+                class="btn btn-icone oeil"
+                :aria-label="
+                    showPassword
+                        ? 'Masquer le mot de passe'
+                        : 'Afficher le mot de passe'
+                "
+                :aria-pressed="showPassword"
                 @click="showPassword = !showPassword"
             >
-                {{ showPassword ? "👁️" : "🙈" }}
+                <EyeOff v-if="showPassword" aria-hidden="true" />
+                <Eye v-else aria-hidden="true" />
             </button>
         </div>
 
         <!-- Message d'erreur, affiché seulement si touched + erreur -->
-        <p v-if="errorMessage" class="base-input-error">{{ errorMessage }}</p>
+        <p v-if="errorMessage" :id="`${id}-erreur`" class="erreur">
+            <CircleAlert aria-hidden="true" />
+            {{ errorMessage }}
+        </p>
     </div>
 </template>
 
 <style scoped>
-.main-input-container {
-    font-family: Arial, Helvetica, sans-serif;
-    font-size: 1rem;
+.obligatoire {
+    color: var(--negatif);
+}
+
+.zone {
+    position: relative;
     display: flex;
-    flex-direction: column;
+}
+
+.zone input {
+    flex: 1;
     width: 100%;
 }
 
-.base-input-label {
-    color: #45335c;
-    text-align: left;
+.zone input[type="password"],
+.zone:has(.oeil) input {
+    padding-right: 48px;
 }
 
-.required-star {
-    color: #c62727;
-}
-
-/* Conteneur input + bouton toggle (pour le password) */
-.base-input-field {
-    display: flex;
-    align-items: center;
-    border: 1px solid #45335c;
-    border-radius: 10px;
-    background: #e3d3f1;
-    transition: border-color 0.2s;
-}
-
-.base-input-field:focus-within {
-    border-color: #888;
-}
-
-.base-input-field.valid {
-    border-color: #14a81a;
-}
-
-.base-input-field.invalid {
-    border-color: #c62727;
-}
-
-.base-input {
-    flex: 1;
-    padding: 0.55rem 0.75rem;
-    background: transparent;
-    border: none;
-    outline: none;
-    color: #000000;
-    font-size: 0.95rem;
-}
-
-.base-input::placeholder {
-    color: #81758e;
-}
-
-.toggle-password {
-    background: none;
-    border: none;
-    cursor: pointer;
-    padding: 0 0.6rem;
-    font-size: 1rem;
-    line-height: 1;
-}
-
-.base-input-error {
-    margin-top: 0.5rem;
-    font-size: 1rem;
-    color: #c62727;
-    text-align: left;
+.oeil {
+    position: absolute;
+    right: 3px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--encre-douce);
 }
 </style>

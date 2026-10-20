@@ -1,0 +1,560 @@
+/* Charte graphique « Sapin » : jetons et composants communs (docs/visuel/charte-graphique.md) */
+:root {
+    /* Marque */
+    --vert-900: #123f2e;
+    --vert-800: #154a35;
+    --vert-700: #1b5c42;
+    --vert-300: #c9e0d3;
+    --vert-200: #d8ebdf;
+    --vert-100: #dcefe4;
+    --vert-50: #f3f6f4;
+
+    /* Action */
+    --jaune-500: #e9b949;
+    --jaune-600: #d9a731;
+    --encre-jaune: #17140c;
+
+    /* Neutres */
+    --encre: #17241e;
+    --encre-douce: #55665d;
+    --trait: #e1e8e4;
+    --trait-champ: #c9d6ce;
+    --blanc: #ffffff;
+
+    /* Sémantique */
+    --positif: #1b5c42;
+    --negatif: #a8352a;
+    --negatif-fond: #f8e3df;
+    --negatif-sur-sombre: #ffb8ad;
+    --alerte: #9a6410;
+    --alerte-fond: #f8ebd3;
+
+    /* Typo */
+    --police: "Manrope", system-ui, -apple-system, "Segoe UI", sans-serif;
+
+    /* Rayons */
+    --rayon-s: 10px;
+    --rayon-m: 12px;
+    --rayon-l: 14px;
+    --rayon-xl: 18px;
+
+    /* Ombres */
+    --ombre-carte: 0 1px 2px #123f2e14;
+    --ombre-flottante: 0 6px 18px #123f2e33;
+    --ombre-fenetre: 0 24px 48px #123f2e33;
+
+    /* Mise en page */
+    --largeur-contenu: 1180px;
+}
+
+/* ── Base ── */
+
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    background: var(--vert-50);
+    color: var(--encre);
+    font-family: var(--police);
+    font-size: 14px;
+    line-height: 1.45;
+    font-weight: 500;
+}
+
+h1,
+h2,
+h3,
+p {
+    margin: 0;
+}
+
+a {
+    color: var(--vert-700);
+    font-weight: 700;
+    text-decoration: none;
+}
+
+a:hover {
+    color: var(--vert-900);
+    text-decoration: underline;
+}
+
+:focus-visible {
+    outline: 2px solid var(--vert-700);
+    outline-offset: 2px;
+}
+
+button,
+input,
+select,
+textarea {
+    font: inherit;
+}
+
+ul.nue {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.num {
+    font-variant-numeric: tabular-nums;
+}
+
+.meta {
+    font-size: 12px;
+    color: var(--encre-douce);
+}
+
+.positif {
+    color: var(--positif);
+}
+
+.negatif {
+    color: var(--negatif);
+}
+
+/* Rechargement d'une autre période : on garde l'ancien contenu, estompé */
+.rechargement {
+    opacity: 0.5;
+    transition: opacity 0.2s;
+}
+
+/* ── Mise en page ── */
+
+.page {
+    width: 100%;
+    max-width: var(--largeur-contenu);
+    margin: 0 auto;
+    padding: 32px 24px 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
+}
+
+.page-etroite {
+    max-width: 900px;
+}
+
+.en-tete-page {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+}
+
+.titre-page {
+    font-size: 30px;
+    line-height: 1.2;
+    font-weight: 800;
+    letter-spacing: -0.025em;
+    color: var(--vert-900);
+}
+
+.sous-titre {
+    margin-top: 4px;
+    color: var(--encre-douce);
+}
+
+.message {
+    text-align: center;
+    color: var(--encre-douce);
+}
+
+@media (max-width: 640px) {
+    .page {
+        padding: 24px 16px 16px;
+    }
+
+    .titre-page {
+        font-size: 26px;
+    }
+}
+
+/* ── Cartes ── */
+
+.carte {
+    background: var(--blanc);
+    border-radius: var(--rayon-xl);
+    padding: 22px;
+    box-shadow: var(--ombre-carte);
+}
+
+.titre-carte {
+    font-size: 16px;
+    line-height: 1.3;
+    font-weight: 800;
+}
+
+.en-tete-carte {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px 12px;
+    margin-bottom: 14px;
+}
+
+.encart {
+    background: var(--vert-50);
+    border-radius: var(--rayon-l);
+    padding: 12px 14px;
+}
+
+/* État vide : texte doux centré, icône au-dessus */
+.vide {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 0;
+    text-align: center;
+    color: var(--encre-douce);
+}
+
+.vide > svg {
+    width: 28px;
+    height: 28px;
+    color: #9db0a5;
+    stroke-width: 1.9;
+}
+
+/* ── Boutons ── */
+
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 44px;
+    padding: 0 18px;
+    border: 0;
+    border-radius: var(--rayon-m);
+    background: transparent;
+    color: var(--encre);
+    font-weight: 700;
+    white-space: nowrap;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.btn:hover {
+    text-decoration: none;
+}
+
+.btn svg {
+    width: 18px;
+    height: 18px;
+    flex: none;
+    stroke-width: 2.4;
+}
+
+.btn:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+}
+
+.btn-principal {
+    min-height: 46px;
+    padding: 0 24px;
+    background: var(--jaune-500);
+    color: var(--encre-jaune);
+    font-weight: 800;
+}
+
+.btn-principal:hover:not(:disabled) {
+    background: var(--jaune-600);
+    color: var(--encre-jaune);
+}
+
+.btn-secondaire {
+    background: var(--blanc);
+    border: 1px solid var(--trait);
+    color: var(--encre);
+}
+
+.btn-secondaire:hover:not(:disabled) {
+    background: var(--vert-50);
+    color: var(--encre);
+}
+
+.btn-discret {
+    color: var(--vert-700);
+}
+
+.btn-discret:hover:not(:disabled) {
+    background: var(--vert-50);
+    color: var(--vert-900);
+}
+
+.btn-danger {
+    background: var(--negatif);
+    color: #ffffff;
+}
+
+.btn-danger:hover:not(:disabled) {
+    background: #8f2c23;
+    color: #ffffff;
+}
+
+.btn-icone {
+    width: 40px;
+    height: 40px;
+    min-height: 40px;
+    padding: 0;
+    border-radius: var(--rayon-s);
+    color: var(--vert-900);
+}
+
+.btn-icone:hover:not(:disabled) {
+    background: var(--vert-50);
+}
+
+.btn-icone svg {
+    stroke-width: 2.2;
+}
+
+/* Actions d'une ligne de liste : boutons compacts alignés à droite */
+.actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px;
+}
+
+.confirmation > span {
+    margin-right: 4px;
+    font-weight: 700;
+}
+
+/* ── Badges ── */
+
+.badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    height: 24px;
+    padding: 0 10px;
+    border-radius: 999px;
+    background: var(--vert-50);
+    color: var(--vert-700);
+    font-size: 12px;
+    font-weight: 700;
+    white-space: nowrap;
+    vertical-align: middle;
+}
+
+.badge svg {
+    width: 13px;
+    height: 13px;
+    stroke-width: 2.4;
+}
+
+a.badge:hover {
+    background: var(--vert-100);
+    text-decoration: none;
+}
+
+.badge-alerte {
+    background: var(--alerte-fond);
+    color: var(--alerte);
+}
+
+.badge-danger {
+    background: var(--negatif-fond);
+    color: var(--negatif);
+}
+
+/* ── Champs ── */
+
+.champ {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    min-width: 0;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--encre);
+}
+
+:where(input:not([type="checkbox"]):not([type="radio"]), select, textarea) {
+    height: 46px;
+    min-width: 0;
+    padding: 0 14px;
+    border: 1px solid var(--trait-champ);
+    border-radius: var(--rayon-m);
+    background: var(--blanc);
+    color: var(--encre);
+    font-size: 15px;
+    font-weight: 500;
+}
+
+:where(textarea) {
+    height: auto;
+    padding: 10px 14px;
+}
+
+input::placeholder,
+textarea::placeholder {
+    color: #7b8b82;
+}
+
+:where(
+    input:not([type="checkbox"]):not([type="radio"]),
+    select,
+    textarea
+):focus {
+    outline: none;
+    border-color: var(--vert-700);
+    box-shadow: 0 0 0 3px #1b5c4226;
+}
+
+input[aria-invalid="true"],
+.champ-invalide input {
+    border-color: var(--negatif);
+}
+
+input[type="checkbox"],
+input[type="radio"] {
+    width: 18px;
+    height: 18px;
+    margin: 0;
+    accent-color: var(--vert-700);
+}
+
+/* Champ montant : gros chiffres, « € » en suffixe dans le champ */
+.champ-montant {
+    position: relative;
+    display: flex;
+}
+
+.champ-montant input {
+    flex: 1;
+    width: 100%;
+    height: 58px;
+    padding-right: 44px;
+    font-size: 28px;
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+}
+
+.champ-montant .devise {
+    position: absolute;
+    right: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--encre-douce);
+    pointer-events: none;
+}
+
+.aide {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--encre-douce);
+}
+
+/* Message d'erreur : 12 px brique, précédé de l'icône circle-alert */
+.erreur {
+    display: flex;
+    align-items: flex-start;
+    gap: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--negatif);
+}
+
+.erreur > svg {
+    width: 14px;
+    height: 14px;
+    flex: none;
+    margin-top: 2px;
+    stroke-width: 2.2;
+}
+
+.message.erreur {
+    justify-content: center;
+    font-size: 14px;
+}
+
+/* ── Fenêtre modale ── */
+
+.voile {
+    position: fixed;
+    inset: 0;
+    z-index: 950;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 6vh 16px 16px;
+    background: #123f2e66;
+    overflow-y: auto;
+}
+
+.fenetre {
+    width: min(100%, 520px);
+    padding: 28px;
+    border-radius: var(--rayon-xl);
+    background: var(--blanc);
+    color: var(--encre);
+    box-shadow: var(--ombre-fenetre);
+}
+
+.titre-fenetre {
+    margin-bottom: 18px;
+    font-size: 20px;
+    font-weight: 800;
+}
+
+.fenetre form {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.deux-colonnes {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+}
+
+.pied-fenetre {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 4px;
+    margin-top: 4px;
+}
+
+/* Les trois boutons du pied tiennent sur une ligne dans 520 px */
+.pied-fenetre .btn {
+    padding: 0 12px;
+}
+
+.pied-fenetre .btn-discret {
+    padding: 0 10px;
+}
+
+.pied-fenetre .btn-principal {
+    padding: 0 20px;
+}
+
+@media (max-width: 640px) {
+    .fenetre {
+        padding: 22px 18px;
+    }
+
+    .deux-colonnes {
+        grid-template-columns: 1fr;
+    }
+
+    .pied-fenetre .btn {
+        flex: 1 1 100%;
+    }
+}

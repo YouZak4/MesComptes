@@ -33,8 +33,8 @@ function choisir(id: Onglet) {
 <template>
     <EnTeteComponent />
 
-    <main class="reglages">
-        <h1>Réglages</h1>
+    <main class="page page-etroite reglages">
+        <h1 class="titre-page">Réglages</h1>
 
         <nav class="onglets" role="tablist">
             <button

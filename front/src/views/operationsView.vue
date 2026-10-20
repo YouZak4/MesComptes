@@ -5,14 +5,12 @@ import { comptesService } from "@/services/comptesService.ts";
 import { useReferentiels } from "@/composables/useReferentiels.ts";
 import { useNotificationStore } from "@/stores/notification";
 import { useSaisieStore } from "@/stores/saisie";
+import { Pencil, Receipt, Repeat, SearchX, Trash } from "@lucide/vue";
 import EnTeteComponent from "@/components/EnTeteComponent.vue";
-import type { Operation, Periode, TypeOperation } from "@/types/comptes.ts";
-import {
-    formatDateLongue,
-    formatMontant,
-    formatMontantSigne,
-    versIso,
-} from "@/utils/format.ts";
+import LigneOperationComponent from "@/components/LigneOperationComponent.vue";
+import SelecteurPeriodeComponent from "@/components/SelecteurPeriodeComponent.vue";
+import type { Operation, Periode } from "@/types/comptes.ts";
+import { formatDateLongue, formatMontant, versIso } from "@/utils/format.ts";
 import { messageErreur } from "@/utils/erreurs.ts";
 import { idConnu, idDepuisQuery } from "@/utils/routage.ts";
 
@@ -28,7 +26,7 @@ const {
     nomsComptes,
     chargerReferentiels,
     titre,
-    icone,
+    categorie,
     details: detailsOperation,
 } = useReferentiels();
 
@@ -80,6 +78,20 @@ const periodeSuivante = computed(() =>
 function allerALaPeriode(p: Periode | null) {
     if (p) changerFiltre("periode", String(p.id));
 }
+
+// Sans période dans l'URL, c'est celle d'aujourd'hui qui est choisie
+function allerALaPeriodeCourante() {
+    changerFiltre("periode", "");
+}
+
+const periodeEnCours = computed(() => {
+    if (!periode.value) return true;
+    const aujourdhui = versIso(new Date());
+    return (
+        periode.value.dateDebut <= aujourdhui &&
+        aujourdhui <= periode.value.dateFin
+    );
+});
 
 // ── Chargement ──
 
@@ -258,10 +270,6 @@ function details(op: Operation): string {
     );
 }
 
-function classeMontant(type: TypeOperation): string {
-    return type === "DEPENSE" ? "depense" : "revenu";
-}
-
 // ── Actions ──
 
 function modifier(op: Operation) {
@@ -314,7 +322,7 @@ async function repeter(op: Operation) {
 <template>
     <EnTeteComponent />
 
-    <main class="operations">
+    <main class="page page-etroite operations">
         <p v-if="isLoading && periodes.length === 0" class="message">
             Chargement...
         </p>
@@ -322,11 +330,12 @@ async function repeter(op: Operation) {
         <p
             v-else-if="errorMessage && periodes.length === 0"
             class="message erreur"
+            role="alert"
         >
             {{ errorMessage }}
         </p>
 
-        <section v-else-if="!periode" class="carte message">
+        <section v-else-if="!periode" class="carte vide">
             Aucune période n'est encore définie.
             <RouterLink :to="{ name: 'accueil' }">
                 Créez-la depuis le tableau de bord.
@@ -334,32 +343,22 @@ async function repeter(op: Operation) {
         </section>
 
         <template v-else>
-            <div class="selecteur-periode">
-                <button
-                    type="button"
-                    class="fleche"
-                    aria-label="Période précédente"
-                    :disabled="periodePrecedente === null"
-                    @click="allerALaPeriode(periodePrecedente)"
-                >
-                    ‹
-                </button>
-                <div class="periode">
-                    <h1>Opérations · {{ periode.nom }}</h1>
-                    <p>
+            <div class="en-tete-page">
+                <div>
+                    <h1 class="titre-page">Opérations · {{ periode.nom }}</h1>
+                    <p class="sous-titre">
                         du {{ formatDateLongue(periode.dateDebut) }} au
                         {{ formatDateLongue(periode.dateFin) }}
                     </p>
                 </div>
-                <button
-                    type="button"
-                    class="fleche"
-                    aria-label="Période suivante"
-                    :disabled="periodeSuivante === null"
-                    @click="allerALaPeriode(periodeSuivante)"
-                >
-                    ›
-                </button>
+                <SelecteurPeriodeComponent
+                    :precedente="periodePrecedente !== null"
+                    :suivante="periodeSuivante !== null"
+                    :en-cours="periodeEnCours"
+                    @precedente="allerALaPeriode(periodePrecedente)"
+                    @suivante="allerALaPeriode(periodeSuivante)"
+                    @courante="allerALaPeriodeCourante"
+                />
             </div>
 
             <!-- Filtres -->
@@ -398,7 +397,7 @@ async function repeter(op: Operation) {
                         :key="c.id"
                         :value="c.id"
                     >
-                        {{ c.icone }} {{ c.nom }}
+                        {{ c.nom }}
                     </option>
                 </select>
                 <select
@@ -418,14 +417,14 @@ async function repeter(op: Operation) {
                 <button
                     v-if="filtresActifs"
                     type="button"
-                    class="bouton-lien"
+                    class="btn btn-discret"
                     @click="effacerFiltres"
                 >
                     Effacer les filtres
                 </button>
             </div>
 
-            <p v-if="errorMessage" class="message erreur">
+            <p v-if="errorMessage" class="message erreur" role="alert">
                 {{ errorMessage }}
             </p>
 
@@ -435,11 +434,11 @@ async function repeter(op: Operation) {
                 {{ operations.length > 1 ? "opérations" : "opération" }}
                 <template v-if="operations.length > 0">
                     ·
-                    <span class="revenu">
+                    <span class="num positif">
                         {{ formatMontant(totaux.revenus) }} de revenus
                     </span>
                     ·
-                    <span class="depense">
+                    <span class="num negatif">
                         {{ formatMontant(totaux.depenses) }} de dépenses
                     </span>
                 </template>
@@ -447,102 +446,102 @@ async function repeter(op: Operation) {
 
             <section class="carte liste" :class="{ rechargement: isLoading }">
                 <p v-if="operations.length === 0 && !isLoading" class="vide">
-                    {{
-                        filtresActifs
-                            ? "Aucune opération ne correspond à ces filtres."
-                            : "Aucune opération sur la période. Appuyez sur N ou sur « + » pour en saisir une."
-                    }}
+                    <template v-if="filtresActifs">
+                        <SearchX aria-hidden="true" />
+                        Aucune opération ne correspond à ces filtres.
+                    </template>
+                    <template v-else>
+                        <Receipt aria-hidden="true" />
+                        Aucune opération sur la période. Appuyez sur N ou sur «
+                        Nouvelle opération » pour en saisir une.
+                    </template>
                 </p>
 
                 <div v-for="jour in parJour" :key="jour.date" class="jour">
-                    <h2>{{ formatDateLongue(jour.date) }}</h2>
-                    <ul>
-                        <li v-for="op in jour.operations" :key="op.id">
-                            <span class="icone">{{
-                                icone(op.categorieId)
-                            }}</span>
-                            <div class="texte">
-                                <span class="titre">
-                                    {{ titre(op) }}
-                                    <RouterLink
-                                        v-if="op.recurrenceId !== null"
-                                        :to="{
-                                            name: 'recurrences',
-                                            query: {
-                                                recurrence: op.recurrenceId,
-                                            },
-                                        }"
-                                        class="badge"
-                                        title="Générée par une récurrence (voir la récurrence)"
-                                        >🔁</RouterLink
-                                    >
-                                </span>
-                                <span v-if="details(op)" class="details">
-                                    {{ details(op) }}
-                                </span>
-                            </div>
-                            <span
-                                class="montant"
-                                :class="classeMontant(op.type)"
-                            >
-                                {{ formatMontantSigne(op.montant, op.type) }}
-                            </span>
+                    <h2 class="date-jour">
+                        {{ formatDateLongue(jour.date) }}
+                    </h2>
+                    <ul class="nue">
+                        <LigneOperationComponent
+                            v-for="op in jour.operations"
+                            :key="op.id"
+                            :categorie="categorie(op.categorieId)"
+                            :titre="titre(op)"
+                            :meta="details(op)"
+                            :montant="op.montant"
+                            :type="op.type"
+                        >
+                            <template v-if="op.recurrenceId !== null" #badges>
+                                <RouterLink
+                                    :to="{
+                                        name: 'recurrences',
+                                        query: { recurrence: op.recurrenceId },
+                                    }"
+                                    class="badge"
+                                    title="Générée par une récurrence (voir la récurrence)"
+                                >
+                                    <Repeat aria-hidden="true" />
+                                    Récurrente
+                                </RouterLink>
+                            </template>
 
-                            <div
-                                v-if="aSupprimer === op.id"
-                                class="actions confirmation"
-                            >
-                                <span>Supprimer ?</span>
-                                <button
-                                    type="button"
-                                    class="bouton-danger"
-                                    :disabled="enCours === op.id"
-                                    @click="supprimer(op)"
+                            <template #actions>
+                                <div
+                                    v-if="aSupprimer === op.id"
+                                    class="actions confirmation"
                                 >
-                                    Oui
-                                </button>
-                                <button
-                                    type="button"
-                                    class="bouton-action"
-                                    @click="aSupprimer = null"
-                                >
-                                    Non
-                                </button>
-                            </div>
-                            <div v-else class="actions">
-                                <button
-                                    type="button"
-                                    class="bouton-action"
-                                    title="Modifier"
-                                    aria-label="Modifier"
-                                    :disabled="enCours === op.id"
-                                    @click="modifier(op)"
-                                >
-                                    ✏️
-                                </button>
-                                <button
-                                    v-if="op.recurrenceId === null"
-                                    type="button"
-                                    class="bouton-action"
-                                    title="Répéter chaque mois"
-                                    aria-label="Répéter chaque mois"
-                                    :disabled="enCours === op.id"
-                                    @click="repeter(op)"
-                                >
-                                    🔁
-                                </button>
-                                <button
-                                    type="button"
-                                    class="bouton-action"
-                                    title="Supprimer"
-                                    aria-label="Supprimer"
-                                    :disabled="enCours === op.id"
-                                    @click="aSupprimer = op.id"
-                                >
-                                    🗑️
-                                </button>
-                            </div>
-                        </li>
+                                    <span>Supprimer ?</span>
+                                    <button
+                                        type="button"
+                                        class="btn btn-danger"
+                                        :disabled="enCours === op.id"
+                                        @click="supprimer(op)"
+                                    >
+                                        Supprimer
+                                    </button>
+                                    <button
+                                        type="button"
+                                        class="btn btn-discret"
+                                        @click="aSupprimer = null"
+                                    >
+                                        Annuler
+                                    </button>
+                                </div>
+                                <div v-else class="actions">
+                                    <button
+                                        type="button"
+                                        class="btn btn-icone"
+                                        title="Modifier"
+                                        aria-label="Modifier"
+                                        :disabled="enCours === op.id"
+                                        @click="modifier(op)"
+                                    >
+                                        <Pencil aria-hidden="true" />
+                                    </button>
+                                    <button
+                                        v-if="op.recurrenceId === null"
+                                        type="button"
+                                        class="btn btn-icone"
+                                        title="Répéter chaque mois"
+                                        aria-label="Répéter chaque mois"
+                                        :disabled="enCours === op.id"
+                                        @click="repeter(op)"
+                                    >
+                                        <Repeat aria-hidden="true" />
+                                    </button>
+                                    <button
+                                        type="button"
+                                        class="btn btn-icone"
+                                        title="Supprimer"
+                                        aria-label="Supprimer"
+                                        :disabled="enCours === op.id"
+                                        @click="aSupprimer = op.id"
+                                    >
+                                        <Trash aria-hidden="true" />
+                                    </button>
+                                </div>
+                            </template>
+                        </LigneOperationComponent>
                     </ul>
                 </div>
             </section>
@@ -551,104 +550,13 @@ async function repeter(op: Operation) {
 </template>
 
 <style scoped>
-.operations {
-    color: #45335c;
-    max-width: 900px;
-    margin: 0 auto;
-    padding: 1.5rem;
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-}
-
-h1 {
-    margin: 0;
-    font-size: 1.6rem;
-}
-
-.message {
-    text-align: center;
-}
-
-.erreur {
-    color: #c62727;
-}
-
-.carte {
-    background: #ffffff;
-    border: 1px solid #e3d3f1;
-    border-radius: 10px;
-    padding: 1.25rem;
-    box-shadow: 0 2px 6px rgba(69, 51, 92, 0.08);
-}
-
-.vide {
-    color: #81758e;
-    margin: 0;
-}
-
-.depense {
-    color: #c62727;
-}
-
-.revenu {
-    color: #14a81a;
-}
-
-.rechargement {
-    opacity: 0.5;
-    transition: opacity 0.2s;
-}
-
-/* Période */
-.selecteur-periode {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-}
-
-.periode p {
-    margin: 0.25rem 0 0;
-    color: #81758e;
-}
-
-.fleche {
-    flex-shrink: 0;
-    width: 2.25rem;
-    height: 2.25rem;
-    border: 1px solid #45335c;
-    border-radius: 50%;
-    background: #e3d3f1;
-    color: #45335c;
-    font-size: 1.4rem;
-    line-height: 1;
-    cursor: pointer;
-}
-
-.fleche:disabled {
-    opacity: 0.3;
-    cursor: default;
-}
-
 /* Filtres */
 .filtres {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
-    gap: 0.6rem;
-    padding: 0.9rem;
-}
-
-.filtres input,
-.filtres select {
-    padding: 0.5rem 0.75rem;
-    border: 1px solid #45335c;
-    border-radius: 10px;
-    background: #e3d3f1;
-    color: #000000;
-    font-size: 0.95rem;
-    font-family: inherit;
-    min-width: 0;
+    gap: 10px;
+    padding: 14px;
 }
 
 .recherche {
@@ -659,122 +567,41 @@ h1 {
     flex: 0 1 200px;
 }
 
-.bouton-lien {
-    border: none;
-    background: none;
-    color: #45335c;
-    text-decoration: underline;
-    cursor: pointer;
-    font-size: 0.9rem;
-}
-
 .resume {
-    margin: 0;
-    color: #81758e;
+    color: var(--encre-douce);
+    font-weight: 600;
 }
 
 /* Liste */
 .liste {
     display: flex;
     flex-direction: column;
-    gap: 1rem;
+    gap: 16px;
 }
 
-.jour h2 {
-    margin: 0 0 0.25rem;
-    font-size: 0.85rem;
-    font-weight: normal;
-    color: #81758e;
-    text-transform: capitalize;
+.date-jour {
+    margin-bottom: 2px;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--encre-douce);
 }
 
-ul {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-}
-
-li {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    padding: 0.6rem 0;
-    border-bottom: 1px solid #f1e9f8;
-}
-
-li:last-child {
-    border-bottom: none;
-}
-
-.icone {
-    width: 1.5rem;
-    text-align: center;
-}
-
-.texte {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    min-width: 0;
-}
-
-.titre {
-    font-weight: bold;
-}
-
-.badge {
-    font-size: 0.8rem;
-    margin-left: 0.25rem;
-    text-decoration: none;
-}
-
-.details {
-    font-size: 0.85rem;
-    color: #81758e;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-
-.montant {
-    font-weight: bold;
-    white-space: nowrap;
-}
-
+/* Largeur de trois boutons : les montants restent alignés en colonne, même sans « Répéter » */
 .actions {
-    display: flex;
-    align-items: center;
-    gap: 0.25rem;
+    flex-wrap: nowrap;
+    justify-content: flex-end;
+    min-width: 128px;
 }
 
-.confirmation span {
-    font-size: 0.85rem;
-    margin-right: 0.25rem;
-}
+@media (max-width: 640px) {
+    .filtres select {
+        flex: 1 1 100%;
+    }
 
-.bouton-action,
-.bouton-danger {
-    padding: 0.3rem 0.5rem;
-    border: 1px solid transparent;
-    border-radius: 8px;
-    background: none;
-    cursor: pointer;
-    font-size: 0.9rem;
-}
-
-.bouton-action:hover {
-    border-color: #e3d3f1;
-    background: #f7f2fb;
-}
-
-.bouton-danger {
-    background: #c62727;
-    color: #ffffff;
-}
-
-.bouton-action:disabled,
-.bouton-danger:disabled {
-    opacity: 0.5;
-    cursor: default;
+    /* Sur téléphone, les boutons passent sous le montant, alignés à droite */
+    .actions {
+        flex-basis: 100%;
+        margin-top: -4px;
+    }
 }
 </style>

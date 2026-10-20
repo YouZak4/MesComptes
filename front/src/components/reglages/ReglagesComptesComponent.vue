@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from "vue";
+import { Archive, CircleAlert, Pencil, Plus } from "@lucide/vue";
 import { vFocus } from "@/directives/focus.ts";
 import { comptesService } from "@/services/comptesService.ts";
 import { useNotificationStore } from "@/stores/notification";
@@ -217,20 +218,21 @@ async function desarchiver(compte: Compte) {
                     <div class="actions">
                         <button
                             type="submit"
-                            class="bouton-principal"
+                            class="btn btn-secondaire"
                             :disabled="enregistrementEnCours"
                         >
                             Enregistrer
                         </button>
                         <button
                             type="button"
-                            class="bouton-secondaire"
+                            class="btn btn-discret"
                             @click="annuler"
                         >
                             Annuler
                         </button>
                     </div>
                     <p v-if="erreurFormulaire" class="erreur" role="alert">
+                        <CircleAlert aria-hidden="true" />
                         {{ erreurFormulaire }}
                     </p>
                 </form>
@@ -250,8 +252,8 @@ async function desarchiver(compte: Compte) {
                         </span>
                     </div>
                     <span
-                        class="solde"
-                        :class="compte.solde < 0 ? 'depense' : 'revenu'"
+                        class="solde num"
+                        :class="{ negatif: compte.solde < 0 }"
                     >
                         {{ formatMontant(compte.solde) }}
                     </span>
@@ -263,35 +265,35 @@ async function desarchiver(compte: Compte) {
                         <span>Retirer ce compte ?</span>
                         <button
                             type="button"
-                            class="bouton-danger"
+                            class="btn btn-danger"
                             :disabled="enCours === compte.id"
                             @click="retirer(compte)"
                         >
-                            Oui
+                            Retirer
                         </button>
                         <button
                             type="button"
-                            class="bouton-action"
+                            class="btn btn-discret"
                             @click="aRetirer = null"
                         >
-                            Non
+                            Annuler
                         </button>
                     </div>
                     <div v-else class="actions">
                         <button
                             type="button"
-                            class="bouton-action"
+                            class="btn btn-icone"
                             title="Modifier"
                             aria-label="Modifier"
                             :disabled="enCours === compte.id"
                             @click="ouvrirModification(compte)"
                         >
-                            ✏️
+                            <Pencil aria-hidden="true" />
                         </button>
                         <button
                             v-if="compte.archive"
                             type="button"
-                            class="bouton-action"
+                            class="btn btn-discret"
                             :disabled="enCours === compte.id"
                             @click="desarchiver(compte)"
                         >
@@ -300,13 +302,13 @@ async function desarchiver(compte: Compte) {
                         <button
                             v-else
                             type="button"
-                            class="bouton-action"
+                            class="btn btn-icone"
                             title="Archiver (ou supprimer s'il n'a aucune opération)"
                             aria-label="Retirer"
                             :disabled="enCours === compte.id"
                             @click="aRetirer = compte.id"
                         >
-                            🗄️
+                            <Archive aria-hidden="true" />
                         </button>
                     </div>
                 </template>
@@ -345,37 +347,35 @@ async function desarchiver(compte: Compte) {
             <div class="actions">
                 <button
                     type="submit"
-                    class="bouton-principal"
+                    class="btn btn-secondaire"
                     :disabled="enregistrementEnCours"
                 >
                     Ajouter
                 </button>
-                <button
-                    type="button"
-                    class="bouton-secondaire"
-                    @click="annuler"
-                >
+                <button type="button" class="btn btn-discret" @click="annuler">
                     Annuler
                 </button>
             </div>
             <p v-if="erreurFormulaire" class="erreur" role="alert">
+                <CircleAlert aria-hidden="true" />
                 {{ erreurFormulaire }}
             </p>
         </form>
         <button
             v-else
             type="button"
-            class="bouton-secondaire ajouter"
+            class="btn btn-secondaire ajouter"
             @click="ouvrirAjout"
         >
-            + Ajouter un compte
+            <Plus aria-hidden="true" />
+            Ajouter un compte
         </button>
     </section>
 </template>
 
 <style scoped>
 .liste {
-    margin: 0.75rem 0 !important;
+    margin: 12px 0 !important;
 }
 
 .edition,
@@ -384,8 +384,7 @@ async function desarchiver(compte: Compte) {
 }
 
 .ajout {
-    padding-top: 0.75rem;
-    border-top: 1px solid #f1e9f8;
+    padding-top: 12px;
 }
 
 .erreur {
@@ -393,7 +392,7 @@ async function desarchiver(compte: Compte) {
 }
 
 .solde {
-    font-weight: bold;
+    font-weight: 800;
     white-space: nowrap;
 }
 </style>

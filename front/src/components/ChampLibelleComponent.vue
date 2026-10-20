@@ -104,7 +104,7 @@ function surTouche(event: KeyboardEvent) {
 </script>
 
 <template>
-    <div class="champ-libelle">
+    <div class="champ">
         <label :for="id">Libellé</label>
         <!-- Conteneur de la liste : elle s'ouvre juste sous le champ, par-dessus le reste -->
         <div class="zone">
@@ -154,33 +154,10 @@ function surTouche(event: KeyboardEvent) {
 </template>
 
 <style scoped>
-.champ-libelle {
-    display: flex;
-    flex-direction: column;
-    gap: 0.3rem;
-    min-width: 0;
-}
-
 .zone {
     position: relative;
     display: flex;
     flex-direction: column;
-}
-
-input {
-    padding: 0.55rem 0.75rem;
-    border: 1px solid #45335c;
-    border-radius: 10px;
-    background: #e3d3f1;
-    color: #000000;
-    font-size: 0.95rem;
-    font-family: inherit;
-    min-width: 0;
-}
-
-input:focus {
-    outline: 2px solid #45335c;
-    outline-offset: 1px;
 }
 
 .suggestions {
@@ -189,29 +166,26 @@ input:focus {
     left: 0;
     right: 0;
     z-index: 1;
-    margin: 0.25rem 0 0;
-    padding: 0.25rem 0;
+    margin: 6px 0 0;
+    padding: 6px;
     list-style: none;
     max-height: 14rem;
     overflow-y: auto;
-    border: 1px solid #45335c;
-    border-radius: 10px;
-    background: #ffffff;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    border-radius: var(--rayon-l);
+    background: var(--blanc);
+    box-shadow: var(--ombre-fenetre);
+    font-size: 14px;
+    font-weight: 600;
 }
 
 .suggestions li {
-    padding: 0.45rem 0.75rem;
+    padding: 9px 12px;
+    border-radius: var(--rayon-s);
     cursor: pointer;
 }
 
 .suggestions li.active {
-    background: #e3d3f1;
-}
-
-.aide {
-    margin: 0;
-    font-size: 0.85rem;
-    color: #81758e;
+    background: var(--vert-50);
+    color: var(--vert-700);
 }
 </style>

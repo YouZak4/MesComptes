@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, nextTick, onMounted, onUnmounted, ref, watch } from "vue";
+import { CircleAlert } from "@lucide/vue";
 import ChampLibelleComponent from "@/components/ChampLibelleComponent.vue";
 import { comptesService } from "@/services/comptesService.ts";
 import type {
@@ -239,14 +240,14 @@ async function enregistrer() {
 
 <template>
     <Teleport to="body">
-        <div class="fond" @mousedown.self="emit('fermer')">
+        <div class="voile" @mousedown.self="emit('fermer')">
             <div
                 class="fenetre"
                 role="dialog"
                 aria-modal="true"
                 aria-labelledby="titre-recurrence"
             >
-                <h2 id="titre-recurrence">
+                <h2 id="titre-recurrence" class="titre-fenetre">
                     {{
                         enModification
                             ? "Modifier la récurrence"
@@ -257,7 +258,7 @@ async function enregistrer() {
                 <form @submit.prevent="enregistrer">
                     <label class="champ">
                         Montant
-                        <span class="montant">
+                        <span class="champ-montant">
                             <input
                                 ref="champMontant"
                                 v-model="montantTexte"
@@ -267,7 +268,7 @@ async function enregistrer() {
                                 placeholder="0,00"
                                 required
                             />
-                            <span class="devise">€</span>
+                            <span class="devise" aria-hidden="true">€</span>
                         </span>
                     </label>
 
@@ -277,7 +278,7 @@ async function enregistrer() {
                         v-model:libelle="libelleExistant"
                     />
 
-                    <div class="ligne">
+                    <div class="deux-colonnes">
                         <label class="champ">
                             Catégorie
                             <select v-model="categorieId" required>
@@ -294,7 +295,7 @@ async function enregistrer() {
                                         :key="c.id"
                                         :value="c.id"
                                     >
-                                        {{ c.icone }} {{ c.nom }}
+                                        {{ c.nom }}
                                     </option>
                                 </optgroup>
                                 <optgroup label="Revenus">
@@ -303,7 +304,7 @@ async function enregistrer() {
                                         :key="c.id"
                                         :value="c.id"
                                     >
-                                        {{ c.icone }} {{ c.nom }}
+                                        {{ c.nom }}
                                     </option>
                                 </optgroup>
                             </select>
@@ -337,7 +338,7 @@ async function enregistrer() {
                     <fieldset class="calendrier">
                         <legend>Calendrier</legend>
 
-                        <div class="ligne">
+                        <div class="deux-colonnes">
                             <label class="champ">
                                 Fréquence
                                 <select v-model="frequence">
@@ -363,7 +364,7 @@ async function enregistrer() {
                             </label>
                         </div>
 
-                        <div class="ligne">
+                        <div class="deux-colonnes">
                             <label class="champ">
                                 À partir du
                                 <input
@@ -416,20 +417,21 @@ async function enregistrer() {
                     </label>
 
                     <p v-if="erreur" class="erreur" role="alert">
+                        <CircleAlert aria-hidden="true" />
                         {{ erreur }}
                     </p>
 
-                    <div class="actions">
+                    <div class="pied-fenetre">
                         <button
                             type="button"
-                            class="bouton-secondaire"
+                            class="btn btn-discret"
                             @click="emit('fermer')"
                         >
                             Annuler
                         </button>
                         <button
                             type="submit"
-                            class="bouton-principal"
+                            class="btn btn-principal"
                             :disabled="enregistrementEnCours"
                         >
                             Enregistrer
@@ -442,147 +444,31 @@ async function enregistrer() {
 </template>
 
 <style scoped>
-.fond {
-    position: fixed;
-    inset: 0;
-    z-index: 950;
-    display: flex;
-    align-items: flex-start;
-    justify-content: center;
-    padding: 6vh 1rem 1rem;
-    background: rgba(30, 20, 45, 0.45);
-    overflow-y: auto;
-}
-
-.fenetre {
-    width: min(100%, 520px);
-    padding: 1.5rem;
-    border-radius: 12px;
-    background: #ffffff;
-    color: #45335c;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
-}
-
-h2 {
-    margin: 0 0 1rem;
-    font-size: 1.25rem;
-}
-
-form {
-    display: flex;
-    flex-direction: column;
-    gap: 0.85rem;
-}
-
-.champ {
-    display: flex;
-    flex-direction: column;
-    gap: 0.3rem;
-    min-width: 0;
-}
-
-.ligne {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 0.75rem;
-}
-
 .calendrier {
     display: flex;
     flex-direction: column;
-    gap: 0.6rem;
+    gap: 12px;
     margin: 0;
-    padding: 0.75rem;
-    border: 1px solid #e3d3f1;
-    border-radius: 10px;
+    padding: 14px;
+    border: 0;
+    border-radius: var(--rayon-l);
+    background: var(--vert-50);
 }
 
+/* Légende posée en haut de l'encart (et non sur sa bordure) */
 legend {
-    padding: 0 0.35rem;
-    font-weight: bold;
+    float: left;
+    width: 100%;
+    padding: 0;
+    font-size: 13px;
+    font-weight: 800;
 }
 
-input,
-select {
-    padding: 0.55rem 0.75rem;
-    border: 1px solid #45335c;
-    border-radius: 10px;
-    background: #e3d3f1;
-    color: #000000;
-    font-size: 0.95rem;
-    font-family: inherit;
-    min-width: 0;
-}
-
-input:focus,
-select:focus {
-    outline: 2px solid #45335c;
-    outline-offset: 1px;
-}
-
-.montant {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-}
-
-.montant input {
-    flex: 1;
-    font-size: 1.5rem;
-    font-weight: bold;
-}
-
-.devise {
-    font-size: 1.5rem;
-    font-weight: bold;
+legend + * {
+    clear: both;
 }
 
 .resume {
-    margin: 0;
-    font-weight: bold;
-}
-
-.aide {
-    margin: 0;
-    font-size: 0.85rem;
-    color: #81758e;
-}
-
-.erreur {
-    margin: 0;
-    color: #c62727;
-}
-
-.actions {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: flex-end;
-    gap: 0.5rem;
-    margin-top: 0.25rem;
-}
-
-.bouton-principal,
-.bouton-secondaire {
-    padding: 0.6rem 1rem;
-    border-radius: 10px;
-    font-size: 0.95rem;
-    cursor: pointer;
-}
-
-.bouton-principal {
-    border: none;
-    background: #45335c;
-    color: #ffffff;
-}
-
-.bouton-secondaire {
-    border: 1px solid #45335c;
-    background: transparent;
-    color: #45335c;
-}
-
-.bouton-principal:disabled {
-    opacity: 0.6;
-    cursor: default;
+    font-weight: 700;
 }
 </style>

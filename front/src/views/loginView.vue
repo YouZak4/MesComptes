@@ -4,7 +4,9 @@ import { useRouter } from "vue-router";
 import api from "@/services/api";
 import { useAuthStore } from "@/stores/auth";
 import { useNotificationStore } from "@/stores/notification";
+import { TrendingUp } from "@lucide/vue";
 import InputComponent from "@/components/InputComponent.vue";
+import "@/styles/connexion.css";
 
 const router = useRouter();
 const auth = useAuthStore();
@@ -95,14 +97,21 @@ async function register() {
 </script>
 
 <template>
-    <div class="main-container">
-        <h1>Bienvenue sur : Mes comptes</h1>
-        <h2>Votre outil de gestion de comptes</h2>
+    <main class="connexion">
+        <div class="carte carte-connexion">
+            <div class="entete">
+                <h1 class="marque">
+                    <span class="logo" aria-hidden="true">
+                        <TrendingUp :size="20" :stroke-width="2.2" />
+                    </span>
+                    Mes comptes
+                </h1>
+                <p class="accroche">Votre outil de suivi des dépenses</p>
+            </div>
 
-        <!-- ── Formulaire de connexion ── -->
-        <div v-if="isRegister" class="login-container">
-            <form @submit.prevent="login">
-                <h2>Se connecter à Mes comptes</h2>
+            <!-- ── Formulaire de connexion ── -->
+            <form v-if="isRegister" @submit.prevent="login">
+                <h2 class="titre-formulaire">Se connecter</h2>
 
                 <InputComponent
                     v-model="identifiantLogin"
@@ -127,27 +136,27 @@ async function register() {
                     @valid="validityLogin.motDePasse = $event"
                 />
 
-                <button
-                    type="submit"
-                    class="login-button"
-                    :disabled="!loginFormValid"
-                >
-                    Connexion
-                </button>
-                <button
-                    type="button"
-                    class="login-button"
-                    @click="isRegister = false"
-                >
-                    Créer un nouveau compte
-                </button>
+                <div class="boutons">
+                    <button
+                        type="submit"
+                        class="btn btn-principal"
+                        :disabled="!loginFormValid"
+                    >
+                        Connexion
+                    </button>
+                    <button
+                        type="button"
+                        class="btn btn-discret"
+                        @click="isRegister = false"
+                    >
+                        Créer un nouveau compte
+                    </button>
+                </div>
             </form>
-        </div>
 
-        <!-- ── Formulaire d'inscription ── -->
-        <div v-if="!isRegister" class="register-container">
-            <form @submit.prevent="register">
-                <h2>Créez un compte pour utiliser Mes comptes</h2>
+            <!-- ── Formulaire d'inscription ── -->
+            <form v-else @submit.prevent="register">
+                <h2 class="titre-formulaire">Créer un compte</h2>
 
                 <InputComponent
                     v-model="nomRegister"
@@ -209,51 +218,23 @@ async function register() {
                     @valid="validityRegister.email = $event"
                 />
 
-                <button
-                    type="submit"
-                    class="register-button"
-                    :disabled="!registerFormValid"
-                >
-                    Créer mon compte
-                </button>
-                <button
-                    type="button"
-                    class="register-button"
-                    @click="isRegister = true"
-                >
-                    J'ai déjà un compte
-                </button>
+                <div class="boutons">
+                    <button
+                        type="submit"
+                        class="btn btn-principal"
+                        :disabled="!registerFormValid"
+                    >
+                        Créer mon compte
+                    </button>
+                    <button
+                        type="button"
+                        class="btn btn-discret"
+                        @click="isRegister = true"
+                    >
+                        J'ai déjà un compte
+                    </button>
+                </div>
             </form>
         </div>
-    </div>
+    </main>
 </template>
-
-<style scoped>
-.main-container {
-    font-family: Arial, Helvetica, sans-serif;
-    font-size: 1rem;
-    width: 25%;
-    margin: 10% auto auto;
-    display: flex;
-    flex-direction: column;
-    text-align: center;
-
-    .register-container {
-        display: flex;
-        flex-direction: column;
-        padding: 1.5rem;
-
-        form {
-            display: flex;
-            flex-direction: column;
-            gap: 0.75rem;
-        }
-    }
-
-    .login-button,
-    .register-button {
-        display: block;
-        margin: 0.5rem auto;
-    }
-}
-</style>
