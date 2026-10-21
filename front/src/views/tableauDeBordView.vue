@@ -1,11 +1,12 @@
 <script setup lang="ts">
-import { computed, onMounted, ref, watch } from "vue";
+import { computed, onMounted, onUnmounted, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import {
     ArrowDown,
     ArrowUp,
     CalendarClock,
     ChartPie,
+    ChevronDown,
     Receipt,
 } from "@lucide/vue";
 import { comptesService } from "@/services/comptesService.ts";
@@ -13,6 +14,7 @@ import { useReferentiels } from "@/composables/useReferentiels.ts";
 import { useSaisieStore } from "@/stores/saisie";
 import EnTeteComponent from "@/components/EnTeteComponent.vue";
 import LigneOperationComponent from "@/components/LigneOperationComponent.vue";
+import LigneRepartitionComponent from "@/components/LigneRepartitionComponent.vue";
 import PastilleCategorieComponent from "@/components/PastilleCategorieComponent.vue";
 import SelecteurPeriodeComponent from "@/components/SelecteurPeriodeComponent.vue";
 import type {
@@ -97,6 +99,14 @@ onMounted(async () => {
     await chargerTableau();
 });
 
+// Une nouvelle opération est datée dans la période affichée
+watch(
+    () => tableau.value?.periode ?? null,
+    (p) => saisie.afficherPeriode(p),
+    { immediate: true }
+);
+onUnmounted(() => saisie.oublierPeriode(tableau.value?.periode ?? null));
+
 watch([periodeId, compteId], chargerTableau);
 // Une opération saisie depuis la saisie rapide : les totaux changent, et un libellé a pu être créé
 watch(
@@ -178,6 +188,8 @@ interface Segment {
     pastille: Pick<Categorie, "icone" | "couleur" | "type">;
     // Absent pour « Autres »
     detail?: TotalCategorie;
+    // « Autres » seulement : les petites catégories qu'il regroupe
+    regroupees?: Segment[];
 }
 
 const repartition = computed<Segment[]>(() => {
@@ -194,9 +206,8 @@ const repartition = computed<Segment[]>(() => {
     });
     if (liste.length <= MAX_SEGMENTS) return liste.map(segment);
     const gardees = liste.slice(0, MAX_SEGMENTS - 1);
-    const reste = liste
-        .slice(MAX_SEGMENTS - 1)
-        .reduce((s, t) => s + t.total, 0);
+    const petites = liste.slice(MAX_SEGMENTS - 1);
+    const reste = petites.reduce((s, t) => s + t.total, 0);
     return [
         ...gardees.map(segment),
         {
@@ -205,9 +216,13 @@ const repartition = computed<Segment[]>(() => {
             total: Math.round(reste * 100) / 100,
             part: part(reste),
             pastille: { icone: "package", couleur: "#6B7079", type: "DEPENSE" },
+            regroupees: petites.map(segment),
         },
     ];
 });
+
+// « Autres » déplié dans la légende : le détail des catégories qu'il regroupe
+const autresDeplies = ref(false);
 
 const totalDepensesCategories = computed(() =>
     depensesParCategorie.value.reduce((s, t) => s + t.total, 0)
@@ -386,42 +401,79 @@ const libelleSoldeComptes = computed(() =>
                             </div>
                         </div>
                         <ul class="nue legende">
-                            <li v-for="s in repartition" :key="s.cle">
-                                <PastilleCategorieComponent
-                                    :categorie="s.pastille"
-                                />
-                                <div class="texte">
-                                    <div class="nom-montant">
-                                        <span>{{ s.nom }}</span>
-                                        <span class="num">
-                                            {{ formatMontant(s.total) }}
-                                        </span>
-                                    </div>
-                                    <span class="meta">
-                                        {{ formatPourcentage(s.part) }} des
-                                        dépenses
-                                        <template
-                                            v-if="
-                                                s.detail &&
-                                                tableau.periodePrecedenteId !==
-                                                    null
-                                            "
+                            <template v-for="s in repartition" :key="s.cle">
+                                <!-- « Autres » : un bouton qui déplie les catégories regroupées -->
+                                <li v-if="s.regroupees" class="autres">
+                                    <button
+                                        type="button"
+                                        class="ligne-autres"
+                                        :aria-expanded="autresDeplies"
+                                        aria-controls="detail-autres"
+                                        @click="autresDeplies = !autresDeplies"
+                                    >
+                                        <LigneRepartitionComponent
+                                            :nom="s.nom"
+                                            :total="s.total"
+                                            :part="s.part"
+                                            :pastille="s.pastille"
+                                            :detail="s.detail"
+                                            :avec-ecart="false"
                                         >
-                                            ·
-                                            <span
-                                                class="ecart num"
-                                                :class="classeEcart(s.detail)"
-                                                :title="`Période précédente : ${formatMontant(s.detail.totalPrecedent)}`"
-                                            >
-                                                {{
-                                                    formatEcart(s.detail.ecart)
-                                                }}
-                                                vs période précédente
-                                            </span>
-                                        </template>
-                                    </span>
-                                </div>
-                            </li>
+                                            <template #meta>
+                                                ·
+                                                <span class="lien-detail">
+                                                    {{
+                                                        autresDeplies
+                                                            ? "Masquer"
+                                                            : "Voir"
+                                                    }}
+                                                    les
+                                                    {{ s.regroupees.length }}
+                                                    catégories
+                                                </span>
+                                            </template>
+                                        </LigneRepartitionComponent>
+                                        <ChevronDown
+                                            class="chevron"
+                                            aria-hidden="true"
+                                        />
+                                    </button>
+                                    <ul
+                                        v-show="autresDeplies"
+                                        id="detail-autres"
+                                        class="nue legende detail-autres"
+                                    >
+                                        <li
+                                            v-for="r in s.regroupees"
+                                            :key="r.cle"
+                                        >
+                                            <LigneRepartitionComponent
+                                                :nom="r.nom"
+                                                :total="r.total"
+                                                :part="r.part"
+                                                :pastille="r.pastille"
+                                                :detail="r.detail"
+                                                :avec-ecart="
+                                                    tableau.periodePrecedenteId !==
+                                                    null
+                                                "
+                                            />
+                                        </li>
+                                    </ul>
+                                </li>
+                                <li v-else>
+                                    <LigneRepartitionComponent
+                                        :nom="s.nom"
+                                        :total="s.total"
+                                        :part="s.part"
+                                        :pastille="s.pastille"
+                                        :detail="s.detail"
+                                        :avec-ecart="
+                                            tableau.periodePrecedenteId !== null
+                                        "
+                                    />
+                                </li>
+                            </template>
                         </ul>
                     </div>
 
@@ -753,6 +805,73 @@ const libelleSoldeComptes = computed(() =>
 
 .ecart {
     font-weight: 600;
+}
+
+/* « Autres » : toute la ligne est cliquable, un chevron et « Voir les N catégories » l'annoncent */
+.legende li.autres {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+}
+
+.ligne-autres {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: calc(100% + 16px);
+    margin: -8px;
+    padding: 8px;
+    border: none;
+    border-radius: var(--rayon-m);
+    background: none;
+    color: inherit;
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+}
+
+.ligne-autres:hover {
+    background: var(--vert-50);
+}
+
+.ligne-autres:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px #1b5c4226;
+}
+
+.lien-detail {
+    font-weight: 700;
+    color: var(--vert-700);
+}
+
+.ligne-autres:hover .lien-detail {
+    text-decoration: underline;
+}
+
+.chevron {
+    flex: none;
+    width: 18px;
+    height: 18px;
+    color: var(--vert-700);
+    transition: transform 0.2s;
+}
+
+.ligne-autres[aria-expanded="true"] .chevron {
+    transform: rotate(180deg);
+}
+
+/* Détail : en retrait sous « Autres », rattaché par un filet */
+.detail-autres {
+    gap: 12px;
+    margin-left: 18px;
+    padding-left: 18px;
+    border-left: 2px solid var(--trait);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .chevron {
+        transition: none;
+    }
 }
 
 /* Prévisions */

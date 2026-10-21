@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from "vue";
 import { CircleAlert, Pencil, Plus } from "@lucide/vue";
+import ChampDateComponent from "@/components/ChampDateComponent.vue";
 import { vFocus } from "@/directives/focus.ts";
 import { comptesService } from "@/services/comptesService.ts";
 import { useNotificationStore } from "@/stores/notification";
@@ -127,8 +128,13 @@ const premiereFin = ref(
 );
 
 async function creerPremiere() {
-    ajoutEnCours.value = true;
     erreurFormulaire.value = null;
+    if (premiereFin.value < premiereDebut.value) {
+        erreurFormulaire.value =
+            "La date de fin doit être postérieure ou égale à la date de début.";
+        return;
+    }
+    ajoutEnCours.value = true;
     try {
         await comptesService.creerPeriode(
             premiereDebut.value,
@@ -177,19 +183,17 @@ async function creerPremiere() {
             class="formulaire premiere"
             @submit.prevent="creerPremiere"
         >
-            <label class="champ">
-                Début
-                <input v-model="premiereDebut" type="date" required />
-            </label>
-            <label class="champ">
-                Fin
-                <input
-                    v-model="premiereFin"
-                    type="date"
-                    :min="premiereDebut"
-                    required
-                />
-            </label>
+            <ChampDateComponent
+                id="premiere-debut"
+                v-model="premiereDebut"
+                label="Début"
+            />
+            <ChampDateComponent
+                id="premiere-fin"
+                v-model="premiereFin"
+                label="Fin"
+                :min="premiereDebut"
+            />
             <button
                 type="submit"
                 class="btn btn-secondaire"
@@ -220,19 +224,17 @@ async function creerPremiere() {
                             :placeholder="`Par défaut : ${dateFin ? nomParDefaut(dateFin) : ''}`"
                         />
                     </label>
-                    <label class="champ">
-                        Début
-                        <input v-model="dateDebut" type="date" required />
-                    </label>
-                    <label class="champ">
-                        Fin
-                        <input
-                            v-model="dateFin"
-                            type="date"
-                            :min="dateDebut"
-                            required
-                        />
-                    </label>
+                    <ChampDateComponent
+                        :id="`periode-debut-${p.id}`"
+                        v-model="dateDebut"
+                        label="Début"
+                    />
+                    <ChampDateComponent
+                        :id="`periode-fin-${p.id}`"
+                        v-model="dateFin"
+                        label="Fin"
+                        :min="dateDebut"
+                    />
                     <div class="actions">
                         <button
                             type="submit"

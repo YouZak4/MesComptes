@@ -2,10 +2,12 @@
 import { computed, nextTick, onMounted, onUnmounted, ref, watch } from "vue";
 import { CircleAlert, Plus } from "@lucide/vue";
 import { comptesService } from "@/services/comptesService.ts";
+import ChampDateComponent from "@/components/ChampDateComponent.vue";
 import ChampLibelleComponent from "@/components/ChampLibelleComponent.vue";
+import LibellesDeCategorieComponent from "@/components/LibellesDeCategorieComponent.vue";
 import { useNotificationStore } from "@/stores/notification";
 import { type OperationAModifier, useSaisieStore } from "@/stores/saisie";
-import type { Categorie, Compte, Libelle } from "@/types/comptes.ts";
+import type { Categorie, Compte, Libelle, Periode } from "@/types/comptes.ts";
 import { versIso } from "@/utils/format.ts";
 import { messageErreur } from "@/utils/erreurs.ts";
 
@@ -14,6 +16,8 @@ const notification = useNotificationStore();
 
 const comptes = ref<Compte[]>([]);
 const categories = ref<Categorie[]>([]);
+// Pour le calendrier, qui montre une période entière
+const periodes = ref<Periode[]>([]);
 const chargementReferentiels = ref(false);
 const enregistrementEnCours = ref(false);
 const erreur = ref<string | null>(null);
@@ -93,10 +97,13 @@ const enModification = computed(() => saisie.aModifier !== null);
 async function chargerReferentiels() {
     chargementReferentiels.value = true;
     try {
-        const [listeComptes, listeCategories] = await Promise.all([
-            comptesService.getComptes(),
-            comptesService.getCategories(),
-        ]);
+        const [listeComptes, listeCategories, listePeriodes] =
+            await Promise.all([
+                comptesService.getComptes(),
+                comptesService.getCategories(),
+                comptesService.getPeriodes(),
+            ]);
+        periodes.value = listePeriodes;
         // Un compte ou une catégorie archivé(e) ou masqué(e) reste proposé(e) s'il est déjà celui de l'opération modifiée
         const actuelle = saisie.aModifier?.operation;
         comptes.value = listeComptes.filter(
@@ -121,6 +128,19 @@ async function chargerReferentiels() {
     }
 }
 
+// Aujourd'hui, sauf si l'écran affiche une autre période : son premier jour
+function dateParDefaut(): string {
+    const aujourdhui = versIso(new Date());
+    const periode = saisie.periodeAffichee;
+    if (
+        periode &&
+        (aujourdhui < periode.dateDebut || periode.dateFin < aujourdhui)
+    ) {
+        return periode.dateDebut;
+    }
+    return aujourdhui;
+}
+
 // Complète : remet tout à zéro. Sinon (« en ajouter une autre ») : garde la date et le compte
 function reinitialiser(complete: boolean) {
     montantTexte.value = "";
@@ -130,7 +150,7 @@ function reinitialiser(complete: boolean) {
     note.value = "";
     erreur.value = null;
     if (complete) {
-        date.value = versIso(new Date());
+        date.value = dateParDefaut();
         compteId.value = null;
     }
 }
@@ -158,6 +178,12 @@ watch(libelleExistant, (libelle) => {
         categorieId.value = libelle.categorieId;
     }
 });
+
+// Libellé choisi d'un clic parmi ceux de la catégorie
+function choisirLibelle(libelle: Libelle) {
+    libelleExistant.value = libelle;
+    libelleTexte.value = libelle.nom;
+}
 
 // ── Enregistrement ──
 
@@ -328,11 +354,19 @@ async function enregistrer(enAjouterUneAutre: boolean) {
                         </select>
                     </label>
 
+                    <LibellesDeCategorieComponent
+                        v-if="libelleExistant === null"
+                        :categorie-id="categorieId"
+                        @choisir="choisirLibelle"
+                    />
+
                     <div class="deux-colonnes">
-                        <label class="champ">
-                            Date
-                            <input v-model="date" type="date" required />
-                        </label>
+                        <ChampDateComponent
+                            id="saisie-date"
+                            v-model="date"
+                            label="Date"
+                            :periodes="periodes"
+                        />
 
                         <label class="champ">
                             Compte

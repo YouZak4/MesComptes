@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, ref, watch } from "vue";
+import { computed, onMounted, onUnmounted, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { comptesService } from "@/services/comptesService.ts";
 import { useReferentiels } from "@/composables/useReferentiels.ts";
@@ -158,6 +158,9 @@ watch(
 );
 // Une opération saisie ou modifiée : un libellé ou une période a pu être créé
 watch(() => saisie.nbEnregistrees, toutCharger);
+// Une nouvelle opération est datée dans la période affichée
+watch(periode, (p) => saisie.afficherPeriode(p), { immediate: true });
+onUnmounted(() => saisie.oublierPeriode(periode.value));
 
 // ── Filtres ──
 

@@ -1,7 +1,9 @@
 <script setup lang="ts">
 import { computed, nextTick, onMounted, onUnmounted, ref, watch } from "vue";
 import { CircleAlert } from "@lucide/vue";
+import ChampDateComponent from "@/components/ChampDateComponent.vue";
 import ChampLibelleComponent from "@/components/ChampLibelleComponent.vue";
+import LibellesDeCategorieComponent from "@/components/LibellesDeCategorieComponent.vue";
 import { comptesService } from "@/services/comptesService.ts";
 import type {
     Categorie,
@@ -126,6 +128,12 @@ const nouveauLibelle = computed(
 watch(libelleExistant, (libelle) => {
     if (libelle) categorieId.value = libelle.categorieId;
 });
+
+// Libellé choisi d'un clic parmi ceux de la catégorie
+function choisirLibelle(libelle: Libelle) {
+    libelleExistant.value = libelle;
+    libelleTexte.value = libelle.nom;
+}
 
 watch(dateDebut, (date) => {
     if (!jourModifie.value && date) jour.value = jourDe(date);
@@ -335,6 +343,12 @@ async function enregistrer() {
                         </label>
                     </div>
 
+                    <LibellesDeCategorieComponent
+                        v-if="libelleExistant === null"
+                        :categorie-id="categorieId"
+                        @choisir="choisirLibelle"
+                    />
+
                     <fieldset class="calendrier">
                         <legend>Calendrier</legend>
 
@@ -365,23 +379,19 @@ async function enregistrer() {
                         </div>
 
                         <div class="deux-colonnes">
-                            <label class="champ">
-                                À partir du
-                                <input
-                                    v-model="dateDebut"
-                                    type="date"
-                                    required
-                                />
-                            </label>
+                            <ChampDateComponent
+                                id="recurrence-debut"
+                                v-model="dateDebut"
+                                label="À partir du"
+                            />
 
-                            <label class="champ">
-                                Jusqu'au
-                                <input
-                                    v-model="dateFin"
-                                    type="date"
-                                    :min="dateDebut"
-                                />
-                            </label>
+                            <ChampDateComponent
+                                id="recurrence-fin"
+                                v-model="dateFin"
+                                label="Jusqu'au"
+                                :min="dateDebut"
+                                facultatif
+                            />
                         </div>
 
                         <p v-if="resume" class="resume">{{ resume }}</p>
