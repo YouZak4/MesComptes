@@ -87,7 +87,7 @@ Une opération est une dépense ou un revenu sur un compte, à une date ; c'est 
 | Champ | Obligatoire | Règle |
 | --- | --- | --- |
 | Compte | Oui | Par défaut, le dernier compte utilisé |
-| Date | Oui | Par défaut, aujourd'hui |
+| Date | Oui | Par défaut, aujourd'hui ; si l'écran affiche une autre période, son premier jour |
 | Type | Oui | Dépense ou revenu ; déduit de la catégorie |
 | Montant | Oui | Positif, 2 décimales, en euros ; le type donne le sens |
 | Catégorie | Oui | Remplie par le libellé, modifiable |
@@ -129,12 +129,16 @@ Cinq écrans suffisent pour la V1 ; l'écran principal est le tableau de bord, a
 
 1. **Tableau de bord de la période** — sélecteur de période (précédente / suivante) et de compte (un compte ou tous).
    - Trois chiffres : revenus, dépenses, solde de la période (l'équivalent de GAINS, PERTES, BENEFICES).
-   - Total par catégorie, trié du plus gros au plus petit, avec l'écart par rapport à la période précédente.
+   - Total par catégorie, trié du plus gros au plus petit, avec l'écart par rapport à la période précédente (« Identique à la période précédente » s'il est nul). Une catégorie sans dépense sur la période reste listée à 0 € si elle en avait sur la précédente, pour montrer l'écart.
+   - Au-delà de 6 catégories de dépenses, les plus petites sont regroupées en « Autres », qui se déplie pour montrer chacune avec son montant et sa part des dépenses.
    - Opérations récurrentes à venir et solde prévu en fin de période.
    - Liste des dernières opérations.
 2. **Saisie rapide** — une fenêtre ouverte par un bouton « + » toujours visible, et par le raccourci clavier N.
    - Montant en premier, puis libellé avec autocomplétion (les plus utilisés proposés d'abord), catégorie remplie automatiquement.
-   - Date et compte préremplis ; Entrée valide. « Enregistrer et en ajouter une autre » pour enchaîner.
+   - À l'inverse, une catégorie choisie sans libellé liste ses libellés : un clic en choisit un, sans devoir retrouver son nom ni passer par les réglages. Même chose dans le formulaire des récurrences.
+   - Date et compte préremplis ; Entrée valide. « Enregistrer et en ajouter une autre » pour enchaîner (la date est gardée).
+   - Depuis une période passée ou future (tableau de bord, opérations), la date proposée est le premier jour de cette période.
+   - Le calendrier de la date montre une période entière (du 25 juillet au 24 août…), même à cheval sur deux mois, et passe d'une période à l'autre. Hors des périodes connues, et dans les autres formulaires, il montre un mois civil.
 3. **Opérations** — liste de la période avec filtres (compte, catégorie, libellé, texte), modification et suppression.
 4. **Récurrences** — liste, création, modification, arrêt.
 5. **Réglages** — comptes, périodes (dates de début et de fin), catégories et libellés (créer, masquer, archiver), profil.
