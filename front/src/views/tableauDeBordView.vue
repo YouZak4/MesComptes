@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, ref, watch } from "vue";
+import { computed, onMounted, onUnmounted, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import {
     ArrowDown,
@@ -96,6 +96,14 @@ onMounted(async () => {
     referentielsCharges.value = true;
     await chargerTableau();
 });
+
+// Une nouvelle opération est datée dans la période affichée
+watch(
+    () => tableau.value?.periode ?? null,
+    (p) => saisie.afficherPeriode(p),
+    { immediate: true }
+);
+onUnmounted(() => saisie.oublierPeriode(tableau.value?.periode ?? null));
 
 watch([periodeId, compteId], chargerTableau);
 // Une opération saisie depuis la saisie rapide : les totaux changent, et un libellé a pu être créé

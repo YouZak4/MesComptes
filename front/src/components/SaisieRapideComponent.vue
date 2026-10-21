@@ -122,6 +122,19 @@ async function chargerReferentiels() {
     }
 }
 
+// Aujourd'hui, sauf si l'écran affiche une autre période : son premier jour
+function dateParDefaut(): string {
+    const aujourdhui = versIso(new Date());
+    const periode = saisie.periodeAffichee;
+    if (
+        periode &&
+        (aujourdhui < periode.dateDebut || periode.dateFin < aujourdhui)
+    ) {
+        return periode.dateDebut;
+    }
+    return aujourdhui;
+}
+
 // Complète : remet tout à zéro. Sinon (« en ajouter une autre ») : garde la date et le compte
 function reinitialiser(complete: boolean) {
     montantTexte.value = "";
@@ -131,7 +144,7 @@ function reinitialiser(complete: boolean) {
     note.value = "";
     erreur.value = null;
     if (complete) {
-        date.value = versIso(new Date());
+        date.value = dateParDefaut();
         compteId.value = null;
     }
 }
