@@ -39,10 +39,11 @@ export function formatMontantSigne(
     return (type === "DEPENSE" ? "−" : "+") + euros.format(montant);
 }
 
-// Écart avec la période précédente, toujours signé
+// Écart avec la période précédente, toujours signé ; « Identique » s'il est nul
 export function formatEcart(ecart: number): string {
-    if (ecart === 0) return "=";
-    return (ecart > 0 ? "+" : "−") + euros.format(Math.abs(ecart));
+    if (ecart === 0) return "Identique à la période précédente";
+    const montant = (ecart > 0 ? "+" : "−") + euros.format(Math.abs(ecart));
+    return `${montant} vs période précédente`;
 }
 
 // "2026-10-13" → Date locale (new Date("2026-10-13") serait en UTC et peut décaler d'un jour)

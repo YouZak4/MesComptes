@@ -386,7 +386,11 @@ const libelleSoldeComptes = computed(() =>
                         <ChartPie aria-hidden="true" />
                         Aucune dépense sur la période.
                     </p>
-                    <div v-else class="repartition">
+                    <div
+                        v-else
+                        class="repartition"
+                        :class="{ 'autres-deplies': autresDeplies }"
+                    >
                         <div
                             class="anneau"
                             role="img"
@@ -505,8 +509,7 @@ const libelleSoldeComptes = computed(() =>
                                             :class="classeEcart(t)"
                                             :title="`Période précédente : ${formatMontant(t.totalPrecedent)}`"
                                         >
-                                            {{ formatEcart(t.ecart) }} vs
-                                            période précédente
+                                            {{ formatEcart(t.ecart) }}
                                         </span>
                                     </span>
                                 </div>
@@ -741,6 +744,11 @@ const libelleSoldeComptes = computed(() =>
     flex-wrap: wrap;
     align-items: center;
     gap: 24px;
+}
+
+/* Légende allongée par le détail de « Autres » : l'anneau reste en haut */
+.repartition.autres-deplies {
+    align-items: flex-start;
 }
 
 .anneau {

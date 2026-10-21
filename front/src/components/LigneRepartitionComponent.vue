@@ -43,7 +43,7 @@ function classeEcart(t: TotalCategorie): string {
                     :class="classeEcart(detail)"
                     :title="`Période précédente : ${formatMontant(detail.totalPrecedent)}`"
                 >
-                    {{ formatEcart(detail.ecart) }} vs période précédente
+                    {{ formatEcart(detail.ecart) }}
                 </span>
             </template>
         </span>
