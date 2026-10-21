@@ -509,8 +509,7 @@ const libelleSoldeComptes = computed(() =>
                                             :class="classeEcart(t)"
                                             :title="`Période précédente : ${formatMontant(t.totalPrecedent)}`"
                                         >
-                                            {{ formatEcart(t.ecart) }} vs
-                                            période précédente
+                                            {{ formatEcart(t.ecart) }}
                                         </span>
                                     </span>
                                 </div>
