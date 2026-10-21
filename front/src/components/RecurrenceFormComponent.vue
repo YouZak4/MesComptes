@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, nextTick, onMounted, onUnmounted, ref, watch } from "vue";
 import { CircleAlert } from "@lucide/vue";
+import ChampDateComponent from "@/components/ChampDateComponent.vue";
 import ChampLibelleComponent from "@/components/ChampLibelleComponent.vue";
 import LibellesDeCategorieComponent from "@/components/LibellesDeCategorieComponent.vue";
 import { comptesService } from "@/services/comptesService.ts";
@@ -378,23 +379,19 @@ async function enregistrer() {
                         </div>
 
                         <div class="deux-colonnes">
-                            <label class="champ">
-                                À partir du
-                                <input
-                                    v-model="dateDebut"
-                                    type="date"
-                                    required
-                                />
-                            </label>
+                            <ChampDateComponent
+                                id="recurrence-debut"
+                                v-model="dateDebut"
+                                label="À partir du"
+                            />
 
-                            <label class="champ">
-                                Jusqu'au
-                                <input
-                                    v-model="dateFin"
-                                    type="date"
-                                    :min="dateDebut"
-                                />
-                            </label>
+                            <ChampDateComponent
+                                id="recurrence-fin"
+                                v-model="dateFin"
+                                label="Jusqu'au"
+                                :min="dateDebut"
+                                facultatif
+                            />
                         </div>
 
                         <p v-if="resume" class="resume">{{ resume }}</p>

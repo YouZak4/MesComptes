@@ -2,11 +2,12 @@
 import { computed, nextTick, onMounted, onUnmounted, ref, watch } from "vue";
 import { CircleAlert, Plus } from "@lucide/vue";
 import { comptesService } from "@/services/comptesService.ts";
+import ChampDateComponent from "@/components/ChampDateComponent.vue";
 import ChampLibelleComponent from "@/components/ChampLibelleComponent.vue";
 import LibellesDeCategorieComponent from "@/components/LibellesDeCategorieComponent.vue";
 import { useNotificationStore } from "@/stores/notification";
 import { type OperationAModifier, useSaisieStore } from "@/stores/saisie";
-import type { Categorie, Compte, Libelle } from "@/types/comptes.ts";
+import type { Categorie, Compte, Libelle, Periode } from "@/types/comptes.ts";
 import { versIso } from "@/utils/format.ts";
 import { messageErreur } from "@/utils/erreurs.ts";
 
@@ -15,6 +16,8 @@ const notification = useNotificationStore();
 
 const comptes = ref<Compte[]>([]);
 const categories = ref<Categorie[]>([]);
+// Pour le calendrier, qui montre une période entière
+const periodes = ref<Periode[]>([]);
 const chargementReferentiels = ref(false);
 const enregistrementEnCours = ref(false);
 const erreur = ref<string | null>(null);
@@ -94,10 +97,13 @@ const enModification = computed(() => saisie.aModifier !== null);
 async function chargerReferentiels() {
     chargementReferentiels.value = true;
     try {
-        const [listeComptes, listeCategories] = await Promise.all([
-            comptesService.getComptes(),
-            comptesService.getCategories(),
-        ]);
+        const [listeComptes, listeCategories, listePeriodes] =
+            await Promise.all([
+                comptesService.getComptes(),
+                comptesService.getCategories(),
+                comptesService.getPeriodes(),
+            ]);
+        periodes.value = listePeriodes;
         // Un compte ou une catégorie archivé(e) ou masqué(e) reste proposé(e) s'il est déjà celui de l'opération modifiée
         const actuelle = saisie.aModifier?.operation;
         comptes.value = listeComptes.filter(
@@ -355,10 +361,12 @@ async function enregistrer(enAjouterUneAutre: boolean) {
                     />
 
                     <div class="deux-colonnes">
-                        <label class="champ">
-                            Date
-                            <input v-model="date" type="date" required />
-                        </label>
+                        <ChampDateComponent
+                            id="saisie-date"
+                            v-model="date"
+                            label="Date"
+                            :periodes="periodes"
+                        />
 
                         <label class="champ">
                             Compte

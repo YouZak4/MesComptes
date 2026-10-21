@@ -2,6 +2,7 @@
 import { computed, onMounted, ref } from "vue";
 import { ArrowLeft, Check, CircleAlert } from "@lucide/vue";
 import { useRoute, useRouter } from "vue-router";
+import ChampDateComponent from "@/components/ChampDateComponent.vue";
 import EnTeteComponent from "@/components/EnTeteComponent.vue";
 import ReglagesComptesComponent from "@/components/reglages/ReglagesComptesComponent.vue";
 import RecurrencesCourantesComponent from "@/components/assistant/RecurrencesCourantesComponent.vue";
@@ -73,6 +74,11 @@ const creationEnCours = ref(false);
 async function creerPeriode() {
     if (creationEnCours.value) return;
     erreurPeriode.value = null;
+    if (fin.value < debut.value) {
+        erreurPeriode.value =
+            "La date de fin doit être postérieure ou égale à la date de début.";
+        return;
+    }
     creationEnCours.value = true;
     try {
         periode.value = await comptesService.creerPeriode(
@@ -152,14 +158,17 @@ function terminer(nbRecurrences: number) {
                 chacune ; vous pourrez ajuster leurs dates dans les réglages.
             </p>
             <form class="formulaire periode" @submit.prevent="creerPeriode">
-                <label class="champ">
-                    Début
-                    <input v-model="debut" type="date" required />
-                </label>
-                <label class="champ">
-                    Fin
-                    <input v-model="fin" type="date" :min="debut" required />
-                </label>
+                <ChampDateComponent
+                    id="bienvenue-debut"
+                    v-model="debut"
+                    label="Début"
+                />
+                <ChampDateComponent
+                    id="bienvenue-fin"
+                    v-model="fin"
+                    label="Fin"
+                    :min="debut"
+                />
                 <button
                     type="submit"
                     class="btn btn-secondaire"

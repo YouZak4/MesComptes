@@ -46,7 +46,7 @@ export function formatEcart(ecart: number): string {
 }
 
 // "2026-10-13" → Date locale (new Date("2026-10-13") serait en UTC et peut décaler d'un jour)
-function versDate(iso: string): Date {
+export function versDate(iso: string): Date {
     const [annee, mois, jour] = iso.split("-").map(Number);
     return new Date(annee, mois - 1, jour);
 }

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from "vue";
 import { Archive, CircleAlert, Pencil, Plus } from "@lucide/vue";
+import ChampDateComponent from "@/components/ChampDateComponent.vue";
 import { vFocus } from "@/directives/focus.ts";
 import { comptesService } from "@/services/comptesService.ts";
 import { useNotificationStore } from "@/stores/notification";
@@ -211,10 +212,11 @@ async function desarchiver(compte: Compte) {
                             required
                         />
                     </label>
-                    <label class="champ">
-                        Au
-                        <input v-model="dateSolde" type="date" required />
-                    </label>
+                    <ChampDateComponent
+                        :id="`compte-date-${enEdition}`"
+                        v-model="dateSolde"
+                        label="Au"
+                    />
                     <div class="actions">
                         <button
                             type="submit"
@@ -340,10 +342,11 @@ async function desarchiver(compte: Compte) {
                     required
                 />
             </label>
-            <label class="champ">
-                Au
-                <input v-model="dateSolde" type="date" required />
-            </label>
+            <ChampDateComponent
+                :id="`compte-date-${enEdition}`"
+                v-model="dateSolde"
+                label="Au"
+            />
             <div class="actions">
                 <button
                     type="submit"
