@@ -224,6 +224,20 @@ const repartition = computed<Segment[]>(() => {
 // « Autres » déplié dans la légende : le détail des catégories qu'il regroupe
 const autresDeplies = ref(false);
 
+// Décalage de l'anneau avant dépliage : il garde sa place au lieu de remonter
+const repartitionEl = ref<HTMLElement | null>(null);
+const anneauEl = ref<HTMLElement | null>(null);
+const decalageAnneau = ref(0);
+
+function basculerAutres() {
+    if (!autresDeplies.value && repartitionEl.value && anneauEl.value) {
+        decalageAnneau.value =
+            anneauEl.value.getBoundingClientRect().top -
+            repartitionEl.value.getBoundingClientRect().top;
+    }
+    autresDeplies.value = !autresDeplies.value;
+}
+
 const totalDepensesCategories = computed(() =>
     depensesParCategorie.value.reduce((s, t) => s + t.total, 0)
 );
@@ -388,14 +402,21 @@ const libelleSoldeComptes = computed(() =>
                     </p>
                     <div
                         v-else
+                        ref="repartitionEl"
                         class="repartition"
                         :class="{ 'autres-deplies': autresDeplies }"
                     >
                         <div
+                            ref="anneauEl"
                             class="anneau"
                             role="img"
                             :aria-label="descriptionAnneau"
-                            :style="{ background: fondAnneau }"
+                            :style="{
+                                background: fondAnneau,
+                                marginTop: autresDeplies
+                                    ? `${decalageAnneau}px`
+                                    : undefined,
+                            }"
                         >
                             <div class="anneau-centre">
                                 <span class="meta">Total</span>
@@ -413,7 +434,7 @@ const libelleSoldeComptes = computed(() =>
                                         class="ligne-autres"
                                         :aria-expanded="autresDeplies"
                                         aria-controls="detail-autres"
-                                        @click="autresDeplies = !autresDeplies"
+                                        @click="basculerAutres"
                                     >
                                         <LigneRepartitionComponent
                                             :nom="s.nom"
@@ -746,7 +767,7 @@ const libelleSoldeComptes = computed(() =>
     gap: 24px;
 }
 
-/* Légende allongée par le détail de « Autres » : l'anneau reste en haut */
+/* Légende allongée par le détail de « Autres » : l'anneau garde sa place (décalage en ligne) */
 .repartition.autres-deplies {
     align-items: flex-start;
 }
