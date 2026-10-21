@@ -1319,7 +1319,7 @@
         "tags" : [ "Opérations" ]
       },
       "post" : {
-        "description" : "Date vide : aujourd'hui. Catégorie vide : celle du libellé. Crée les périodes manquantes jusqu'à sa date.",
+        "description" : "Date vide : aujourd'hui. Catégorie vide : celle du libellé. Crée les périodes manquantes pour couvrir sa date.",
         "operationId" : "creer_2",
         "requestBody" : {
           "content" : {

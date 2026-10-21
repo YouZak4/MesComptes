@@ -35,7 +35,7 @@ Une période est un « mois de compte » dont l'utilisateur règle la date de d�
 - **Contiguïté :** les périodes se suivent sans trou ni chevauchement. Modifier la date de fin d'une période déplace la date de début de la suivante, et inversement. Ainsi, chaque jour appartient à exactement une période.
 - **Nom :** par défaut le mois de la date de fin (« Février 2026 » pour 23/01 → 25/02), modifiable.
 - **Création :** la période suivante commence le lendemain de la fin de la précédente et dure un mois par défaut ; l'utilisateur ajuste la date de fin quand il connaît son jour de paie.
-- **Création automatique :** saisir une opération datée après la dernière période crée la ou les périodes manquantes avec la durée par défaut.
+- **Création automatique :** saisir une opération datée après la dernière période, ou avant la première, crée la ou les périodes manquantes avec la durée par défaut.
 - **Première période :** demandée à la première connexion (date de début et de fin), préremplie avec le mois en cours.
 - **Appartenance :** une opération n'enregistre pas sa période ; elle est déduite de sa date. Déplacer une limite de période reclasse donc automatiquement les opérations concernées.
 - La durée par défaut est un réglage de l'utilisateur (un mois en V1).

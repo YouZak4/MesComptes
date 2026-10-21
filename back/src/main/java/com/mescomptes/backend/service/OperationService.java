@@ -73,7 +73,7 @@ public class OperationService {
     }
 
     /**
-     * Enregistre une opération. Si sa date est après la dernière période, les périodes manquantes sont créées.
+     * Enregistre une opération. Si sa date n'est couverte par aucune période, les périodes manquantes sont créées.
      *
      * @param utilisateurId id de l'utilisateur connecté
      * @param dto           compte, date, montant, catégorie et/ou libellé, note
@@ -83,7 +83,7 @@ public class OperationService {
     public DtoOperation creer(UUID utilisateurId, DtoOperationSaisie dto) {
         Operation operation = new Operation();
         appliquer(utilisateurId, operation, dto);
-        periodeService.couvrirJusqua(utilisateurId, operation.getDate());
+        periodeService.couvrir(utilisateurId, operation.getDate());
         return versDto(operationRepository.save(operation));
     }
 
@@ -100,7 +100,7 @@ public class OperationService {
     public DtoOperation modifier(UUID utilisateurId, Long id, DtoOperationSaisie dto) {
         Operation operation = trouver(utilisateurId, id);
         appliquer(utilisateurId, operation, dto);
-        periodeService.couvrirJusqua(utilisateurId, operation.getDate());
+        periodeService.couvrir(utilisateurId, operation.getDate());
         try {
             return versDto(operationRepository.saveAndFlush(operation));
         } catch (DataIntegrityViolationException e) {

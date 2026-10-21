@@ -44,7 +44,7 @@ Cas acceptés :
   - date de fin avant la date de début ;
   - période qui laisserait un trou. Le message donne les dates possibles.
 
-Saisir une [opération](operations.md) datée après la dernière période crée d'elle-même les périodes manquantes, d'un mois chacune.
+Saisir une [opération](operations.md) datée après la dernière période ou avant la première crée d'elle-même les périodes manquantes, d'un mois chacune.
 
 ## `PUT /periodes/{id}`
 
