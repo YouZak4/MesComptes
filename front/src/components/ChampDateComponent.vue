@@ -48,8 +48,11 @@ const champ = ref<HTMLElement | null>(null);
 const declencheur = ref<HTMLButtonElement | null>(null);
 const grille = ref<HTMLElement | null>(null);
 const ouvert = ref(false);
-// Le calendrier s'aligne à droite du champ quand il dépasserait de l'écran
+// Le calendrier s'aligne à droite du champ quand il dépasserait de l'écran,
+// et s'ouvre au-dessus quand la place manque en dessous
 const aDroite = ref(false);
+const auDessus = ref(false);
+const HAUTEUR_CALENDRIER = 420;
 
 interface Fenetre {
     debut: string;
@@ -140,6 +143,10 @@ function ouvrir() {
     jourActif.value = depart;
     const rect = champ.value?.getBoundingClientRect();
     aDroite.value = rect !== undefined && rect.left + 320 > window.innerWidth;
+    auDessus.value =
+        rect !== undefined &&
+        rect.bottom + HAUTEUR_CALENDRIER > window.innerHeight &&
+        rect.top > window.innerHeight - rect.bottom;
     ouvert.value = true;
     document.addEventListener("mousedown", surClicDehors);
     focaliserJourActif();
@@ -238,7 +245,7 @@ function surTouche(event: KeyboardEvent) {
             ref="declencheur"
             type="button"
             class="declencheur"
-            :class="{ vide: !date }"
+            :class="{ 'sans-date': !date }"
             aria-haspopup="dialog"
             :aria-expanded="ouvert"
             @click="basculer"
@@ -250,7 +257,7 @@ function surTouche(event: KeyboardEvent) {
         <div
             v-if="ouvert && fenetre"
             class="calendrier"
-            :class="{ 'a-droite': aDroite }"
+            :class="{ 'a-droite': aDroite, 'au-dessus': auDessus }"
             role="dialog"
             :aria-label="`Choisir : ${label}`"
             @keydown="surTouche"
@@ -264,7 +271,7 @@ function surTouche(event: KeyboardEvent) {
                 >
                     <ChevronLeft aria-hidden="true" />
                 </button>
-                <div class="titre">
+                <div class="titre-calendrier">
                     <strong>{{ fenetre.titre }}</strong>
                     <span>{{ sousTitre }}</span>
                 </div>
@@ -364,7 +371,7 @@ function surTouche(event: KeyboardEvent) {
     color: var(--vert-700);
 }
 
-.declencheur.vide {
+.declencheur.sans-date {
     color: #7b8b82;
 }
 
@@ -394,6 +401,13 @@ function surTouche(event: KeyboardEvent) {
     right: 0;
 }
 
+/* Au-dessus du bouton (46 px + l'écart), par-dessus le libellé du champ */
+.calendrier.au-dessus {
+    top: auto;
+    bottom: 52px;
+    margin-top: 0;
+}
+
 .entete {
     display: flex;
     align-items: center;
@@ -402,19 +416,19 @@ function surTouche(event: KeyboardEvent) {
     margin-bottom: 10px;
 }
 
-.titre {
+.titre-calendrier {
     display: flex;
     flex-direction: column;
     align-items: center;
     text-align: center;
 }
 
-.titre strong {
+.titre-calendrier strong {
     font-size: 15px;
     font-weight: 800;
 }
 
-.titre span {
+.titre-calendrier span {
     font-size: 12px;
     font-weight: 500;
     color: var(--encre-douce);
