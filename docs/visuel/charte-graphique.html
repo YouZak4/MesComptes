@@ -132,6 +132,44 @@ svg.ic { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-wid
 
 .anneau { width: 140px; height: 140px; border-radius: 50%; flex: none; display: flex; align-items: center; justify-content: center; }
 .anneau-in { width: 100px; height: 100px; border-radius: 50%; background: #fff; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+.positif { color: var(--positif); }
+.negatif { color: var(--negatif); }
+
+/* « Autres » dépliable : toute la ligne est un bouton */
+.ligne-autres { display: flex; align-items: center; gap: 12px; width: calc(100% + 16px); margin: -8px; padding: 8px; border: 0; border-radius: var(--rayon-m); background: none; color: inherit; font: inherit; text-align: left; cursor: pointer; }
+.ligne-autres:hover { background: var(--vert-50); }
+.ligne-autres:hover .lien-detail { text-decoration: underline; }
+.lien-detail { font-weight: 700; color: var(--vert-700); }
+.chevron { width: 18px; height: 18px; flex: none; color: var(--vert-700); transition: transform .2s; }
+.ligne-autres[aria-expanded="true"] .chevron { transform: rotate(180deg); }
+.detail-autres { display: flex; flex-direction: column; gap: 12px; margin: 10px 0 0 18px; padding-left: 18px; border-left: 2px solid var(--trait); }
+
+/* Libellés de la catégorie */
+.libelles-cat { display: flex; flex-direction: column; gap: 6px; }
+.libelles-cat ul { display: flex; flex-wrap: wrap; gap: 6px; margin: 0; padding: 0; list-style: none; }
+.puce-libelle { padding: 6px 12px; border: 1px solid var(--trait-champ); border-radius: 999px; background: #fff; color: var(--encre); font: inherit; font-size: 13px; font-weight: 600; cursor: pointer; }
+.puce-libelle:hover, .puce-libelle:focus-visible { outline: none; border-color: var(--vert-700); background: var(--vert-50); color: var(--vert-700); }
+
+/* Champ date et calendrier */
+.champ-date { display: flex; align-items: center; gap: 10px; height: 46px; padding: 0 14px; border: 1px solid var(--trait-champ); border-radius: var(--rayon-m); background: #fff; color: var(--encre); font: inherit; font-size: 15px; text-align: left; cursor: pointer; }
+.champ-date svg.ic { width: 18px; height: 18px; color: var(--vert-700); }
+.champ-date.sans-date { color: #7B8B82; }
+.champ-date[aria-expanded="true"] { border-color: var(--vert-700); box-shadow: 0 0 0 3px #1B5C4226; }
+.calendrier { width: 320px; max-width: 100%; padding: 14px; border-radius: var(--rayon-l); background: #fff; box-shadow: var(--ombre-fenetre); }
+.cal-entete { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 10px; }
+.cal-titre { display: flex; flex-direction: column; align-items: center; }
+.cal-titre strong { font-size: 15px; font-weight: 800; }
+.cal-grille { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 2px; }
+.cal-js { margin-bottom: 4px; font-size: 11px; font-weight: 700; color: var(--encre-douce); text-align: center; }
+.jour { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 40px; padding: 0; border: 0; border-radius: var(--rayon-s); background: none; color: var(--encre); font: inherit; font-size: 14px; font-weight: 600; font-variant-numeric: tabular-nums; line-height: 1.1; cursor: pointer; }
+.jour .mois { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: .02em; color: var(--vert-700); }
+.jour:hover { background: var(--vert-50); color: var(--vert-700); }
+.jour.hors { color: #A3B1A9; font-weight: 500; }
+.jour.aujourdhui { box-shadow: inset 0 0 0 1.5px var(--vert-300); font-weight: 800; }
+.jour.choisi, .jour.choisi:hover { background: var(--vert-700); color: #fff; }
+.jour.choisi .mois { color: var(--vert-200); }
+.cal-pied { display: flex; justify-content: flex-end; margin-top: 10px; padding-top: 8px; border-top: 1px solid var(--trait); }
+.cal-pied .btn { min-height: 36px; padding: 0 12px; }
 
 /* ===== Mise en page du document ===== */
 .doc { max-width: var(--largeur-contenu); margin: 0 auto; padding: 40px 24px 120px; display: flex; flex-direction: column; gap: 56px; }
@@ -197,6 +235,8 @@ code { font-family: ui-monospace, 'Cascadia Code', Consolas, monospace; font-siz
     <symbol id="i-logout" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4 M16 17l5-5-5-5 M21 12H9"/></symbol>
     <symbol id="i-left" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></symbol>
     <symbol id="i-right" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></symbol>
+    <symbol id="i-chevron-down" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></symbol>
+    <symbol id="i-calendar" viewBox="0 0 24 24"><path d="M8 2v4 M16 2v4 M3 10h18 M5 4h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z M8 14h.01 M12 14h.01 M16 14h.01 M8 18h.01 M12 18h.01 M16 18h.01"/></symbol>
     <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14 M5 12h14"/></symbol>
     <symbol id="i-up" viewBox="0 0 24 24"><path d="M12 19V5 M5 12l7-7 7 7"/></symbol>
     <symbol id="i-down" viewBox="0 0 24 24"><path d="M12 5v14 M19 12l-7 7-7-7"/></symbol>
@@ -241,7 +281,7 @@ code { font-family: ui-monospace, 'Cascadia Code', Consolas, monospace; font-siz
 <main class="doc">
   <header>
     <h1>Charte graphique · Sapin</h1>
-    <p>Version 1.0, 14 octobre 2026. Référence visuelle : maquette « 7 · Sapin, menu en haut et bouton centré ». Cette page est aussi un exemple vivant : tous ses composants utilisent les jetons de la section « Variables CSS ».</p>
+    <p>Version 1.1, 21 octobre 2026 (ajouts : calendrier, libellés de la catégorie, « Autres » dépliable). Référence visuelle : maquette « 7 · Sapin, menu en haut et bouton centré ». Cette page est aussi un exemple vivant : tous ses composants utilisent les jetons de la section « Variables CSS ».</p>
   </header>
 
   <!-- 1. Intention -->
@@ -416,14 +456,26 @@ code { font-family: ui-monospace, 'Cascadia Code', Consolas, monospace; font-siz
     <div class="grille-l">
       <div class="carte">
         <h3>Dépenses par catégorie</h3>
-        <div class="rangee" style="gap:24px">
-          <div class="anneau" role="img" aria-label="Répartition : Cadeaux 48 %, Courses 41 %, Abonnements 10 %" style="background:conic-gradient(#A8335F 0 48%, #9A6410 48% 89.5%, #3F51A3 89.5% 100%)">
-            <div class="anneau-in"><span class="meta" style="font-weight:600">Total</span><span class="num" style="font-size:17px;font-weight:800">114,50 €</span></div>
+        <!-- « Autres » déplié : l'anneau reste en haut (align-items: flex-start) -->
+        <div class="rangee" style="gap:24px;align-items:flex-start">
+          <div class="anneau" role="img" aria-label="Répartition : Cadeaux 39 %, Courses 34 %, Abonnements 9 %, Autres 18 %" style="background:conic-gradient(#A8335F 0 39.3%, #9A6410 39.3% 73.2%, #3F51A3 73.2% 81.8%, #6B7079 81.8% 100%)">
+            <div class="anneau-in"><span class="meta" style="font-weight:600">Total</span><span class="num" style="font-size:17px;font-weight:800">140,00 €</span></div>
           </div>
           <div style="flex:1 1 180px;display:flex;flex-direction:column;gap:14px">
-            <div class="rangee" style="flex-wrap:nowrap"><span class="pastille-cat" style="background:#F6E3EA;color:#A8335F"><svg class="ic"><use href="#c-gift"/></svg></span><div style="flex:1"><div style="display:flex;justify-content:space-between;font-weight:700"><span>Cadeaux</span><span class="num">55,00 €</span></div><div class="meta">48 % des dépenses</div></div></div>
-            <div class="rangee" style="flex-wrap:nowrap"><span class="pastille-cat" style="background:#F8EBD3;color:#9A6410"><svg class="ic"><use href="#c-cart"/></svg></span><div style="flex:1"><div style="display:flex;justify-content:space-between;font-weight:700"><span>Courses</span><span class="num">47,50 €</span></div><div class="meta">41 % des dépenses</div></div></div>
-            <div class="rangee" style="flex-wrap:nowrap"><span class="pastille-cat" style="background:#E4E8F6;color:#3F51A3"><svg class="ic"><use href="#c-tv"/></svg></span><div style="flex:1"><div style="display:flex;justify-content:space-between;font-weight:700"><span>Abonnements & loisirs</span><span class="num">12,00 €</span></div><div class="meta">10 % des dépenses</div></div></div>
+            <div class="rangee" style="flex-wrap:nowrap"><span class="pastille-cat" style="background:#F6E3EA;color:#A8335F"><svg class="ic"><use href="#c-gift"/></svg></span><div style="flex:1"><div style="display:flex;justify-content:space-between;font-weight:700"><span>Cadeaux</span><span class="num">55,00 €</span></div><div class="meta">39 % des dépenses · <span class="num negatif" style="font-weight:600">+35,00 € vs période précédente</span></div></div></div>
+            <div class="rangee" style="flex-wrap:nowrap"><span class="pastille-cat" style="background:#F8EBD3;color:#9A6410"><svg class="ic"><use href="#c-cart"/></svg></span><div style="flex:1"><div style="display:flex;justify-content:space-between;font-weight:700"><span>Courses</span><span class="num">47,50 €</span></div><div class="meta">34 % des dépenses · <span class="num positif" style="font-weight:600">−12,30 € vs période précédente</span></div></div></div>
+            <div class="rangee" style="flex-wrap:nowrap"><span class="pastille-cat" style="background:#E4E8F6;color:#3F51A3"><svg class="ic"><use href="#c-tv"/></svg></span><div style="flex:1"><div style="display:flex;justify-content:space-between;font-weight:700"><span>Abonnements & loisirs</span><span class="num">12,00 €</span></div><div class="meta">9 % des dépenses · <span style="font-weight:600">Identique à la période précédente</span></div></div></div>
+            <div>
+              <button class="ligne-autres" type="button" aria-expanded="true" aria-controls="detail-autres" onclick="const o = this.getAttribute('aria-expanded') !== 'true'; this.setAttribute('aria-expanded', o); this.querySelector('.lien-detail').textContent = (o ? 'Masquer' : 'Voir') + ' les 2 catégories'; document.getElementById('detail-autres').hidden = !o">
+                <span class="pastille-cat" style="background:#ECEDEF;color:#6B7079"><svg class="ic"><use href="#c-package"/></svg></span>
+                <div style="flex:1"><div style="display:flex;justify-content:space-between;font-weight:700"><span>Autres</span><span class="num">25,50 €</span></div><div class="meta">18 % des dépenses · <span class="lien-detail">Masquer les 2 catégories</span></div></div>
+                <svg class="ic chevron" aria-hidden="true"><use href="#i-chevron-down"/></svg>
+              </button>
+              <div id="detail-autres" class="detail-autres">
+                <div class="rangee" style="flex-wrap:nowrap"><span class="pastille-cat" style="background:#F8E4D8;color:#B8501A"><svg class="ic"><use href="#c-fuel"/></svg></span><div style="flex:1"><div style="display:flex;justify-content:space-between;font-weight:700"><span>Carburant</span><span class="num">14,00 €</span></div><div class="meta">10 % des dépenses</div></div></div>
+                <div class="rangee" style="flex-wrap:nowrap"><span class="pastille-cat" style="background:#F8E1DF;color:#B83227"><svg class="ic"><use href="#c-heart"/></svg></span><div style="flex:1"><div style="display:flex;justify-content:space-between;font-weight:700"><span>Santé</span><span class="num">11,50 €</span></div><div class="meta">8 % des dépenses</div></div></div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -453,9 +505,13 @@ code { font-family: ui-monospace, 'Cascadia Code', Consolas, monospace; font-siz
         <h3>Nouvelle opération</h3>
         <div class="champ"><label for="f-mt">Montant</label><div class="montant"><input id="f-mt" inputmode="decimal" placeholder="0,00"><span>€</span></div></div>
         <div class="champ"><label for="f-lib">Libellé</label><input id="f-lib" placeholder="Netflix, Supermarché…"></div>
-        <div class="champ"><label for="f-cat">Catégorie</label><select id="f-cat"><option>Choisir une catégorie</option><option>Courses</option><option>Cadeaux</option></select></div>
+        <div class="champ"><label for="f-cat">Catégorie</label><select id="f-cat"><option>Choisir une catégorie</option><option selected>Courses</option><option>Cadeaux</option></select></div>
+        <div class="libelles-cat">
+          <span class="meta">Libellés de cette catégorie</span>
+          <ul><li><button class="puce-libelle" type="button">Boucherie</button></li><li><button class="puce-libelle" type="button">Boulangerie</button></li><li><button class="puce-libelle" type="button">Marché</button></li><li><button class="puce-libelle" type="button">Supermarché</button></li></ul>
+        </div>
         <div class="deux">
-          <div class="champ"><label for="f-date">Date</label><input id="f-date" type="date" value="2026-10-14"></div>
+          <div class="champ"><label for="f-date">Date</label><button id="f-date" class="champ-date" type="button" aria-haspopup="dialog" aria-expanded="false"><svg class="ic"><use href="#i-calendar"/></svg>lun. 3 août 2026</button></div>
           <div class="champ"><label for="f-cpt">Compte</label><select id="f-cpt"><option>Compte courant</option></select></div>
         </div>
         <div class="champ erreur"><label for="f-note">Note</label><input id="f-note" value="x"><span class="msg-erreur"><svg class="ic"><use href="#i-alert"/></svg>Exemple de message d'erreur.</span></div>
@@ -466,6 +522,26 @@ code { font-family: ui-monospace, 'Cascadia Code', Consolas, monospace; font-siz
         </div>
       </form>
     </div>
+
+    <h4>Champ date et calendrier</h4>
+    <p class="intro">Le sélecteur du navigateur n'est jamais utilisé. Dans la saisie d'une opération, le calendrier montre une période entière, ici Août 2026 du 25 juillet au 24 août, et ses flèches passent d'une période à l'autre ; ailleurs, un mois civil. Le repère du mois surmonte le premier jour et chaque 1er.</p>
+    <div class="rangee" style="align-items:flex-start;gap:24px">
+      <div style="display:flex;flex-direction:column;gap:12px;flex:0 1 240px">
+        <div class="champ"><span style="font-size:13px;font-weight:700">Date</span><span class="champ-date" aria-expanded="true"><svg class="ic"><use href="#i-calendar"/></svg>lun. 3 août 2026</span></div>
+        <div class="champ"><span style="font-size:13px;font-weight:700">Jusqu'au (facultatif)</span><span class="champ-date sans-date"><svg class="ic"><use href="#i-calendar"/></svg>Aucune date</span></div>
+      </div>
+      <div class="calendrier" role="group" aria-label="Exemple de calendrier">
+        <div class="cal-entete">
+          <button class="btn btn-icone" type="button" aria-label="Précédent"><svg class="ic" style="stroke-width:2.2"><use href="#i-left"/></svg></button>
+          <div class="cal-titre"><strong>Août 2026</strong><span class="meta">du 25 juil. au 24 août</span></div>
+          <button class="btn btn-icone" type="button" aria-label="Suivant"><svg class="ic" style="stroke-width:2.2"><use href="#i-right"/></svg></button>
+        </div>
+        <div class="cal-grille cal-js" aria-hidden="true"><span>L</span><span>M</span><span>M</span><span>J</span><span>V</span><span>S</span><span>D</span></div>
+        <div class="cal-grille"><button class="jour hors" type="button" tabindex="-1">20</button><button class="jour hors" type="button" tabindex="-1">21</button><button class="jour hors" type="button" tabindex="-1">22</button><button class="jour hors" type="button" tabindex="-1">23</button><button class="jour hors" type="button" tabindex="-1">24</button><button class="jour" type="button" tabindex="-1"><span class="mois">juil</span>25</button><button class="jour" type="button" tabindex="-1">26</button><button class="jour" type="button" tabindex="-1">27</button><button class="jour" type="button" tabindex="-1">28</button><button class="jour" type="button" tabindex="-1">29</button><button class="jour" type="button" tabindex="-1">30</button><button class="jour" type="button" tabindex="-1">31</button><button class="jour" type="button" tabindex="-1"><span class="mois">août</span>1</button><button class="jour" type="button" tabindex="-1">2</button><button class="jour choisi" type="button" tabindex="-1">3</button><button class="jour" type="button" tabindex="-1">4</button><button class="jour" type="button" tabindex="-1">5</button><button class="jour" type="button" tabindex="-1">6</button><button class="jour" type="button" tabindex="-1">7</button><button class="jour" type="button" tabindex="-1">8</button><button class="jour" type="button" tabindex="-1">9</button><button class="jour" type="button" tabindex="-1">10</button><button class="jour" type="button" tabindex="-1">11</button><button class="jour" type="button" tabindex="-1">12</button><button class="jour" type="button" tabindex="-1">13</button><button class="jour" type="button" tabindex="-1">14</button><button class="jour" type="button" tabindex="-1">15</button><button class="jour" type="button" tabindex="-1">16</button><button class="jour" type="button" tabindex="-1">17</button><button class="jour" type="button" tabindex="-1">18</button><button class="jour" type="button" tabindex="-1">19</button><button class="jour" type="button" tabindex="-1">20</button><button class="jour" type="button" tabindex="-1">21</button><button class="jour" type="button" tabindex="-1">22</button><button class="jour" type="button" tabindex="-1">23</button><button class="jour" type="button" tabindex="-1">24</button><button class="jour hors" type="button" tabindex="-1">25</button><button class="jour hors" type="button" tabindex="-1">26</button><button class="jour hors" type="button" tabindex="-1">27</button><button class="jour hors" type="button" tabindex="-1">28</button><button class="jour hors" type="button" tabindex="-1">29</button><button class="jour hors" type="button" tabindex="-1">30</button>
+</div>
+        <div class="cal-pied"><button class="btn btn-discret" type="button">Aujourd'hui</button></div>
+      </div>
+    </div>
   </section>
 
   <!-- 8. Accessibilité et ton -->
@@ -473,8 +549,8 @@ code { font-family: ui-monospace, 'Cascadia Code', Consolas, monospace; font-siz
     <h2>7. Ton et accessibilité</h2>
     <div class="regles">
       <div class="regle"><h5>Ton</h5><ul><li>Neutre, comme l'interface actuelle (« Se connecter »).</li><li>Actions à l'infinitif : Enregistrer, Masquer, Tout voir.</li><li>Jamais d'emoji.</li></ul></div>
-      <div class="regle"><h5>Dates</h5><ul><li>Abrégées en liste : <code>13 oct.</code></li><li>Complètes en en-tête : <code>du 25 septembre au 25 octobre 2026</code></li></ul></div>
-      <div class="regle"><h5>Accessibilité</h5><ul><li>Contraste ≥ 4,5:1 (3:1 au-delà de 24 px et pour les icônes).</li><li>La couleur n'est jamais le seul indice.</li><li>Focus visible, vrais <code>&lt;button&gt;</code>, <code>&lt;label&gt;</code>.</li></ul></div>
+      <div class="regle"><h5>Dates</h5><ul><li>Abrégées en liste : <code>13 oct.</code></li><li>Complètes en en-tête : <code>du 25 septembre au 25 octobre 2026</code></li><li>Écart nul : « Identique à la période précédente », jamais « = »</li></ul></div>
+      <div class="regle"><h5>Accessibilité</h5><ul><li>Contraste ≥ 4,5:1 (3:1 au-delà de 24 px et pour les icônes).</li><li>La couleur n'est jamais le seul indice.</li><li>Focus visible, vrais <code>&lt;button&gt;</code>, <code>&lt;label&gt;</code>.</li><li>Calendrier : flèches, Pg préc. / Pg suiv., Entrée, Échap.</li></ul></div>
     </div>
   </section>
 
