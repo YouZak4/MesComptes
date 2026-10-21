@@ -2,6 +2,7 @@
 import { computed, nextTick, onMounted, onUnmounted, ref, watch } from "vue";
 import { CircleAlert } from "@lucide/vue";
 import ChampLibelleComponent from "@/components/ChampLibelleComponent.vue";
+import LibellesDeCategorieComponent from "@/components/LibellesDeCategorieComponent.vue";
 import { comptesService } from "@/services/comptesService.ts";
 import type {
     Categorie,
@@ -126,6 +127,12 @@ const nouveauLibelle = computed(
 watch(libelleExistant, (libelle) => {
     if (libelle) categorieId.value = libelle.categorieId;
 });
+
+// Libellé choisi d'un clic parmi ceux de la catégorie
+function choisirLibelle(libelle: Libelle) {
+    libelleExistant.value = libelle;
+    libelleTexte.value = libelle.nom;
+}
 
 watch(dateDebut, (date) => {
     if (!jourModifie.value && date) jour.value = jourDe(date);
@@ -334,6 +341,12 @@ async function enregistrer() {
                             </select>
                         </label>
                     </div>
+
+                    <LibellesDeCategorieComponent
+                        v-if="libelleExistant === null"
+                        :categorie-id="categorieId"
+                        @choisir="choisirLibelle"
+                    />
 
                     <fieldset class="calendrier">
                         <legend>Calendrier</legend>

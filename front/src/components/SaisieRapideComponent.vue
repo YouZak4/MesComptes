@@ -3,6 +3,7 @@ import { computed, nextTick, onMounted, onUnmounted, ref, watch } from "vue";
 import { CircleAlert, Plus } from "@lucide/vue";
 import { comptesService } from "@/services/comptesService.ts";
 import ChampLibelleComponent from "@/components/ChampLibelleComponent.vue";
+import LibellesDeCategorieComponent from "@/components/LibellesDeCategorieComponent.vue";
 import { useNotificationStore } from "@/stores/notification";
 import { type OperationAModifier, useSaisieStore } from "@/stores/saisie";
 import type { Categorie, Compte, Libelle } from "@/types/comptes.ts";
@@ -158,6 +159,12 @@ watch(libelleExistant, (libelle) => {
         categorieId.value = libelle.categorieId;
     }
 });
+
+// Libellé choisi d'un clic parmi ceux de la catégorie
+function choisirLibelle(libelle: Libelle) {
+    libelleExistant.value = libelle;
+    libelleTexte.value = libelle.nom;
+}
 
 // ── Enregistrement ──
 
@@ -327,6 +334,12 @@ async function enregistrer(enAjouterUneAutre: boolean) {
                             </optgroup>
                         </select>
                     </label>
+
+                    <LibellesDeCategorieComponent
+                        v-if="libelleExistant === null"
+                        :categorie-id="categorieId"
+                        @choisir="choisirLibelle"
+                    />
 
                     <div class="deux-colonnes">
                         <label class="champ">
