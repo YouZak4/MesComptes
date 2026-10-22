@@ -224,19 +224,9 @@ const repartition = computed<Segment[]>(() => {
 // « Autres » déplié dans la légende : le détail des catégories qu'il regroupe
 const autresDeplies = ref(false);
 
-// Décalage de l'anneau avant dépliage : il garde sa place au lieu de remonter
-const repartitionEl = ref<HTMLElement | null>(null);
-const anneauEl = ref<HTMLElement | null>(null);
-const decalageAnneau = ref(0);
-
-function basculerAutres() {
-    if (!autresDeplies.value && repartitionEl.value && anneauEl.value) {
-        decalageAnneau.value =
-            anneauEl.value.getBoundingClientRect().top -
-            repartitionEl.value.getBoundingClientRect().top;
-    }
-    autresDeplies.value = !autresDeplies.value;
-}
+const regroupees = computed(
+    () => repartition.value.find((s) => s.regroupees)?.regroupees ?? []
+);
 
 const totalDepensesCategories = computed(() =>
     depensesParCategorie.value.reduce((s, t) => s + t.total, 0)
@@ -394,29 +384,18 @@ const libelleSoldeComptes = computed(() =>
 
             <div class="colonnes" :class="{ rechargement: isLoading }">
                 <!-- Répartition par catégorie -->
-                <section class="carte colonne">
+                <section class="carte colonne categories">
                     <h2 class="titre-carte">Dépenses par catégorie</h2>
                     <p v-if="depensesParCategorie.length === 0" class="vide">
                         <ChartPie aria-hidden="true" />
                         Aucune dépense sur la période.
                     </p>
-                    <div
-                        v-else
-                        ref="repartitionEl"
-                        class="repartition"
-                        :class="{ 'autres-deplies': autresDeplies }"
-                    >
+                    <div v-else class="repartition">
                         <div
-                            ref="anneauEl"
                             class="anneau"
                             role="img"
                             :aria-label="descriptionAnneau"
-                            :style="{
-                                background: fondAnneau,
-                                marginTop: autresDeplies
-                                    ? `${decalageAnneau}px`
-                                    : undefined,
-                            }"
+                            :style="{ background: fondAnneau }"
                         >
                             <div class="anneau-centre">
                                 <span class="meta">Total</span>
@@ -434,7 +413,7 @@ const libelleSoldeComptes = computed(() =>
                                         class="ligne-autres"
                                         :aria-expanded="autresDeplies"
                                         aria-controls="detail-autres"
-                                        @click="basculerAutres"
+                                        @click="autresDeplies = !autresDeplies"
                                     >
                                         <LigneRepartitionComponent
                                             :nom="s.nom"
@@ -463,28 +442,6 @@ const libelleSoldeComptes = computed(() =>
                                             aria-hidden="true"
                                         />
                                     </button>
-                                    <ul
-                                        v-show="autresDeplies"
-                                        id="detail-autres"
-                                        class="nue legende detail-autres"
-                                    >
-                                        <li
-                                            v-for="r in s.regroupees"
-                                            :key="r.cle"
-                                        >
-                                            <LigneRepartitionComponent
-                                                :nom="r.nom"
-                                                :total="r.total"
-                                                :part="r.part"
-                                                :pastille="r.pastille"
-                                                :detail="r.detail"
-                                                :avec-ecart="
-                                                    tableau.periodePrecedenteId !==
-                                                    null
-                                                "
-                                            />
-                                        </li>
-                                    </ul>
                                 </li>
                                 <li v-else>
                                     <LigneRepartitionComponent
@@ -499,6 +456,26 @@ const libelleSoldeComptes = computed(() =>
                                     />
                                 </li>
                             </template>
+                        </ul>
+                        <!-- Détail de « Autres » : sous la légende, hors de la rangée de l'anneau -->
+                        <ul
+                            v-if="regroupees.length > 0"
+                            v-show="autresDeplies"
+                            id="detail-autres"
+                            class="nue legende detail-autres"
+                        >
+                            <li v-for="r in regroupees" :key="r.cle">
+                                <LigneRepartitionComponent
+                                    :nom="r.nom"
+                                    :total="r.total"
+                                    :part="r.part"
+                                    :pastille="r.pastille"
+                                    :detail="r.detail"
+                                    :avec-ecart="
+                                        tableau.periodePrecedenteId !== null
+                                    "
+                                />
+                            </li>
                         </ul>
                     </div>
 
@@ -759,17 +736,48 @@ const libelleSoldeComptes = computed(() =>
     margin-bottom: 4px;
 }
 
-/* Répartition */
-.repartition {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 24px;
+/* Répartition : l'anneau est centré sur la légende repliée seule. Le détail de « Autres »
+   occupe sa propre rangée en dessous, donc l'anneau ne bouge pas quand on le déplie. */
+.categories {
+    container-type: inline-size;
 }
 
-/* Légende allongée par le détail de « Autres » : l'anneau garde sa place (décalage en ligne) */
-.repartition.autres-deplies {
-    align-items: flex-start;
+.repartition {
+    display: grid;
+    grid-template-columns: 140px minmax(0, 1fr);
+    grid-template-areas:
+        "anneau legende"
+        ". detail";
+    align-items: center;
+    column-gap: 24px;
+}
+
+.repartition > .anneau {
+    grid-area: anneau;
+}
+
+.repartition > .legende {
+    grid-area: legende;
+}
+
+.repartition > .detail-autres {
+    grid-area: detail;
+    margin-top: 10px;
+}
+
+/* Trop étroit pour l'anneau (140 px) et la légende (200 px) côte à côte : l'un sous l'autre */
+@container (max-width: 363px) {
+    .repartition {
+        grid-template-columns: minmax(0, 1fr);
+        grid-template-areas:
+            "anneau"
+            "legende"
+            "detail";
+    }
+
+    .repartition > .legende {
+        margin-top: 24px;
+    }
 }
 
 .anneau {
@@ -840,7 +848,6 @@ const libelleSoldeComptes = computed(() =>
 .legende li.autres {
     flex-direction: column;
     align-items: stretch;
-    gap: 10px;
 }
 
 .ligne-autres {

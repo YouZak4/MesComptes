@@ -144,6 +144,18 @@ svg.ic { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-wid
 .ligne-autres[aria-expanded="true"] .chevron { transform: rotate(180deg); }
 .detail-autres { display: flex; flex-direction: column; gap: 12px; margin: 10px 0 0 18px; padding-left: 18px; border-left: 2px solid var(--trait); }
 
+/* Répartition : l'anneau est centré sur la légende repliée, le détail de « Autres » a sa propre rangée dessous */
+.carte-repartition { container-type: inline-size; }
+.repartition { display: grid; grid-template-columns: 140px minmax(0, 1fr); grid-template-areas: "anneau legende" ". detail"; align-items: center; column-gap: 24px; }
+.repartition > .anneau { grid-area: anneau; }
+.repartition > .legende { grid-area: legende; display: flex; flex-direction: column; gap: 14px; }
+.repartition > .detail-autres { grid-area: detail; }
+.detail-autres[hidden] { display: none; }
+@container (max-width: 363px) {
+  .repartition { grid-template-columns: minmax(0, 1fr); grid-template-areas: "anneau" "legende" "detail"; }
+  .repartition > .legende { margin-top: 24px; }
+}
+
 /* Libellés de la catégorie */
 .libelles-cat { display: flex; flex-direction: column; gap: 6px; }
 .libelles-cat ul { display: flex; flex-wrap: wrap; gap: 6px; margin: 0; padding: 0; list-style: none; }
@@ -454,14 +466,14 @@ code { font-family: ui-monospace, 'Cascadia Code', Consolas, monospace; font-siz
 
     <h4>Cartes de contenu</h4>
     <div class="grille-l">
-      <div class="carte">
+      <div class="carte carte-repartition">
         <h3>Dépenses par catégorie</h3>
-        <!-- « Autres » déplié : l'anneau garde la place qu'il avait replié -->
-        <div class="rangee" style="gap:24px;align-items:flex-start">
+        <!-- « Autres » déplié : l'anneau reste centré sur la légende repliée, le détail s'ouvre dessous -->
+        <div class="repartition">
           <div class="anneau" role="img" aria-label="Répartition : Cadeaux 39 %, Courses 34 %, Abonnements 9 %, Autres 18 %" style="background:conic-gradient(#A8335F 0 39.3%, #9A6410 39.3% 73.2%, #3F51A3 73.2% 81.8%, #6B7079 81.8% 100%)">
             <div class="anneau-in"><span class="meta" style="font-weight:600">Total</span><span class="num" style="font-size:17px;font-weight:800">140,00 €</span></div>
           </div>
-          <div style="flex:1 1 180px;display:flex;flex-direction:column;gap:14px">
+          <div class="legende">
             <div class="rangee" style="flex-wrap:nowrap"><span class="pastille-cat" style="background:#F6E3EA;color:#A8335F"><svg class="ic"><use href="#c-gift"/></svg></span><div style="flex:1"><div style="display:flex;justify-content:space-between;font-weight:700"><span>Cadeaux</span><span class="num">55,00 €</span></div><div class="meta">39 % des dépenses · <span class="num negatif" style="font-weight:600">+35,00 € vs période précédente</span></div></div></div>
             <div class="rangee" style="flex-wrap:nowrap"><span class="pastille-cat" style="background:#F8EBD3;color:#9A6410"><svg class="ic"><use href="#c-cart"/></svg></span><div style="flex:1"><div style="display:flex;justify-content:space-between;font-weight:700"><span>Courses</span><span class="num">47,50 €</span></div><div class="meta">34 % des dépenses · <span class="num positif" style="font-weight:600">−12,30 € vs période précédente</span></div></div></div>
             <div class="rangee" style="flex-wrap:nowrap"><span class="pastille-cat" style="background:#E4E8F6;color:#3F51A3"><svg class="ic"><use href="#c-tv"/></svg></span><div style="flex:1"><div style="display:flex;justify-content:space-between;font-weight:700"><span>Abonnements & loisirs</span><span class="num">12,00 €</span></div><div class="meta">9 % des dépenses · <span style="font-weight:600">Identique à la période précédente</span></div></div></div>
@@ -471,11 +483,11 @@ code { font-family: ui-monospace, 'Cascadia Code', Consolas, monospace; font-siz
                 <div style="flex:1"><div style="display:flex;justify-content:space-between;font-weight:700"><span>Autres</span><span class="num">25,50 €</span></div><div class="meta">18 % des dépenses · <span class="lien-detail">Masquer les 2 catégories</span></div></div>
                 <svg class="ic chevron" aria-hidden="true"><use href="#i-chevron-down"/></svg>
               </button>
-              <div id="detail-autres" class="detail-autres">
-                <div class="rangee" style="flex-wrap:nowrap"><span class="pastille-cat" style="background:#F8E4D8;color:#B8501A"><svg class="ic"><use href="#c-fuel"/></svg></span><div style="flex:1"><div style="display:flex;justify-content:space-between;font-weight:700"><span>Carburant</span><span class="num">14,00 €</span></div><div class="meta">10 % des dépenses</div></div></div>
-                <div class="rangee" style="flex-wrap:nowrap"><span class="pastille-cat" style="background:#F8E1DF;color:#B83227"><svg class="ic"><use href="#c-heart"/></svg></span><div style="flex:1"><div style="display:flex;justify-content:space-between;font-weight:700"><span>Santé</span><span class="num">11,50 €</span></div><div class="meta">8 % des dépenses</div></div></div>
-              </div>
             </div>
+          </div>
+          <div id="detail-autres" class="detail-autres">
+            <div class="rangee" style="flex-wrap:nowrap"><span class="pastille-cat" style="background:#F8E4D8;color:#B8501A"><svg class="ic"><use href="#c-fuel"/></svg></span><div style="flex:1"><div style="display:flex;justify-content:space-between;font-weight:700"><span>Carburant</span><span class="num">14,00 €</span></div><div class="meta">10 % des dépenses</div></div></div>
+            <div class="rangee" style="flex-wrap:nowrap"><span class="pastille-cat" style="background:#F8E1DF;color:#B83227"><svg class="ic"><use href="#c-heart"/></svg></span><div style="flex:1"><div style="display:flex;justify-content:space-between;font-weight:700"><span>Santé</span><span class="num">11,50 €</span></div><div class="meta">8 % des dépenses</div></div></div>
           </div>
         </div>
       </div>
