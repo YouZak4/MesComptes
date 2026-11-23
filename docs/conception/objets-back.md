@@ -108,7 +108,7 @@ Un modèle d'opération qui revient tout seul : loyer, salaire, abonnements. Ell
 ### Authentification et utilisateur
 | DTO | Sens | Rôle |
 |---|---|---|
-| `DtoRegister` | reçu | Inscription : nom, prénom (facultatif), identifiant, mot de passe, email (email valide). |
+| `DtoRegister` | reçu | Inscription : nom, prénom (facultatif), identifiant, mot de passe, email (email valide). Identifiant et mot de passe suivent les règles de `ReglesSaisie`, partagées avec `DtoMotDePasseSaisie` et reprises par le front (`utils/validation.ts`). |
 | `DtoInscriptionEnAttente` | renvoyé | Réponse à l'inscription : le `jeton`, l'email **masqué** (jamais l'adresse complète) et `secondesAvantRenvoi` pour afficher le décompte, même après un rafraîchissement. |
 | `DtoVerification` | reçu | Le `jeton` et le `code` reçu par mail pour valider l'inscription. |
 | `DtoRenvoiCode` | reçu | Le `jeton` pour redemander un code. |

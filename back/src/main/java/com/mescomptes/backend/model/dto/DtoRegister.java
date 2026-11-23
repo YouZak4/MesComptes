@@ -2,8 +2,10 @@ package com.mescomptes.backend.model.dto;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
+import lombok.ToString;
 
 @Data
 public class DtoRegister {
@@ -14,8 +16,11 @@ public class DtoRegister {
     @Size(max = 100, message = "Le prénom ne doit pas dépasser 100 caractères.")
     private String prenom;
     @NotBlank(message = "L'identifiant est obligatoire.")
+    @Pattern(regexp = ReglesSaisie.IDENTIFIANT, message = ReglesSaisie.IDENTIFIANT_MESSAGE)
     private String identifiant;
     @NotBlank(message = "Le mot de passe est obligatoire.")
+    @Pattern(regexp = ReglesSaisie.MOT_DE_PASSE, message = ReglesSaisie.MOT_DE_PASSE_MESSAGE)
+    @ToString.Exclude
     private String motDePasse;
     @NotBlank(message = "L'adresse mail est obligatoire.")
     @Email(message = "L'adresse mail n'est pas valide.")

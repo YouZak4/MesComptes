@@ -7,6 +7,10 @@ import { useNotificationStore } from "@/stores/notification";
 import { useProfilStore } from "@/stores/profil";
 import type { ChangementEmail } from "@/types/utilisateur.ts";
 import { messageErreur } from "@/utils/erreurs.ts";
+import {
+    MESSAGE_MOT_DE_PASSE,
+    motDePasseConforme,
+} from "@/utils/validation.ts";
 
 const notification = useNotificationStore();
 const profil = useProfilStore();
@@ -194,6 +198,11 @@ const motDePasseEnCours = ref(false);
 async function changerMotDePasse() {
     if (motDePasseEnCours.value) return;
     erreurMotDePasse.value = null;
+    // Même règle qu'à l'inscription ; le back la vérifie aussi
+    if (!motDePasseConforme(nouveau.value)) {
+        erreurMotDePasse.value = MESSAGE_MOT_DE_PASSE;
+        return;
+    }
     if (nouveau.value !== confirmation.value) {
         erreurMotDePasse.value =
             "La confirmation ne correspond pas au nouveau mot de passe.";
@@ -383,6 +392,9 @@ async function changerMotDePasse() {
 
         <section class="carte">
             <h2>Mot de passe</h2>
+            <p class="aide">
+                Nouveau mot de passe : {{ MESSAGE_MOT_DE_PASSE }}
+            </p>
             <form class="formulaire" @submit.prevent="changerMotDePasse">
                 <label class="champ large">
                     Mot de passe actuel

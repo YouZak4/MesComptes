@@ -2808,7 +2808,8 @@
           },
           "nouveauMotDePasse" : {
             "type" : "string",
-            "minLength" : 1
+            "minLength" : 1,
+            "pattern" : "^(?=.*[A-Z])(?=.*\\d)(?=.*[^A-Za-z0-9]).{8,30}$"
           }
         },
         "required" : [ "motDePasseActuel", "nouveauMotDePasse" ]
@@ -3083,11 +3084,13 @@
           },
           "identifiant" : {
             "type" : "string",
-            "minLength" : 1
+            "minLength" : 1,
+            "pattern" : "^[a-zA-Z0-9_-]{8,30}$"
           },
           "motDePasse" : {
             "type" : "string",
-            "minLength" : 1
+            "minLength" : 1,
+            "pattern" : "^(?=.*[A-Z])(?=.*\\d)(?=.*[^A-Za-z0-9]).{8,30}$"
           },
           "nom" : {
             "type" : "string",
