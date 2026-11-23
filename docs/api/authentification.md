@@ -32,8 +32,8 @@ Démarre une inscription et envoie un code par mail. Le code expire au bout de 1
 |---|---|---|---|
 | `nom` | texte | Oui | 100 caractères au plus ; peut servir de pseudo |
 | `prenom` | texte | Non | 100 caractères au plus ; vide = aucun |
-| `identifiant` | texte | Oui | Identifiant de connexion |
-| `motDePasse` | texte | Oui | |
+| `identifiant` | texte | Oui | Identifiant de connexion : 8 à 30 caractères, lettres sans accent, chiffres, `_` et `-` |
+| `motDePasse` | texte | Oui | 8 à 30 caractères, avec au moins une majuscule, un chiffre et un caractère spécial |
 | `email` | texte | Oui | Adresse valide ; mise en minuscules |
 
 ```json
@@ -49,6 +49,8 @@ Démarre une inscription et envoie un code par mail. Le code expire au bout de 1
 - `jeton` identifie l'inscription en attente, à la place de l'adresse.
 - `emailMasque` garde la première lettre et le domaine.
 - `secondesAvantRenvoi` permet d'afficher le décompte avant de pouvoir redemander un code.
+
+**400** `VALIDATION_ERROR` : champ manquant, ou identifiant ou mot de passe hors règle. Aucun mail n'est alors envoyé.
 
 Une nouvelle inscription avec la même adresse remplace la précédente, avec un nouveau jeton.
 
@@ -93,3 +95,5 @@ Envoie un nouveau code. L'ancien ne marche plus et le compteur de tentatives rep
 
 - **200** : le JWT, **en texte brut** (pas de JSON), valable 24 heures. Au passage, les récurrences en retard de l'utilisateur sont générées.
 - **401** : identifiant ou mot de passe incorrect.
+
+Les règles de format de l'inscription ne s'appliquent pas ici : un compte dont le mot de passe a été choisi avant elles se connecte normalement.

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref, useId } from "vue";
+import { computed, onMounted, onUnmounted, ref, useId, watch } from "vue";
 import { CircleAlert, Eye, EyeOff } from "@lucide/vue";
 
 const props = withDefaults(
@@ -45,9 +45,8 @@ const inputType = computed(() => {
     return props.type;
 });
 
-const errorMessage = computed((): string | null => {
-    if (!touched.value) return null;
-
+// Erreur de la valeur courante, que le champ ait déjà perdu le focus ou non
+const erreur = computed((): string | null => {
     const val = props.modelValue;
 
     if (props.required && val.trim() === "") {
@@ -69,23 +68,61 @@ const errorMessage = computed((): string | null => {
     return null;
 });
 
+// Le message ne s'affiche qu'une fois le champ quitté, pour ne pas gêner la saisie
+const errorMessage = computed(() => (touched.value ? erreur.value : null));
+
 const isValid = computed(() => {
     if (!touched.value) return null;
     return errorMessage.value === null;
 });
 
+// La validité, elle, suit chaque changement de valeur (saisie, remise à zéro par le parent…)
+// pour qu'un formulaire ne puisse pas être envoyé avec une saisie au mauvais format
+const estValide = computed(
+    () => erreur.value === null && props.modelValue.trim() !== ""
+);
+watch(estValide, (valide) => emit("valid", valide), { immediate: true });
+
 function onInput(event: Event) {
     const target = event.target as HTMLInputElement;
     emit("update:modelValue", target.value);
-    emit("valid", errorMessage.value === null && target.value.trim() !== "");
 }
 
+// Bouton de la souris (ou doigt) enfoncé quelque part dans la page
+let pointeurEnfonce = false;
+function surPointeurEnfonce() {
+    pointeurEnfonce = true;
+}
+function surPointeurRelache() {
+    pointeurEnfonce = false;
+}
+onMounted(() => {
+    document.addEventListener("pointerdown", surPointeurEnfonce, true);
+    document.addEventListener("pointerup", surPointeurRelache, true);
+    document.addEventListener("pointercancel", surPointeurRelache, true);
+});
+onUnmounted(() => {
+    document.removeEventListener("pointerdown", surPointeurEnfonce, true);
+    document.removeEventListener("pointerup", surPointeurRelache, true);
+    document.removeEventListener("pointercancel", surPointeurRelache, true);
+});
+
 function onBlur() {
-    touched.value = true;
-    emit(
-        "valid",
-        errorMessage.value === null && props.modelValue.trim() !== ""
-    );
+    if (!pointeurEnfonce) {
+        touched.value = true;
+        return;
+    }
+    // Champ quitté par un clic ailleurs : le message n'apparaît qu'une fois le clic terminé.
+    // Affiché tout de suite, il décalerait la page sous le pointeur et le clic tomberait à côté
+    const fin = new AbortController();
+    const afficher = () => {
+        fin.abort();
+        setTimeout(() => (touched.value = true));
+    };
+    document.addEventListener("pointerup", afficher, { signal: fin.signal });
+    document.addEventListener("pointercancel", afficher, {
+        signal: fin.signal,
+    });
 }
 </script>
 

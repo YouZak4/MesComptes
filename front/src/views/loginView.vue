@@ -6,6 +6,12 @@ import { useAuthStore } from "@/stores/auth";
 import { useNotificationStore } from "@/stores/notification";
 import { TrendingUp } from "@lucide/vue";
 import InputComponent from "@/components/InputComponent.vue";
+import {
+    MESSAGE_IDENTIFIANT,
+    MESSAGE_MOT_DE_PASSE,
+    REGLE_IDENTIFIANT,
+    REGLE_MOT_DE_PASSE,
+} from "@/utils/validation.ts";
 import "@/styles/connexion.css";
 
 const router = useRouter();
@@ -118,21 +124,16 @@ async function register() {
                     label="Identifiant"
                     placeholder="Votre identifiant"
                     :required="true"
-                    :min-length="8"
-                    :max-length="30"
-                    :regex="/^[a-zA-Z0-9_-]+$/"
-                    regex-message="Entre 8 et 30 caractères, lettres, chiffres, _ et - uniquement."
                     @valid="validityLogin.identifiant = $event"
                 />
 
+                <!-- Connexion : champs simplement obligatoires. Les règles de format valent à la création
+                     du compte ; les imposer ici bloquerait un compte dont le mot de passe ne les suit pas -->
                 <InputComponent
                     v-model="motDePasseLogin"
                     type="password"
                     label="Mot de passe"
                     :required="true"
-                    :min-length="8"
-                    :regex="/^(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,30}$/"
-                    regex-message="8 caractères minimum, avec au moins une majuscule, un chiffre et un caractère spécial."
                     @valid="validityLogin.motDePasse = $event"
                 />
 
@@ -179,10 +180,9 @@ async function register() {
                     label="Identifiant"
                     placeholder="Votre identifiant de connexion"
                     :required="true"
-                    :min-length="8"
                     :max-length="30"
-                    :regex="/^[a-zA-Z0-9_-]+$/"
-                    regex-message="Entre 8 et 30 caractères, lettres, chiffres, _ et - uniquement."
+                    :regex="REGLE_IDENTIFIANT"
+                    :regex-message="MESSAGE_IDENTIFIANT"
                     @valid="validityRegister.identifiant = $event"
                 />
 
@@ -191,9 +191,8 @@ async function register() {
                     type="password"
                     label="Mot de passe"
                     :required="true"
-                    :min-length="8"
-                    :regex="/^(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,30}$/"
-                    regex-message="8 caractères minimum, avec au moins une majuscule, un chiffre et un caractère spécial."
+                    :regex="REGLE_MOT_DE_PASSE"
+                    :regex-message="MESSAGE_MOT_DE_PASSE"
                     @valid="validityRegister.motDePasse = $event"
                 />
 

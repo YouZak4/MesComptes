@@ -1,6 +1,7 @@
 package com.mescomptes.backend.model.dto;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
 import lombok.Data;
 import lombok.ToString;
 
@@ -11,6 +12,7 @@ public class DtoMotDePasseSaisie {
     @ToString.Exclude
     private String motDePasseActuel;
     @NotBlank(message = "Le nouveau mot de passe est obligatoire.")
+    @Pattern(regexp = ReglesSaisie.MOT_DE_PASSE, message = ReglesSaisie.MOT_DE_PASSE_MESSAGE)
     @ToString.Exclude
     private String nouveauMotDePasse;
 }

@@ -7,6 +7,7 @@ import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.hasKey;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.nullValue;
@@ -101,13 +102,30 @@ class UtilisateurControllerTests extends ApiTestBase {
 
         // 422 et non 401 : le front déconnecte sur 401
         mvc.perform(en(moi, put("/utilisateurs/moi/mot-de-passe")).content("""
-                        {"motDePasseActuel": "faux", "nouveauMotDePasse": "nouveau"}"""))
+                        {"motDePasseActuel": "faux", "nouveauMotDePasse": "Nouveau-123"}"""))
                 .andExpect(status().isUnprocessableContent());
         mvc.perform(en(moi, put("/utilisateurs/moi/mot-de-passe")).content("""
-                        {"motDePasseActuel": "ancien", "nouveauMotDePasse": "nouveau"}"""))
+                        {"motDePasseActuel": "ancien", "nouveauMotDePasse": "Nouveau-123"}"""))
                 .andExpect(status().isNoContent());
 
-        assertThat(passwordEncoder.matches("nouveau", utilisateurRepository.findById(moi.getId()).orElseThrow().getMotDePasse())).isTrue();
+        assertThat(passwordEncoder.matches("Nouveau-123", utilisateurRepository.findById(moi.getId()).orElseThrow().getMotDePasse())).isTrue();
+    }
+
+    @Test
+    void leNouveauMotDePasseDoitRespecterLaRegle() throws Exception {
+        // Mot de passe actuel hors règle (compte ancien) : il reste accepté pour en changer
+        moi.setMotDePasse(passwordEncoder.encode("ancien"));
+        utilisateurRepository.save(moi);
+
+        for (String refuse : new String[]{"nouveau", "Court-1", "sansmajuscule-1", "SansChiffre-x", "SansSpecial1"}) {
+            mvc.perform(en(moi, put("/utilisateurs/moi/mot-de-passe")).content("""
+                            {"motDePasseActuel": "ancien", "nouveauMotDePasse": "%s"}""".formatted(refuse)))
+                    .andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.error").value("VALIDATION_ERROR"))
+                    .andExpect(jsonPath("$.message").value(containsString("majuscule, un chiffre et un caractère spécial")));
+        }
+
+        assertThat(passwordEncoder.matches("ancien", utilisateurRepository.findById(moi.getId()).orElseThrow().getMotDePasse())).isTrue();
     }
 
     // ── Changement d'adresse mail ──
