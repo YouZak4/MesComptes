@@ -20,6 +20,7 @@ public class DtoRegister {
     private String identifiant;
     @NotBlank(message = "Le mot de passe est obligatoire.")
     @Pattern(regexp = ReglesSaisie.MOT_DE_PASSE, message = ReglesSaisie.MOT_DE_PASSE_MESSAGE)
+    @OctetsMax(value = ReglesSaisie.MOT_DE_PASSE_OCTETS_MAX, message = ReglesSaisie.MOT_DE_PASSE_OCTETS_MESSAGE)
     @ToString.Exclude
     private String motDePasse;
     @NotBlank(message = "L'adresse mail est obligatoire.")

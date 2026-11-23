@@ -42,9 +42,39 @@ class InscriptionTests extends ApiTestBase {
     }
 
     @Test
+    void unMotDePasseLongEstAccepteJusquALaLimite() throws Exception {
+        // 64 caractères sans accent, puis 71 octets avec des lettres accentuées (2 octets chacune)
+        for (String accepte : new String[]{"A1-" + "a".repeat(61), "A1-" + "é".repeat(34)}) {
+            mvc.perform(post("/auth/register").contentType(MediaType.APPLICATION_JSON)
+                            .content(inscription(identifiantNeuf(), accepte)))
+                    .andExpect(status().isAccepted());
+        }
+    }
+
+    @Test
+    void unMotDePasseDePlusDe72OctetsEstRefuse() throws Exception {
+        // 38 caractères seulement, mais 73 octets : BCrypt en ignorerait la fin
+        mvc.perform(post("/auth/register").contentType(MediaType.APPLICATION_JSON)
+                        .content(inscription(identifiantNeuf(), "A1-" + "é".repeat(35))))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error").value("VALIDATION_ERROR"))
+                .andExpect(jsonPath("$.message").value(containsString("trop long")));
+        verifyNoInteractions(mailService);
+    }
+
+    @Test
+    void uneConnexionAvecUnMotDePasseTresLongEchoueSansErreurServeur() throws Exception {
+        mvc.perform(post("/auth/login").contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"identifiant": "%s", "motDePasse": "%s"}"""
+                                .formatted(moi.getIdentifiant(), "A1-" + "é".repeat(200))))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
     void unMotDePasseHorsRegleEstRefuseSansEnvoyerDeMail() throws Exception {
         for (String refuse : new String[]{"court", "Court-1", "sansmajuscule-1", "SansChiffre-x", "SansSpecial1",
-                "Beaucoup-Trop-Long-Pour-La-Regle-1"}) {
+                "A1-" + "a".repeat(62)}) {
             mvc.perform(post("/auth/register").contentType(MediaType.APPLICATION_JSON)
                             .content(inscription(identifiantNeuf(), refuse)))
                     .andExpect(status().isBadRequest())

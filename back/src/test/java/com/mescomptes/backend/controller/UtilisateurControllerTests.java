@@ -112,18 +112,37 @@ class UtilisateurControllerTests extends ApiTestBase {
     }
 
     @Test
+    void unNouveauMotDePasseDe64CaracteresEstAccepte() throws Exception {
+        moi.setMotDePasse(passwordEncoder.encode("ancien"));
+        utilisateurRepository.save(moi);
+        String long64 = "A1-" + "a".repeat(61);
+
+        mvc.perform(en(moi, put("/utilisateurs/moi/mot-de-passe")).content("""
+                        {"motDePasseActuel": "ancien", "nouveauMotDePasse": "%s"}""".formatted(long64)))
+                .andExpect(status().isNoContent());
+
+        assertThat(passwordEncoder.matches(long64, utilisateurRepository.findById(moi.getId()).orElseThrow().getMotDePasse())).isTrue();
+    }
+
+    @Test
     void leNouveauMotDePasseDoitRespecterLaRegle() throws Exception {
         // Mot de passe actuel hors règle (compte ancien) : il reste accepté pour en changer
         moi.setMotDePasse(passwordEncoder.encode("ancien"));
         utilisateurRepository.save(moi);
 
-        for (String refuse : new String[]{"nouveau", "Court-1", "sansmajuscule-1", "SansChiffre-x", "SansSpecial1"}) {
+        for (String refuse : new String[]{"nouveau", "Court-1", "sansmajuscule-1", "SansChiffre-x", "SansSpecial1",
+                "A1-" + "a".repeat(62)}) {
             mvc.perform(en(moi, put("/utilisateurs/moi/mot-de-passe")).content("""
                             {"motDePasseActuel": "ancien", "nouveauMotDePasse": "%s"}""".formatted(refuse)))
                     .andExpect(status().isBadRequest())
                     .andExpect(jsonPath("$.error").value("VALIDATION_ERROR"))
                     .andExpect(jsonPath("$.message").value(containsString("majuscule, un chiffre et un caractère spécial")));
         }
+        // 38 caractères mais 73 octets
+        mvc.perform(en(moi, put("/utilisateurs/moi/mot-de-passe")).content("""
+                        {"motDePasseActuel": "ancien", "nouveauMotDePasse": "%s"}""".formatted("A1-" + "é".repeat(35))))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value(containsString("trop long")));
 
         assertThat(passwordEncoder.matches("ancien", utilisateurRepository.findById(moi.getId()).orElseThrow().getMotDePasse())).isTrue();
     }

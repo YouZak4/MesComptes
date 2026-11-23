@@ -3,10 +3,10 @@ import { mount } from "@vue/test-utils";
 import { nextTick } from "vue";
 import InputComponent from "@/components/InputComponent.vue";
 
-// Même règle que le mot de passe de l'écran de connexion
-const REGLE_MOT_DE_PASSE = /^(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,30}$/;
-const MESSAGE_MOT_DE_PASSE =
-    "8 caractères minimum, avec au moins une majuscule, un chiffre et un caractère spécial.";
+import {
+    MESSAGE_MOT_DE_PASSE,
+    REGLE_MOT_DE_PASSE,
+} from "@/utils/validation.ts";
 
 // Monte le champ avec un v-model simulé : chaque saisie remonte dans modelValue
 function monter(props: Record<string, unknown> = {}) {
@@ -83,6 +83,24 @@ describe("InputComponent", () => {
         expect(messageErreur(wrapper)).toBe(MESSAGE_MOT_DE_PASSE);
         expect(input.attributes("aria-invalid")).toBe("true");
         expect(derniereValidite(wrapper)).toBe(false);
+    });
+
+    it("applique le contrôle libre et affiche son message", async () => {
+        const wrapper = monter({
+            required: true,
+            verifier: (valeur: string) =>
+                valeur.includes("x") ? null : "Il manque un x.",
+        });
+        const input = wrapper.find("input");
+
+        await input.setValue("abc");
+        await input.trigger("blur");
+        expect(messageErreur(wrapper)).toBe("Il manque un x.");
+        expect(derniereValidite(wrapper)).toBe(false);
+
+        await input.setValue("abx");
+        expect(messageErreur(wrapper)).toBeNull();
+        expect(derniereValidite(wrapper)).toBe(true);
     });
 
     it("signale un champ obligatoire laissé vide une fois quitté", async () => {

@@ -1,13 +1,23 @@
 import { describe, expect, it } from "vitest";
-import { REGLE_IDENTIFIANT, motDePasseConforme } from "@/utils/validation.ts";
+import {
+    MESSAGE_MOT_DE_PASSE,
+    MESSAGE_MOT_DE_PASSE_TROP_LONG,
+    REGLE_IDENTIFIANT,
+    erreurMotDePasse,
+} from "@/utils/validation.ts";
 
-describe("motDePasseConforme", () => {
-    it.each(["Correct-123", "Abcdef1!", "Un-Mot-De-Passe-De-30-Car-1234"])(
-        "accepte %j",
-        (motDePasse) => {
-            expect(motDePasseConforme(motDePasse)).toBe(true);
-        }
-    );
+describe("erreurMotDePasse", () => {
+    it.each([
+        "Correct-123",
+        "Abcdef1!",
+        "Un-Mot-De-Passe-De-30-Car-1234",
+        // 64 caractères, la limite
+        "A1-" + "a".repeat(61),
+        // 71 octets : 34 lettres accentuées de 2 octets
+        "A1-" + "é".repeat(34),
+    ])("accepte %j", (motDePasse) => {
+        expect(erreurMotDePasse(motDePasse)).toBeNull();
+    });
 
     it.each([
         ["", "vide"],
@@ -15,9 +25,15 @@ describe("motDePasseConforme", () => {
         ["sansmajuscule-1", "sans majuscule"],
         ["SansChiffre-x", "sans chiffre"],
         ["SansSpecial1", "sans caractère spécial"],
-        ["Beaucoup-Trop-Long-Pour-La-Regle-1", "plus de 30 caractères"],
-    ])("refuse %j (%s)", (motDePasse) => {
-        expect(motDePasseConforme(motDePasse)).toBe(false);
+        ["A1-" + "a".repeat(62), "plus de 64 caractères"],
+    ])("rappelle la règle pour %j (%s)", (motDePasse) => {
+        expect(erreurMotDePasse(motDePasse)).toBe(MESSAGE_MOT_DE_PASSE);
+    });
+
+    it("signale qu'un mot de passe accentué de moins de 64 caractères dépasse 72 octets", () => {
+        expect(erreurMotDePasse("A1-" + "é".repeat(35))).toBe(
+            MESSAGE_MOT_DE_PASSE_TROP_LONG
+        );
     });
 });
 

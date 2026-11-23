@@ -8,9 +8,8 @@ import { TrendingUp } from "@lucide/vue";
 import InputComponent from "@/components/InputComponent.vue";
 import {
     MESSAGE_IDENTIFIANT,
-    MESSAGE_MOT_DE_PASSE,
     REGLE_IDENTIFIANT,
-    REGLE_MOT_DE_PASSE,
+    erreurMotDePasse,
 } from "@/utils/validation.ts";
 import "@/styles/connexion.css";
 
@@ -191,8 +190,7 @@ async function register() {
                     type="password"
                     label="Mot de passe"
                     :required="true"
-                    :regex="REGLE_MOT_DE_PASSE"
-                    :regex-message="MESSAGE_MOT_DE_PASSE"
+                    :verifier="erreurMotDePasse"
                     @valid="validityRegister.motDePasse = $event"
                 />
 
