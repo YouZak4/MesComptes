@@ -8,7 +8,8 @@
         "build": "vue-tsc && vite build",
         "build:prod": "vue-tsc && vite build --mode prod",
         "preview": "vite preview",
-        "host": "pnpm vite"
+        "host": "pnpm vite",
+        "lint": "eslint ."
     },
     "dependencies": {
         "@lucide/vue": "^1.59.0",
