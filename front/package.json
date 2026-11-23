@@ -9,7 +9,9 @@
         "build:prod": "vue-tsc && vite build --mode prod",
         "preview": "vite preview",
         "host": "pnpm vite",
-        "lint": "eslint ."
+        "lint": "eslint .",
+        "test": "vitest run",
+        "test:watch": "vitest"
     },
     "dependencies": {
         "@lucide/vue": "^1.59.0",
@@ -24,6 +26,7 @@
         "@typescript-eslint/parser": "^8.57.2",
         "@vitejs/plugin-vue": "^6.0.5",
         "@vue/eslint-config-typescript": "^14.7.0",
+        "@vue/test-utils": "^2.6.0",
         "eslint": "^10.1.0",
         "eslint-config-prettier": "^10.1.8",
         "eslint-plugin-import": "^2.32.0",
@@ -32,9 +35,11 @@
         "eslint-plugin-promise": "^7.2.1",
         "eslint-plugin-vue": "^10.8.0",
         "jiti": "^2.7.0",
+        "jsdom": "^31.0.1",
         "prettier": "^3.8.1",
         "typescript": "^5.9.3",
         "vite": "^8.0.2",
+        "vitest": "^5.1.1",
         "vue-eslint-parser": "^10.4.0",
         "vue-tsc": "^3.2.6"
     }

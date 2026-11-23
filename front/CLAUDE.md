@@ -7,9 +7,19 @@ pnpm install
 pnpm dev        # serveur Vite (port VITE_FRONT_PORT du .env, 5173 par défaut)
 pnpm build      # vue-tsc (vérification des types) + vite build
 pnpm lint       # ESLint + Prettier
+pnpm test       # tests Vitest (une passe)
+pnpm test:watch # tests Vitest relancés à chaque modification
 ```
 
-Il n'y a pas de tests front : `pnpm build` et `pnpm lint` sont les contrôles.
+Contrôles : `pnpm test`, `pnpm build` et `pnpm lint`.
+
+## Tests (Vitest)
+
+- Configuration dans le bloc `test` de `vite.config.ts` : environnement `jsdom`, fichiers `src/**/*.test.ts`.
+- Un test se place à côté du fichier testé : `src/utils/format.ts` → `src/utils/format.test.ts`.
+- Importer `describe`, `it`, `expect` depuis `vitest` (pas de globales). Noms des tests en français.
+- Composants : `@vue/test-utils` (`mount`) est installé.
+- Tout nouveau code testable (utilitaire, store, composable) arrive avec ses tests.
 
 ## Configuration
 
