@@ -1,3 +1,4 @@
+/// <reference types="vitest/config" />
 import { resolve } from "path";
 import { defineConfig, loadEnv } from "vite";
 import vue from "@vitejs/plugin-vue";
@@ -16,6 +17,11 @@ export default defineConfig(({ mode }) => {
         plugins: [vue()],
         define: {
             global: "window",
+        },
+        // Tests Vitest : à côté du fichier testé (xxx.test.ts), DOM simulé par jsdom
+        test: {
+            environment: "jsdom",
+            include: ["src/**/*.test.ts"],
         },
     };
 });

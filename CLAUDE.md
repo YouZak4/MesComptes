@@ -28,7 +28,7 @@ Tout est en français : code (classes, méthodes, variables), commentaires, mess
 ## Règles
 
 - **Doc dans le même commit** : toute modification de l'API ou d'une règle métier met à jour `docs/` dans le même commit, et régénère `docs/api/openapi.json` (commande dans `back/CLAUDE.md`).
-- **Contrôles avant de dire « terminé »** : `./mvnw test` dans `back/`, `pnpm build` et `pnpm lint` dans `front/`. Si un contrôle ne peut pas tourner (PostgreSQL absent…), le dire.
+- **Contrôles avant de dire « terminé »** : `./mvnw test` dans `back/`, `pnpm test`, `pnpm build` et `pnpm lint` dans `front/`. Si un contrôle ne peut pas tourner (PostgreSQL absent…), le dire.
 - **Jamais de secret** dans le code ou la doc. `back/src/main/resources/application.properties` et `front/.env*` sont ignorés par Git ; seuls les modèles (`.example`) sont versionnés.
 
 ## Git
@@ -47,7 +47,7 @@ Tout est en français : code (classes, méthodes, variables), commentaires, mess
 
 Ne jamais merger soi-même dans `develop` : l'intégration passe par une pull request. Une branche qui contient une nouvelle fonctionnalité n'est poussée **que si les quatre étapes ci-dessous sont passées**. Si une étape échoue, corriger puis reprendre depuis l'étape 1. Présenter le résultat de chaque étape à l'utilisateur avant de pousser.
 
-1. **Tests unitaires et d'intégration** : lancer `./mvnw test` dans `back/` (plus `pnpm build` et `pnpm lint` dans `front/`). Si la fonctionnalité n'est pas couverte, écrire les tests manquants d'abord (règles de `back/CLAUDE.md` : cas nominal, validation, 404 sur les données de `autre`). Le front n'a pas de framework de test : proposer d'en ajouter un (Vitest) plutôt que de l'installer sans accord.
+1. **Tests unitaires et d'intégration** : lancer `./mvnw test` dans `back/` et `pnpm test`, `pnpm build`, `pnpm lint` dans `front/`. Si la fonctionnalité n'est pas couverte, écrire les tests manquants d'abord (back : règles de `back/CLAUDE.md`, cas nominal, validation, 404 sur les données de `autre` ; front : Vitest, voir `front/CLAUDE.md`).
 2. **Revue de code** : relire tout le diff de la branche par rapport à `develop` (`git diff develop...`) : bugs, respect des conventions des `CLAUDE.md`, doc `docs/` et `openapi.json` à jour, code mort ou dupliqué. Corriger ce qui doit l'être.
 3. **Tests fonctionnels et non-régression** : lancer l'application (back + front) et tester la nouvelle fonctionnalité, puis les fonctionnalités existantes qu'elle peut toucher, pour repérer les effets de bord. Mettre à jour le cahier de test `docs/tests/cahier-de-test.md` (le créer s'il n'existe pas) : pour chaque cas, l'écran ou la route, les étapes, le résultat attendu, le résultat obtenu et la date.
 4. **Recherche de vulnérabilités** : analyser le code de la branche sous l'angle sécurité : isolation des données par `utilisateurId` (404 pour les données d'un autre), contrôle d'accès et JWT, validation des entrées, injections (SQL/JPQL, XSS côté Vue avec `v-html`), secrets exposés, dépendances ajoutées. Corriger toute faille trouvée.
