@@ -281,9 +281,8 @@ async function changerMotDePasse() {
             <template v-if="changement">
                 <p class="aide">
                     Un code a été envoyé à
-                    <strong>{{ changement.nouvelEmail }}</strong
-                    >. Saisissez-le pour confirmer : l'adresse actuelle reste
-                    valable d'ici là.
+                    <strong>{{ changement.nouvelEmail }}</strong>. Saisissez-le
+                    pour confirmer : l'adresse actuelle reste valable d'ici là.
                 </p>
                 <form class="formulaire" @submit.prevent="verifierCode">
                     <label class="champ">
