@@ -34,10 +34,20 @@ Tout est en français : code (classes, méthodes, variables), commentaires, mess
 ## Git
 
 - Branche principale : `develop` (`master` existe aussi). Le dépôt est sur GitHub, les changements passent par des pull requests.
-- Pour chaque modification : créer une nouvelle branche depuis `develop` (`feat/…`, `fix/…`, `docs/…`, `refactor/…`) puis commiter. Ne pas pousser ni ouvrir de PR sans demande.
+- **Une branche par fonctionnalité** : chaque nouvelle fonctionnalité ou modification se fait sur sa propre branche créée depuis `develop` (`feat/…`, `fix/…`, `docs/…`, `refactor/…`). Jamais de travail directement sur `develop` ou `master`.
+- **Pas de commit sans demande explicite** : ne jamais commiter, pousser ni ouvrir de PR tant que l'utilisateur ne l'a pas demandé.
 - Ne **pas** ajouter de ligne `Co-Authored-By` dans les commits.
 - Messages au format commitlint (`@commitlint/config-conventional`) : `type(portée): sujet`
   - types autorisés : `build`, `chore`, `ci`, `docs`, `feat`, `fix`, `perf`, `refactor`, `revert`, `style`, `test` ;
   - portée facultative : `back`, `front`, `visuel`… ;
   - sujet en français, en minuscule, sans point final, court.
   - Exemples du dépôt : `feat(back): créer les périodes manquantes avant la première`, `fix(front): l'anneau garde sa place quand « Autres » est déplié`, `docs: calendrier, libellés de la catégorie et « Autres » dépliable`.
+
+## Avant de pousser une branche
+
+Ne jamais merger soi-même dans `develop` : l'intégration passe par une pull request. Une branche qui contient une nouvelle fonctionnalité n'est poussée **que si les quatre étapes ci-dessous sont passées**. Si une étape échoue, corriger puis reprendre depuis l'étape 1. Présenter le résultat de chaque étape à l'utilisateur avant de pousser.
+
+1. **Tests unitaires et d'intégration** : lancer `./mvnw test` dans `back/` (plus `pnpm build` et `pnpm lint` dans `front/`). Si la fonctionnalité n'est pas couverte, écrire les tests manquants d'abord (règles de `back/CLAUDE.md` : cas nominal, validation, 404 sur les données de `autre`). Le front n'a pas de framework de test : proposer d'en ajouter un (Vitest) plutôt que de l'installer sans accord.
+2. **Revue de code** : relire tout le diff de la branche par rapport à `develop` (`git diff develop...`) : bugs, respect des conventions des `CLAUDE.md`, doc `docs/` et `openapi.json` à jour, code mort ou dupliqué. Corriger ce qui doit l'être.
+3. **Tests fonctionnels et non-régression** : lancer l'application (back + front) et tester la nouvelle fonctionnalité, puis les fonctionnalités existantes qu'elle peut toucher, pour repérer les effets de bord. Mettre à jour le cahier de test `docs/tests/cahier-de-test.md` (le créer s'il n'existe pas) : pour chaque cas, l'écran ou la route, les étapes, le résultat attendu, le résultat obtenu et la date.
+4. **Recherche de vulnérabilités** : analyser le code de la branche sous l'angle sécurité : isolation des données par `utilisateurId` (404 pour les données d'un autre), contrôle d'accès et JWT, validation des entrées, injections (SQL/JPQL, XSS côté Vue avec `v-html`), secrets exposés, dépendances ajoutées. Corriger toute faille trouvée.
