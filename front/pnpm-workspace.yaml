@@ -1,0 +1,3 @@
+﻿# Réglages pnpm du front
+# pnpm add écrit la version exacte (1.2.3) au lieu d'une plage (^1.2.3)
+saveExact: true
