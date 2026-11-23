@@ -27,6 +27,12 @@ Contrôles : `pnpm test`, `pnpm build` et `pnpm lint`.
 - L'URL de l'API est écrite en dur dans `src/services/api.ts` (`http://localhost:8085/api`) ; `VITE_BACK_URL` n'est pas utilisé.
 - Alias `@` → `src/`.
 
+## Dépendances
+
+- Versions exactes dans `package.json`, sans `^` ni `~` : `saveExact: true` dans `pnpm-workspace.yaml` le fait pour `pnpm add`.
+- `pnpm-lock.yaml` est versionné : il ne se modifie jamais à la main, et part dans le même commit que le `package.json`.
+- Version de pnpm fixée par le champ `packageManager` de `package.json`.
+
 ## Architecture (`src/`)
 
 | Dossier | Rôle |
