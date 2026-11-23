@@ -12,9 +12,15 @@ public final class ReglesSaisie {
             "L'identifiant doit faire entre 8 et 30 caractères : lettres, chiffres, _ et - uniquement.";
 
     // Au moins une majuscule, un chiffre et un caractère qui n'est ni une lettre ni un chiffre
-    public static final String MOT_DE_PASSE = "^(?=.*[A-Z])(?=.*\\d)(?=.*[^A-Za-z0-9]).{8,30}$";
+    public static final String MOT_DE_PASSE = "^(?=.*[A-Z])(?=.*\\d)(?=.*[^A-Za-z0-9]).{8,64}$";
     public static final String MOT_DE_PASSE_MESSAGE =
-            "Le mot de passe doit faire entre 8 et 30 caractères, avec au moins une majuscule, un chiffre et un caractère spécial.";
+            "Le mot de passe doit faire entre 8 et 64 caractères, avec au moins une majuscule, un chiffre et un caractère spécial.";
+
+    // BCrypt ne lit que les 72 premiers octets : au-delà, la fin du mot de passe serait ignorée.
+    // 64 caractères sans accent tiennent toujours ; une lettre accentuée compte 2 octets, un symbole jusqu'à 4
+    public static final int MOT_DE_PASSE_OCTETS_MAX = 72;
+    public static final String MOT_DE_PASSE_OCTETS_MESSAGE =
+            "Le mot de passe est trop long : les lettres accentuées et les symboles comptent pour plusieurs caractères.";
 
     private ReglesSaisie() {
     }

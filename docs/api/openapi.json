@@ -2809,7 +2809,7 @@
           "nouveauMotDePasse" : {
             "type" : "string",
             "minLength" : 1,
-            "pattern" : "^(?=.*[A-Z])(?=.*\\d)(?=.*[^A-Za-z0-9]).{8,30}$"
+            "pattern" : "^(?=.*[A-Z])(?=.*\\d)(?=.*[^A-Za-z0-9]).{8,64}$"
           }
         },
         "required" : [ "motDePasseActuel", "nouveauMotDePasse" ]
@@ -3090,7 +3090,7 @@
           "motDePasse" : {
             "type" : "string",
             "minLength" : 1,
-            "pattern" : "^(?=.*[A-Z])(?=.*\\d)(?=.*[^A-Za-z0-9]).{8,30}$"
+            "pattern" : "^(?=.*[A-Z])(?=.*\\d)(?=.*[^A-Za-z0-9]).{8,64}$"
           },
           "nom" : {
             "type" : "string",

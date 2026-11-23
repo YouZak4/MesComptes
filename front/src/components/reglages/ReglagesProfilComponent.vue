@@ -9,7 +9,7 @@ import type { ChangementEmail } from "@/types/utilisateur.ts";
 import { messageErreur } from "@/utils/erreurs.ts";
 import {
     MESSAGE_MOT_DE_PASSE,
-    motDePasseConforme,
+    erreurMotDePasse as erreurRegleMotDePasse,
 } from "@/utils/validation.ts";
 
 const notification = useNotificationStore();
@@ -199,8 +199,9 @@ async function changerMotDePasse() {
     if (motDePasseEnCours.value) return;
     erreurMotDePasse.value = null;
     // Même règle qu'à l'inscription ; le back la vérifie aussi
-    if (!motDePasseConforme(nouveau.value)) {
-        erreurMotDePasse.value = MESSAGE_MOT_DE_PASSE;
+    const erreurRegle = erreurRegleMotDePasse(nouveau.value);
+    if (erreurRegle !== null) {
+        erreurMotDePasse.value = erreurRegle;
         return;
     }
     if (nouveau.value !== confirmation.value) {

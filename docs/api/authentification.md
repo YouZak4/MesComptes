@@ -33,7 +33,7 @@ Démarre une inscription et envoie un code par mail. Le code expire au bout de 1
 | `nom` | texte | Oui | 100 caractères au plus ; peut servir de pseudo |
 | `prenom` | texte | Non | 100 caractères au plus ; vide = aucun |
 | `identifiant` | texte | Oui | Identifiant de connexion : 8 à 30 caractères, lettres sans accent, chiffres, `_` et `-` |
-| `motDePasse` | texte | Oui | 8 à 30 caractères, avec au moins une majuscule, un chiffre et un caractère spécial |
+| `motDePasse` | texte | Oui | 8 à 64 caractères, avec au moins une majuscule, un chiffre et un caractère spécial, et 72 octets au plus en UTF-8 (limite de BCrypt : une lettre accentuée compte 2 octets) |
 | `email` | texte | Oui | Adresse valide ; mise en minuscules |
 
 ```json

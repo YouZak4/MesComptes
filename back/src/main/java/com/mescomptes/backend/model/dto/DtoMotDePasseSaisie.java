@@ -13,6 +13,7 @@ public class DtoMotDePasseSaisie {
     private String motDePasseActuel;
     @NotBlank(message = "Le nouveau mot de passe est obligatoire.")
     @Pattern(regexp = ReglesSaisie.MOT_DE_PASSE, message = ReglesSaisie.MOT_DE_PASSE_MESSAGE)
+    @OctetsMax(value = ReglesSaisie.MOT_DE_PASSE_OCTETS_MAX, message = ReglesSaisie.MOT_DE_PASSE_OCTETS_MESSAGE)
     @ToString.Exclude
     private String nouveauMotDePasse;
 }

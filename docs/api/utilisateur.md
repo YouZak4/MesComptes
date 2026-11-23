@@ -46,7 +46,7 @@ Profil de l'utilisateur connecté. Seul l'utilisateur connecté est exposé, jam
 { "motDePasseActuel": "…", "nouveauMotDePasse": "…" }
 ```
 
-`nouveauMotDePasse` suit la règle de l'inscription : 8 à 30 caractères, avec au moins une majuscule, un chiffre et un caractère spécial. L'actuel n'y est pas soumis.
+`nouveauMotDePasse` suit la règle de l'inscription : 8 à 64 caractères, avec au moins une majuscule, un chiffre et un caractère spécial, 72 octets au plus en UTF-8. L'actuel n'y est pas soumis.
 
 - **204** : mot de passe changé.
 - **400** `VALIDATION_ERROR` : nouveau mot de passe manquant ou hors règle.

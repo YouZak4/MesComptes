@@ -12,6 +12,8 @@ const props = withDefaults(
         disabled?: boolean;
         regex?: RegExp;
         regexMessage?: string;
+        // Contrôle libre, pour ce qu'une regex ne sait pas dire : renvoie le message d'erreur ou null
+        verifier?: (valeur: string) => string | null;
         minLength?: number;
         maxLength?: number;
         // Valeur à recopier à l'identique (confirmation d'un mot de passe)
@@ -60,6 +62,10 @@ const erreur = computed((): string | null => {
     }
     if (props.regex && !props.regex.test(val)) {
         return props.regexMessage ?? "Format invalide.";
+    }
+    const erreurVerifiee = props.verifier?.(val) ?? null;
+    if (erreurVerifiee !== null) {
+        return erreurVerifiee;
     }
     if (props.correspondA !== undefined && val !== props.correspondA) {
         return props.correspondAMessage;
