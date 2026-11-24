@@ -7,5 +7,6 @@ Thumbs.db
 
 # Paramètres locaux de Claude Code
 .claude/settings.local.json
+CLAUDE.local.md
 
 # Les règles propres au back et au front sont dans back/.gitignore et front/.gitignore

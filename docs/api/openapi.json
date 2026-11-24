@@ -3118,7 +3118,7 @@
       "DtoTableauDeBord" : {
         "type" : "object",
         "properties" : {
-          "avenir" : {
+          "aVenir" : {
             "type" : "array",
             "items" : {
               "$ref" : "#/components/schemas/DtoOccurrence"
