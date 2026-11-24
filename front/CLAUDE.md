@@ -32,6 +32,9 @@ Contrôles : `pnpm test`, `pnpm build` et `pnpm lint`.
 - Versions exactes dans `package.json`, sans `^` ni `~` : `saveExact: true` dans `pnpm-workspace.yaml` le fait pour `pnpm add`.
 - `pnpm-lock.yaml` est versionné : il ne se modifie jamais à la main, et part dans le même commit que le `package.json`.
 - Version de pnpm fixée par le champ `packageManager` de `package.json`.
+- Node 26 (`.nvmrc`, `engines` de `package.json`) : la version majeure de `@types/node` suit celle de Node.
+- TypeScript reste en 6.x : la 7 (compilateur en Go) n'a pas l'API JavaScript dont vue-tsc et typescript-eslint ont besoin. À revoir quand ils la prendront en charge.
+- Pinia 4 demande `@vue/devtools-api` installé à côté de lui, dans la version attendue par ses peers.
 
 ## Architecture (`src/`)
 

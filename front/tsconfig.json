@@ -3,10 +3,9 @@
         "target": "ESNext",
         "useDefineForClassFields": true,
         "module": "ESNext",
-        "baseUrl": ".",
         "types": ["vite/client"],
         "paths": {
-            "@/*": ["src/*"]
+            "@/*": ["./src/*"]
         },
         "lib": ["ESNext", "DOM", "DOM.Iterable"],
         "skipLibCheck": true,
