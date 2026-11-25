@@ -15,7 +15,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
- * Exporte la description OpenAPI de l'API dans docs/api/openapi.json, sans démarrer de serveur.
+ * Exporte la description OpenAPI de l'API dans docs/reference/api/openapi.json, sans démarrer de serveur.
  * Ne tourne que sur demande, pour ne pas réécrire le fichier à chaque lancement des tests :
  * ./mvnw test -Dtest=OpenApiExportTests -Dopenapi.export=true
  */
@@ -25,7 +25,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class OpenApiExportTests {
 
     // Les tests Maven tournent depuis back/
-    private static final Path FICHIER = Path.of("..", "docs", "api", "openapi.json");
+    private static final Path FICHIER = Path.of("..", "docs", "reference", "api", "openapi.json");
 
     @Autowired
     private MockMvc mvc;

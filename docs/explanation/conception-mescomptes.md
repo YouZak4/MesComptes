@@ -1,6 +1,10 @@
+---
+derniere_relecture: 2026-11-25
+---
+
 # MesComptes – Document de conception
 
-Validé par Romain le 12/10/2026. Version de référence : [Claude Doc](https://claude.ai/code/artifact/f1f39ecd-43b1-4975-83bc-d796b4316e08) (ce fichier en est une copie, sans le schéma interactif).
+Ce fichier est la référence : il évolue avec le code, dans les mêmes commits. La première version a été validée par Romain le 12/10/2026 à partir d'un [brouillon en Claude Doc](https://claude.ai/code/artifact/f1f39ecd-43b1-4975-83bc-d796b4316e08), qui n'est plus tenu à jour.
 
 ## Objectif et périmètre
 
@@ -44,7 +48,7 @@ Une période est un « mois de compte » dont l'utilisateur règle la date de d�
 
 La catégorie sert aux totaux ; le libellé dit ce qu'est l'opération et porte une catégorie par défaut, ce qui rend la saisie rapide (choisir « Netflix » remplit « Abonnements & loisirs »).
 
-**Règles**
+### Règles
 
 - Une **catégorie** a un nom, un type (dépense ou revenu), une icône et une couleur.
 - Un **libellé** a un nom et une catégorie par défaut. Sur une opération, la catégorie proposée reste modifiable.
@@ -149,7 +153,7 @@ Un **assistant de première connexion** enchaîne : première période, comptes,
 
 L'opération est l'entité centrale ; la période n'est pas une clé étrangère mais se retrouve par la date de l'opération, ce qui permet de déplacer ses limites sans rien réécrire.
 
-Entités et relations (le schéma est dans le Claude Doc) :
+Entités et relations (schéma des liens dans [Les objets du back](../reference/back/objets-back.md)) :
 
 - **Utilisateur** : possède tout ce qui suit (les éléments fournis n'ont pas d'utilisateur).
 - **Compte** : nom, solde initial, date du solde, archivé.
@@ -160,7 +164,7 @@ Entités et relations (le schéma est dans le Claude Doc) :
 - **Période** : nom, date début, date fin ; retrouvée par la date de l'opération (pas de clé étrangère).
 - **Justificatif** (version suivante) : fichier, format, taille ; 0 à n par Opération.
 
-**Contraintes en base (PostgreSQL)**
+### Contraintes en base (PostgreSQL)
 
 - `utilisateur_id` sur `compte`, `periode`, `operation` (via le compte) et `recurrence` ; nullable sur `categorie` et `libelle`, où vide signifie « fourni ».
 - Table `masquage (utilisateur_id, type_element, element_id)` pour cacher un élément fourni.

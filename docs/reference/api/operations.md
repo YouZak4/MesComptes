@@ -1,3 +1,7 @@
+---
+derniere_relecture: 2026-11-25
+---
+
 # Opérations
 
 Une opération est une dépense ou un revenu sur un compte, à une date. Son type n'est pas saisi : il est déduit de sa catégorie. Sa période n'est pas enregistrée non plus : elle se déduit de sa date.
@@ -44,7 +48,7 @@ Filtres facultatifs et combinables, en paramètres de requête :
 | `libelleId` | Opérations de ce libellé |
 | `q` | Texte contenu dans la note ou le nom du libellé, sans tenir compte des majuscules |
 
-```
+```text
 GET /api/operations?periodeId=7&categorieId=2&q=courses
 ```
 

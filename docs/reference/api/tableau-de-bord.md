@@ -1,3 +1,7 @@
+---
+derniere_relecture: 2026-11-25
+---
+
 # Tableau de bord
 
 Synthèse d'une période pour un compte ou tous : revenus, dépenses, totaux par catégorie comparés à la période précédente, récurrences à venir et soldes prévus.
@@ -13,7 +17,7 @@ Synthèse d'une période pour un compte ou tous : revenus, dépenses, totaux par
 | `periodeId` (facultatif) | Période affichée. Vide : celle qui contient aujourd'hui, sinon la dernière. |
 | `compteId` (facultatif) | Compte affiché. Vide : tous les comptes, archivés compris. |
 
-```
+```text
 GET /api/tableau-de-bord?periodeId=7&compteId=3
 ```
 
@@ -25,7 +29,7 @@ GET /api/tableau-de-bord?periodeId=7&compteId=3
 
 ```json
 {
-  "periode": { "id": 7, "nom": "Octobre 2026", "dateDebut": "2026-09-25", "dateFin": "2026-10-25" },
+  "periode": { "id": 7, "nom": "Octobre 2026", "dateDebut": "2026-09-25", "dateFin": "2026-10-24" },
   "periodePrecedenteId": 6,
   "periodeSuivanteId": null,
   "compteId": null,

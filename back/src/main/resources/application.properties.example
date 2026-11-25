@@ -35,7 +35,7 @@ app.verification.nettoyage-cron=0 0 * * * *
 app.recurrences.generation-cron=0 5 0 * * *
 # Documentation de l'API (springdoc) : /api/v3/api-docs et /api/swagger-ui.html ; false pour ne pas l'exposer
 springdoc.api-docs.enabled=true
-# JSON indenté et clés triées : le fichier exporté dans docs/api ne change que si l'API change
+# JSON indenté et clés triées : le fichier exporté dans docs/reference/api ne change que si l'API change
 springdoc.writer-with-default-pretty-printer=true
 springdoc.writer-with-order-by-keys=true
 springdoc.default-produces-media-type=application/json

@@ -1,3 +1,7 @@
+---
+derniere_relecture: 2026-11-25
+---
+
 # Périodes
 
 Une période est un « mois de compte » aux dates réglables, en principe du jour du salaire à la veille du suivant (du 25/09 au 24/10). Les périodes d'un utilisateur se suivent **sans trou ni chevauchement** : chaque jour appartient à exactement une période. Une opération n'enregistre pas sa période, elle est déduite de sa date.
@@ -13,7 +17,7 @@ Il n'y a pas de suppression.
 ## La période (`DtoPeriode`)
 
 ```json
-{ "id": 7, "nom": "Octobre 2026", "dateDebut": "2026-09-25", "dateFin": "2026-10-25" }
+{ "id": 7, "nom": "Octobre 2026", "dateDebut": "2026-09-25", "dateFin": "2026-10-24" }
 ```
 
 Le nom par défaut est le mois de la date de fin, avec une majuscule.

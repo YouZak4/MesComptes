@@ -1,3 +1,7 @@
+---
+derniere_relecture: 2026-10-14
+---
+
 # Récurrences
 
 Une récurrence est un modèle d'opération (loyer, salaire, Netflix, prêt…) que l'application ajoute d'elle-même au bon jour : chaque nuit, et à la connexion pour rattraper les jours où le serveur était arrêté. Chaque opération générée porte l'id de sa récurrence (`recurrenceId`).
