@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from "vue";
+import { computed, onMounted, ref, watch } from "vue";
 import { ArrowLeft, Check, CircleAlert } from "@lucide/vue";
 import { useRoute, useRouter } from "vue-router";
 import ChampDateComponent from "@/components/ChampDateComponent.vue";
@@ -10,6 +10,7 @@ import { comptesService } from "@/services/comptesService.ts";
 import { useNotificationStore } from "@/stores/notification";
 import type { Compte, Periode } from "@/types/comptes.ts";
 import { versIso } from "@/utils/format.ts";
+import { finDePeriode } from "@/utils/periodes.ts";
 import { messageErreur } from "@/utils/erreurs.ts";
 import "@/styles/reglages.css";
 
@@ -59,15 +60,17 @@ onMounted(async () => {
     }
 });
 
-// ── Étape 1 : première période, préremplie avec le mois en cours ──
+// ── Étape 1 : première période, du jour du salaire à la veille du suivant ──
 
 const maintenant = new Date();
 const debut = ref(
     versIso(new Date(maintenant.getFullYear(), maintenant.getMonth(), 1))
 );
-const fin = ref(
-    versIso(new Date(maintenant.getFullYear(), maintenant.getMonth() + 1, 0))
-);
+const fin = ref(finDePeriode(debut.value));
+// Une période = un mois de salaire : changer le début recale la fin
+watch(debut, (d) => {
+    if (d) fin.value = finDePeriode(d);
+});
 const erreurPeriode = ref<string | null>(null);
 const creationEnCours = ref(false);
 
@@ -152,21 +155,23 @@ function terminer(nbRecurrences: number) {
         <section v-else-if="etape === 1" class="carte">
             <h2>Votre première période</h2>
             <p class="aide">
-                Une période est votre « mois de compte », par exemple d'un jour
-                de paie au suivant : les totaux du tableau de bord sont calculés
-                sur elle. Les suivantes seront ajoutées d'elles-mêmes, d'un mois
-                chacune ; vous pourrez ajuster leurs dates dans les réglages.
+                Une période est votre « mois de compte » : elle commence le jour
+                de votre salaire et se termine la veille du suivant, pour qu'un
+                salaire y soit compté une seule fois. Les totaux du tableau de
+                bord sont calculés sur elle. Les suivantes seront ajoutées
+                d'elles-mêmes, d'un mois chacune ; vous pourrez ajuster leurs
+                dates dans les réglages.
             </p>
             <form class="formulaire periode" @submit.prevent="creerPeriode">
                 <ChampDateComponent
                     id="bienvenue-debut"
                     v-model="debut"
-                    label="Début"
+                    label="Début (jour du salaire)"
                 />
                 <ChampDateComponent
                     id="bienvenue-fin"
                     v-model="fin"
-                    label="Fin"
+                    label="Fin (veille du prochain salaire)"
                     :min="debut"
                 />
                 <button

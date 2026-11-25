@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from "vue";
+import { computed, onMounted, ref, watch } from "vue";
 import { CircleAlert, Pencil, Plus } from "@lucide/vue";
 import ChampDateComponent from "@/components/ChampDateComponent.vue";
 import { vFocus } from "@/directives/focus.ts";
@@ -8,6 +8,7 @@ import { useNotificationStore } from "@/stores/notification";
 import type { Periode } from "@/types/comptes.ts";
 import { formatDateLongue, versIso } from "@/utils/format.ts";
 import { messageErreur } from "@/utils/erreurs.ts";
+import { finDePeriode } from "@/utils/periodes.ts";
 
 const notification = useNotificationStore();
 
@@ -121,11 +122,13 @@ async function ajouterSuivante() {
     }
 }
 
-// Première période (si l'utilisateur n'en a encore aucune) : le mois en cours
+// Première période (si l'utilisateur n'en a encore aucune) : préremplie avec
+// le mois en cours ; elle finit la veille du salaire suivant
 const premiereDebut = ref(versIso(new Date(new Date().setDate(1))));
-const premiereFin = ref(
-    versIso(new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0))
-);
+const premiereFin = ref(finDePeriode(premiereDebut.value));
+watch(premiereDebut, (d) => {
+    if (d) premiereFin.value = finDePeriode(d);
+});
 
 async function creerPremiere() {
     erreurFormulaire.value = null;
@@ -173,9 +176,10 @@ async function creerPremiere() {
         </div>
         <p class="aide">
             Les périodes se suivent sans trou : déplacer une date déplace aussi
-            la limite de la période voisine. Une nouvelle période dure un mois ;
-            ajustez sa fin à votre jour de paie. Les opérations suivent leur
-            date et changent de période d'elles-mêmes.
+            la limite de la période voisine. Une période commence le jour de
+            votre salaire et se termine la veille du suivant ; une nouvelle
+            période dure un mois. Les opérations suivent leur date et changent
+            de période d'elles-mêmes.
         </p>
 
         <form
@@ -186,12 +190,12 @@ async function creerPremiere() {
             <ChampDateComponent
                 id="premiere-debut"
                 v-model="premiereDebut"
-                label="Début"
+                label="Début (jour du salaire)"
             />
             <ChampDateComponent
                 id="premiere-fin"
                 v-model="premiereFin"
-                label="Fin"
+                label="Fin (veille du prochain salaire)"
                 :min="premiereDebut"
             />
             <button
