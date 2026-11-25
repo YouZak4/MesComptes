@@ -12,4 +12,10 @@ Un ADR note une décision structurante et surtout **pourquoi** elle a été pris
 
 | N° | Décision | Statut |
 |---|---|---|
-| | | |
+| 0001 | [La période d'une opération se déduit de sa date](0001-periode-deduite-de-la-date.md) | Accepté |
+| 0002 | [Les données d'un autre utilisateur répondent 404, jamais 403](0002-404-pour-les-donnees-d-un-autre-utilisateur.md) | Accepté |
+| 0003 | [Schéma géré par Hibernate, Flyway pour le reste](0003-schema-par-hibernate-et-flyway.md) | Accepté |
+| 0004 | [L'id des utilisateurs est un UUID](0004-id-utilisateur-en-uuid.md) | Accepté |
+| 0005 | [Un mot de passe actuel faux répond 422, pas 401](0005-mot-de-passe-actuel-faux-en-422.md) | Accepté |
+| 0006 | [Le front reste sur TypeScript 6](0006-typescript-reste-en-6.md) | Accepté |
+| 0007 | [Code, documentation et commits en français](0007-code-et-documentation-en-francais.md) | Accepté |
