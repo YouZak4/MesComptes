@@ -1,7 +1,7 @@
 # 0003 – Schéma géré par Hibernate, Flyway pour le reste
 
 - **Date :** 2026-10-12
-- **Statut :** Accepté
+- **Statut :** Remplacé par [0008](0008-toute-modification-de-schema-par-flyway.md)
 - **Note :** Rédigé après coup le 2026-11-25, à partir du code, de l'historique Git et de la documentation. Le contexte et les inconvénients marqués « à confirmer » sont déduits.
 
 ## Contexte

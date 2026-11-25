@@ -87,9 +87,11 @@ Architecture en couches dans `com.mescomptes.backend` : `controller` → `servic
 
 ### Base de données
 
-- Hibernate est en `ddl-auto=update` : il crée et complète les tables seul.
-- **Flyway** (`db/migration/V<n>__description.sql`) ne sert qu'à ce qu'Hibernate ne sait pas faire : renommages, changements de type, reprise de données. Flyway passe avant Hibernate, donc une migration doit fonctionner sur une base neuve où la table n'existe pas encore (voir le garde `IF NOT EXISTS … RETURN` de `V3__icones_lucide.sql`).
+- **Toute modification du schéma ou des données passe par Flyway** (`db/migration/V<n>__description.sql`), dans le même commit que l'entité modifiée ([ADR 0008](docs/adr/0008-toute-modification-de-schema-par-flyway.md)).
+- Hibernate est en `ddl-auto=validate` : il ne modifie jamais la base, il vérifie que les entités correspondent au schéma et refuse de démarrer sinon.
 - On ne modifie jamais une migration déjà commitée : on en ajoute une nouvelle.
+- Contraintes et index portent un nom explicite (`fk_operation_compte`, `uk_categorie_nom`, `idx_operation_compte_date`).
+- Marche à suivre : [écrire une migration Flyway](docs/how-to/back/ecrire-une-migration-flyway.md).
 
 ### Tests du back
 
