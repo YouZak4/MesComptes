@@ -30,7 +30,7 @@ Depuis `back/` :
 - API : <http://localhost:8085/api>
 - Swagger UI : <http://localhost:8085/api/swagger-ui.html>
 
-Au démarrage, Hibernate crée ou complète les tables, et les catégories et libellés fournis sont insérés.
+Au démarrage, Flyway joue les migrations de `src/main/resources/db/migration/`, Hibernate vérifie que les entités correspondent au schéma, puis les catégories et libellés fournis sont insérés.
 
 ## Tester
 

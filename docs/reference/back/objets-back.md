@@ -10,7 +10,7 @@ Référence des objets de `back/src/main/java/com/mescomptes/backend/model/`. Ce
 
 Le back sépare deux familles d'objets :
 
-- **Les entités** (`model/entities`) sont les tables de la base PostgreSQL. Hibernate les crée et les met à jour (`ddl-auto=update`). Elles ne sortent jamais telles quelles de l'API.
+- **Les entités** (`model/entities`) sont les tables de la base PostgreSQL. Le schéma est créé par les migrations Flyway ; Hibernate vérifie au démarrage que les entités lui correspondent (`ddl-auto=validate`). Elles ne sortent jamais telles quelles de l'API.
 - **Les DTO** (`model/dto`) sont ce qui circule en JSON entre le front et le back. Il y a deux sortes de DTO :
   - les DTO de **lecture** (`DtoCompte`, `DtoOperation`…), renvoyés par l'API ;
   - les DTO de **saisie** (`DtoCompteSaisie`, `DtoOperationSaisie`…), reçus de l'API, avec leurs règles de validation (`@NotNull`, `@Size`…) et leurs messages d'erreur en français.
