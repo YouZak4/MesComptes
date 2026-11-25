@@ -1,48 +1,48 @@
-# frontend
+# Front MesComptes
 
-This template should help get you started developing with Vue 3 in Vite.
+Application web de MesComptes : Vue 3, TypeScript, Vite, Pinia. Elle appelle l'API du back sur `http://localhost:8085/api`.
 
-## Recommended IDE Setup
+## Prérequis
 
-[VS Code](https://code.visualstudio.com/) + [Vue (Official)](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur).
+- Node 26 (version fixée dans `.nvmrc`)
+- pnpm (version fixée par le champ `packageManager` de `package.json`). **Ne pas utiliser npm** : il ignorerait `pnpm-lock.yaml` et créerait un `package-lock.json`.
+- Le back lancé, pour que l'application ait des données (voir [`back/README.md`](../back/README.md))
 
-## Recommended Browser Setup
+## Configuration
 
-- Chromium-based browsers (Chrome, Edge, Brave, etc.):
-  - [Vue.js devtools](https://chromewebstore.google.com/detail/vuejs-devtools/nhdogjmejiglipccpnnnanhbledajbpd)
-  - [Turn on Custom Object Formatter in Chrome DevTools](http://bit.ly/object-formatters)
-- Firefox:
-  - [Vue.js devtools](https://addons.mozilla.org/en-US/firefox/addon/vue-js-devtools/)
-  - [Turn on Custom Object Formatter in Firefox DevTools](https://fxdx.dev/firefox-devtools-custom-object-formatters/)
+`.env` n'est pas versionné. Créez-le à partir du modèle :
 
-## Type Support for `.vue` Imports in TS
-
-TypeScript cannot handle type information for `.vue` imports by default, so we replace the `tsc` CLI with `vue-tsc` for type checking. In editors, we need [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) to make the TypeScript language service aware of `.vue` types.
-
-## Customize configuration
-
-See [Vite Configuration Reference](https://vite.dev/config/).
-
-## Project Setup
-
-```sh
-npm install
+```bash
+cp .env.example .env
 ```
 
-### Compile and Hot-Reload for Development
+`VITE_FRONT_PORT` règle le port du serveur de développement (5173 si absent). L'URL de l'API est écrite dans `src/services/api.ts`.
 
-```sh
-npm run dev
+## Lancer
+
+Depuis `front/` :
+
+```bash
+pnpm install
+pnpm dev
 ```
 
-### Type-Check, Compile and Minify for Production
+L'application est servie sur le port de `VITE_FRONT_PORT`.
 
-```sh
-npm run build
-```
+## Commandes
 
-### Lint with [ESLint](https://eslint.org/)
+| Commande | Rôle |
+|---|---|
+| `pnpm dev` | Serveur de développement avec rechargement à chaud |
+| `pnpm build` | Vérification des types (`vue-tsc`) puis build de production dans `dist/` |
+| `pnpm lint` | ESLint et Prettier |
+| `pnpm test` | Tests Vitest, une passe |
+| `pnpm test:watch` | Tests Vitest relancés à chaque modification |
 
-```sh
-npm run lint
-```
+Avant de proposer une modification, `pnpm test`, `pnpm build` et `pnpm lint` doivent passer.
+
+## Aller plus loin
+
+- [Architecture du front](../docs/reference/front/architecture-front.md) : dossiers de `src/` et appels à l'API
+- [Charte graphique « Sapin »](../docs/reference/visuel/charte-graphique.md) : couleurs, composants et variables CSS
+- [API REST](../docs/reference/api/README.md) : les routes appelées par le front

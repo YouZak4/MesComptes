@@ -1,3 +1,7 @@
+---
+derniere_relecture: 2026-11-25
+---
+
 # API REST de MesComptes
 
 L'API expose 40 routes sous `/api` (port 8085 en local). Elles exigent toutes un JWT, sauf l'inscription et la connexion, et ne renvoient que les données de l'utilisateur connecté.
@@ -95,18 +99,12 @@ Le back décrit son API avec [springdoc](https://springdoc.org/), à partir des 
 
 | Adresse (back lancé en local) | Contenu |
 |---|---|
-| http://localhost:8085/api/swagger-ui.html | Interface Swagger UI : parcourir et essayer les routes (bouton « Authorize » pour coller le JWT). |
-| http://localhost:8085/api/v3/api-docs | Description OpenAPI en JSON. |
-| http://localhost:8085/api/v3/api-docs.yaml | La même, en YAML. |
+| <http://localhost:8085/api/swagger-ui.html> | Interface Swagger UI : parcourir et essayer les routes (bouton « Authorize » pour coller le JWT). |
+| <http://localhost:8085/api/v3/api-docs> | Description OpenAPI en JSON. |
+| <http://localhost:8085/api/v3/api-docs.yaml> | La même, en YAML. |
 
 `springdoc.api-docs.enabled=false` dans `application.properties` coupe les deux, par exemple sur un serveur public.
 
 ### Régénérer `openapi.json`
 
-Après une modification de l'API, depuis `back/` :
-
-```bash
-./mvnw test -Dtest=OpenApiExportTests -Dopenapi.export=true
-```
-
-Le test démarre l'application sans serveur, lit `/v3/api-docs` et écrit `docs/api/openapi.json`. Il faut que la base PostgreSQL soit accessible, comme pour les autres tests. Les clés sont triées et le JSON indenté : le fichier ne change dans Git que si l'API change. Sans `-Dopenapi.export=true`, ce test est ignoré.
+Après une modification de l'API : voir la [marche à suivre](../../how-to/back/regenerer-openapi.md).

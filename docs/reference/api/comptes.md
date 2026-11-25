@@ -1,3 +1,7 @@
+---
+derniere_relecture: 2026-10-14
+---
+
 # Comptes
 
 Les comptes de l'utilisateur (« Compte courant », « Livret A »…). Un premier compte « Compte courant » est créé à l'inscription.

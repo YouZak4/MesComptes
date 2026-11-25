@@ -1,3 +1,7 @@
+---
+derniere_relecture: 2026-10-14
+---
+
 # Masquage
 
 Un utilisateur peut cacher une catégorie ou un libellé **fourni** qu'il n'utilise pas, puis le réafficher. Un élément personnel ne se masque pas : il s'archive (voir [Catégories](categories.md) et [Libellés](libelles.md)).

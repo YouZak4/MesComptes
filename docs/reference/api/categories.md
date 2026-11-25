@@ -1,3 +1,7 @@
+---
+derniere_relecture: 2026-10-14
+---
+
 # Catégories
 
 La catégorie sert aux totaux du tableau de bord ; son type (`DEPENSE` ou `REVENU`) donne le sens des opérations. Il y a deux sortes de catégories :

@@ -1,3 +1,7 @@
+---
+derniere_relecture: 2026-10-14
+---
+
 # Libellés
 
 Le libellé dit ce qu'est une opération (« Netflix », « Loyer ») et porte une catégorie par défaut : choisir « Netflix » remplit « Abonnements & loisirs ». Comme les catégories, un libellé est **fourni** (commun à tous, non modifiable, [masquable](masquage.md)) ou **personnel** (modifiable, archivable).

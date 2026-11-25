@@ -1,3 +1,7 @@
+---
+derniere_relecture: 2026-11-23
+---
+
 # Utilisateur
 
 Profil de l'utilisateur connecté. Seul l'utilisateur connecté est exposé, jamais la liste des autres.

@@ -1,3 +1,7 @@
+---
+derniere_relecture: 2026-11-25
+---
+
 # Authentification
 
 Routes publiques, sans JWT. L'inscription se fait en deux temps : un code à 6 chiffres est envoyé par mail, et l'utilisateur n'est créé qu'une fois ce code saisi.

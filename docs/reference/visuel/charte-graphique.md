@@ -1,3 +1,7 @@
+---
+derniere_relecture: 2026-10-21
+---
+
 # Charte graphique MesComptes · « Sapin »
 
 Version 1.1 · 21 octobre 2026 (ajouts : calendrier, libellés de la catégorie, « Autres » dépliable)
@@ -18,6 +22,7 @@ MesComptes doit inspirer **confiance et calme**, comme un outil financier série
 | Une seule action forte par écran : le bouton jaune | Plusieurs boutons qui se disputent l'attention |
 
 Trois principes :
+
 1. **Le chiffre d'abord.** Les montants sont l'information principale : gros, gras et alignés.
 2. **Une couleur, une signification.** Le vert porte la marque, le jaune porte l'action, le rouge brique signale une sortie d'argent. Les teintes de catégories ne servent qu'à reconnaître une catégorie.
 3. **Le calme par l'espace.** On sépare les blocs par des cartes blanches sur fond vert très pâle, pas par des traits.
@@ -116,6 +121,7 @@ Repli : `system-ui, -apple-system, "Segoe UI", sans-serif`.
 | Méta | 12 px / 1.4 | 500–600 | 0 | Date, catégorie, note sous un libellé |
 
 Règles :
+
 - **Tous les montants** utilisent `font-variant-numeric: tabular-nums` pour que les chiffres s'alignent en colonne.
 - Format français : `1 234,50 €` avec une espace fine insécable (U+202F) pour les milliers, une virgule pour les décimales et une espace insécable avant « € ».
 - Le signe négatif est le vrai moins `−` (U+2212), pas un tiret.
@@ -126,6 +132,7 @@ Règles :
 ## 4. Espacements, rayons, ombres
 
 ### Espacements (base 4 px)
+
 `4 · 8 · 12 · 14 · 16 · 22 · 24 · 32 · 40` px.
 
 | Contexte | Valeur |
@@ -139,6 +146,7 @@ Règles :
 | Largeur max du contenu | 1180 px, centré |
 
 ### Rayons
+
 | Jeton | Valeur | Usage |
 |---|---|---|
 | `--rayon-s` | 10 px | Boutons icône, petits contrôles |
@@ -148,6 +156,7 @@ Règles :
 | `--rayon-rond` | 50 % | Avatar circulaire, anneau du graphique |
 
 ### Ombres
+
 | Jeton | Valeur | Usage |
 |---|---|---|
 | `--ombre-carte` | `0 1px 2px #123F2E14` | Cartes et sélecteur de période, à peine visible |
@@ -184,7 +193,7 @@ Icônes d'interface :
 
 ## 6. Mise en page
 
-```
+```text
 ┌──────────────────────────────────────────────────────────────┐
 │ ▣ Mes comptes  [Tableau de bord] Opérations Récurrences …  Y │  barre Sapin, pleine largeur
 ├──────────────────────────────────────────────────────────────┤
@@ -225,26 +234,32 @@ Icônes d'interface :
 États : au survol, le fond fonce d'un cran (doré → `#D9A731`, blanc → `--vert-50`). Au focus, contour `2px solid #1B5C42` décalé de 2 px. Désactivé : opacité 0,45 et curseur `not-allowed`. Cible tactile minimale de 44 px.
 
 ### 7.2 Cartes
+
 Fond blanc, rayon 18 px, marge intérieure 22 px, `--ombre-carte`, sans bordure. Titre en 16 px / 800, suivi d'un lien discret « Tout voir » aligné à droite si besoin.
 **Carte héros** (solde) : fond Forêt `#123F2E`, libellé en `#B9D6C6`, montant 32 px en blanc (ou `--negatif-sur-sombre` s'il est négatif).
 
 ### 7.3 Indicateur
+
 Carte blanche : pastille d'indicateur de 44 px, libellé en `--encre-douce` (600), montant 24 px / 800 dessous.
 
 ### 7.4 Ligne d'opération
+
 `[pastille catégorie 38] [libellé 700 / méta 12 px] ……… [−47,50 € 800]`
 Méta : `13 oct. · Courses · note`. Pas de séparateur entre les lignes, juste 11 px de marge verticale. Au survol, fond `--vert-50`.
 
 ### 7.5 Répartition par catégorie
+
 Anneau de 140 px (épaisseur 20 px) fait avec `conic-gradient`, segments aux couleurs des catégories, total au centre (« Total » en 12 px et montant en 17 px / 800). À droite, une légende : pastille, nom, montant, puis « 48 % des dépenses » en méta. Au-delà de 6 catégories, les plus petites sont regroupées en « Autres ».
 Après la part, la méta donne l'écart avec la période précédente : `+35,00 € vs période précédente`, en brique si défavorable et en Sapin si favorable, ou « Identique à la période précédente » en `--encre-douce`.
 
 **« Autres » dépliable** : toute la ligne est un bouton (`aria-expanded`). La méta se termine par « · **Voir les 9 catégories** » en Sapin 700 (« Masquer… » une fois déplié), souligné au survol, et un chevron `chevron-down` de 18 px en Sapin, à droite, pivote de 180° à l'ouverture. Au survol, fond `--vert-50`, rayon 12 px. Le détail s'affiche dessous en retrait de 18 px, rattaché par un filet de 2 px `--trait` à gauche, avec la même présentation que les autres lignes. Une fois la légende allongée, l'anneau garde exactement la place qu'il avait avant le dépliage : il ne remonte pas sous le titre.
 
 ### 7.6 Encart interne
+
 Fond `--vert-50`, rayon 14 px, marge intérieure 12 × 14 px. Il sert aux prévisions (« Solde prévu », « Comptes en fin de période »), sur une grille de deux colonnes.
 
 ### 7.7 Champs de formulaire
+
 - Libellé au-dessus, 13 px / 700, `--encre`.
 - Champ : fond blanc, bordure 1 px `#C9D6CE`, rayon 12 px, hauteur 46 px, marge intérieure 0 × 14 px, texte 15 px.
 - Focus : bordure Sapin et halo `0 0 0 3px #1B5C4226`.
@@ -254,15 +269,19 @@ Fond `--vert-50`, rayon 14 px, marge intérieure 12 × 14 px. Il sert aux prévi
 - On n'utilise plus de fond violet ni de fond coloré pour les champs.
 
 ### 7.8 Fenêtre modale (ex. Nouvelle opération)
+
 Voile `#123F2E66`. Fenêtre blanche, rayon 18 px, marge intérieure 28 px, largeur 520 px, `--ombre-fenetre`. Titre 20 px / 800. Pied de fenêtre aligné à droite : Discret « Annuler », Secondaire « Enregistrer et en ajouter une autre », Principal doré « Enregistrer ».
 
 ### 7.9 Pastilles d'état (badges)
+
 Hauteur 24 px, rayon 999 px, 12 px / 700. Variantes : neutre (`--vert-50` / Sapin), alerte (`--alerte-fond` / `--alerte`), danger (`--negatif-fond` / `--negatif`). Exemples : « Récurrente », « Masquée ».
 
 ### 7.10 États vides
+
 Texte `--encre-douce` centré dans la carte, avec une icône Lucide de 28 px en `#9DB0A5` au-dessus et un lien d'action Sapin si une action existe. Exemple : « Aucune opération récurrente à venir. Ajouter une récurrence ».
 
 ### 7.11 Champ date et calendrier
+
 Le sélecteur de date du navigateur n'est jamais utilisé : tous les champs date ouvrent le calendrier de l'application.
 
 - **Champ** : même allure qu'un champ de saisie (7.7), mais c'est un bouton. Icône `calendar-days` de 18 px en Sapin, puis la date en clair : `sam. 25 juillet 2026`. Sans date (champ facultatif) : « Aucune date » en `#7B8B82`.
@@ -284,16 +303,19 @@ Le sélecteur de date du navigateur n'est jamais utilisé : tous les champs date
 - **Pied** : filet `--trait`, puis boutons discrets « Aujourd'hui » et, pour un champ facultatif, « Effacer ».
 
 ### 7.12 Libellés de la catégorie
+
 Sous le champ Catégorie, tant qu'aucun libellé existant n'est choisi : « Libellés de cette catégorie » en méta, puis un bouton pilule par libellé (rayon 999 px, bordure 1 px `--trait-champ`, fond blanc, 13 px / 600, marge intérieure 6 × 12 px). Au survol et au focus, bordure Sapin, fond `--vert-50` et texte Sapin. Les pilules passent à la ligne. Au-delà d'environ quatre lignes, la zone défile.
 
 ---
 
 ## 8. Écran de connexion
+
 Fond `--vert-50`. Carte blanche centrée de 420 px (rayon 18 px, marge intérieure 32 px). Dessus : logo et « Mes comptes » en Sapin, puis l'accroche « Votre outil de suivi des dépenses » en `--encre-douce`. Champs selon 7.7. L'œil du mot de passe utilise `eye` / `eye-off` de Lucide. « Connexion » est un bouton doré pleine largeur, « Créer un nouveau compte » un bouton discret dessous.
 
 ---
 
 ## 9. Ton et rédaction
+
 - On tutoie ou on reste neutre de façon cohérente. L'interface actuelle est neutre (« Se connecter »), on garde ce ton.
 - Libellés courts, verbe à l'infinitif pour les actions : « Enregistrer », « Masquer », « Tout voir ».
 - Dates abrégées en liste (`13 oct.`), complètes en en-tête (`du 25 septembre au 25 octobre 2026`).
@@ -303,6 +325,7 @@ Fond `--vert-50`. Carte blanche centrée de 420 px (rayon 18 px, marge intérieu
 ---
 
 ## 10. Accessibilité
+
 - Contraste minimal de 4,5:1 pour le texte, 3:1 pour le texte ≥ 24 px et pour les icônes. Toutes les paires de cette charte le respectent.
 - Les couleurs de catégorie ne sont jamais le seul indice : le nom de la catégorie est toujours écrit à côté.
 - Focus clavier toujours visible (contour Sapin de 2 px).
