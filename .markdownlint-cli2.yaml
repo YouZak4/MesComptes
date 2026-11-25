@@ -1,0 +1,19 @@
+# Règles markdownlint du projet : toutes les règles par défaut, sauf celles ci-dessous.
+# Liste des règles : https://github.com/DavidAnson/markdownlint/blob/main/doc/Rules.md
+config:
+  default: true
+  # Longueur des lignes : non imposée, un paragraphe peut tenir sur une seule ligne.
+  MD013: false
+  # Titres identiques autorisés s'ils ne sont pas frères (ex. « Contrôles automatiques » dans deux sections).
+  MD024:
+    siblings_only: true
+  # Alignement des colonnes des tableaux : non imposé, les tableaux restent écrits à la main.
+  MD060: false
+
+ignores:
+  - "**/node_modules/**"
+  - "back/target/**"
+  - "front/dist/**"
+  - "**/CLAUDE.local.md"
+  # Le corps de PR commence par un titre de niveau 2, comme le veut l'usage.
+  - ".github/pull_request_template.md"

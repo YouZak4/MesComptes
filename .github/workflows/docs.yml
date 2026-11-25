@@ -1,0 +1,79 @@
+# Contrôles de la documentation : syntaxe Markdown, liens internes et description OpenAPI.
+# Les règles sont expliquées dans CONTRIBUTING.md, section « Contrôles automatiques ».
+name: Documentation
+
+on:
+  pull_request:
+  push:
+    branches: [develop, master]
+
+permissions:
+  contents: read
+
+jobs:
+  markdown:
+    name: Syntaxe Markdown
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: DavidAnson/markdownlint-cli2-action@v24
+        with:
+          globs: "**/*.md"
+
+  liens:
+    name: Liens internes
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: lycheeverse/lychee-action@v2
+        with:
+          # Hors ligne : seuls les liens relatifs et les ancres sont vérifiés,
+          # pour que la CI ne dépende pas de sites extérieurs ni de localhost.
+          args: >-
+            --offline
+            --include-fragments
+            --no-progress
+            --exclude-path front/node_modules
+            "**/*.md"
+          fail: true
+
+  openapi:
+    name: openapi.json à jour
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_DB: mescomptes
+          POSTGRES_USER: mescomptes
+          POSTGRES_PASSWORD: mescomptes
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+          cache: maven
+      - name: Créer la configuration à partir du modèle
+        run: cp back/src/main/resources/application.properties.example back/src/main/resources/application.properties
+      - name: Régénérer openapi.json
+        working-directory: back
+        env:
+          # Valeurs de CI uniquement : les variables d'environnement remplacent les A_REMPLACER du modèle.
+          SPRING_DATASOURCE_USERNAME: mescomptes
+          SPRING_DATASOURCE_PASSWORD: mescomptes
+          JWT_SECRET: cle-de-ci-sans-valeur-reelle-0123456789abcdef
+        run: bash ./mvnw -B test -Dtest=OpenApiExportTests -Dopenapi.export=true
+      - name: Comparer avec la version commitée
+        run: |
+          if ! git diff --ignore-cr-at-eol --exit-code -- docs/reference/api/openapi.json; then
+            echo "::error file=docs/reference/api/openapi.json::openapi.json n'est pas à jour. Voir docs/how-to/back/regenerer-openapi.md"
+            exit 1
+          fi
