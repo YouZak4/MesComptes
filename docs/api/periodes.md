@@ -1,6 +1,6 @@
 # Périodes
 
-Une période est un « mois de compte » aux dates réglables, par exemple d'un jour de paie au suivant. Les périodes d'un utilisateur se suivent **sans trou ni chevauchement** : chaque jour appartient à exactement une période. Une opération n'enregistre pas sa période, elle est déduite de sa date.
+Une période est un « mois de compte » aux dates réglables, en principe du jour du salaire à la veille du suivant (du 25/09 au 24/10). Les périodes d'un utilisateur se suivent **sans trou ni chevauchement** : chaque jour appartient à exactement une période. Une opération n'enregistre pas sa période, elle est déduite de sa date.
 
 | Méthode | Route | Rôle |
 |---|---|---|
